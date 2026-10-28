@@ -1,0 +1,18 @@
+{
+  "formato": 1,
+  "ultimo": "base-v0.1-s0",
+  "ejecuciones": [
+    {
+      "run_id": "base-v0.1-s0",
+      "fecha": "2026-10-28T15:32:43",
+      "commit": "f37d5054e3dc*",
+      "ambiente": "0.1",
+      "epochs": 5000,
+      "seed": 0,
+      "aterrizajes": 0.785,
+      "velocidad_contacto": 1.9505930632744906,
+      "error_posicion": 5.517376205096453,
+      "primer_aterrizaje": 1785
+    }
+  ]
+}
