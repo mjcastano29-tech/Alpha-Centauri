@@ -61,7 +61,7 @@ def git_info():
         except (OSError, subprocess.CalledProcessError):
             return None
     return {"commit": git("rev-parse", "--short=12", "HEAD"), "branch": git("rev-parse", "--abbrev-ref", "HEAD"),
-            "cambios_sin_commit": bool(git("status", "--porcelain"))}
+            "cambios_sin_commit": bool(git("status", "--porcelain", "--untracked-files=no"))}
 
 
 def load_registry():
