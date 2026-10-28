@@ -1,6 +1,6 @@
 {
   "formato": 1,
-  "ultimo": "ppo-rel-v0.1-s0",
+  "ultimo": "ppo-v2-v0.1-s0",
   "ejecuciones": [
     {
       "run_id": "base-v0.1-s0",
@@ -43,6 +43,20 @@
       "velocidad_contacto": 2.573809737447291,
       "error_posicion": 5.931124915602038,
       "primer_aterrizaje": 15936
+    },
+    {
+      "run_id": "ppo-v2-v0.1-s0",
+      "experimento": "experimento-2-ppo",
+      "agente": "PPO (red neuronal)",
+      "fecha": "2026-10-28T18:18:05",
+      "commit": "6458e2b0fbb0*",
+      "ambiente": "0.1",
+      "epochs": 15942,
+      "seed": 0,
+      "aterrizajes": 0.97,
+      "velocidad_contacto": 1.1975763256094811,
+      "error_posicion": 4.943637642366295,
+      "primer_aterrizaje": 1970
     }
   ]
 }
