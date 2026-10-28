@@ -104,9 +104,13 @@ def main():
         ev = evaluacion(run_id, args.viento)
         experimento = manifest.get("experimento", "")
         numero = experimento.split("-")[1] if experimento.startswith("experimento-") else str(k)
+        agente = manifest["agente"]
+        corto = agente.get("nombre", "modelo").split(" (")[0]  # "PPO (red neuronal)" -> "PPO"
+        accion = agente.get("accion", "") or ("relativa v1" if manifest["config"].get("accion") == "relativa" else "cruda" if agente.get("clase") == "ppo" else "")
+        variante = " · acción cruda" if accion.startswith("cruda") else " · acción rel. v1" if "v1" in accion else " · acción v2" if "v2" in accion else ""
         runs.append({
             "id": run_id, "experimento": experimento, "numero": numero,
-            "nombre": f"Exp. {numero} · {manifest['agente'].get('nombre', 'modelo')}",
+            "nombre": f"Exp. {numero} · {corto}{variante}",
             "agente": manifest["agente"].get("nombre", ""), "tipo": manifest["agente"].get("tipo", ""),
             "commit": manifest["git"]["commit"], "fecha": manifest["fecha"], "ambiente": manifest["ambiente"]["version"],
             "config": manifest["config"], "software": manifest["software"],

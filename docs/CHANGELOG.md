@@ -25,7 +25,19 @@ y se anota aquí. Los modelos entrenados con versiones distintas del ambiente no
 - ε de 1 a 0,02 en el 60 % de las épocas; α de 0,1 a 0,01; γ 0,99; evaluación cada 5 % de las épocas y
   se conserva la mejor versión.
 
+## Agente PPO (experimento 2)
+
+### 0.1 · 2026-10-28
+- Red MLP 128×128 (Stable-Baselines3, PyTorch) sobre la acción relativa v2: 3 valores en [−1, 1]
+  (empuje = 1 + a₀, máximo ×1,6; inclinación = a₁, a₂ × 0,12). 600 000 pasos en 8 entornos,
+  evaluación sin ruido cada 20 000 pasos, se conserva la mejor versión.
+- Historia: la acción cruda (`--accion cruda`) y la relativa v1 (inclinación ±0,3) no aterrizan;
+  ver docs/experimento-2.md.
+
 ## Formato de las ejecuciones (`resultados/runs/<id>/`)
 
 ### 1 · 2026-10-28
 - `manifest.json`, `modelo.npz`, `entrenamiento.json`, `vuelos.json.gz`; índice en `resultados/registro.json`.
+- Mismo día, ampliación compatible: `experimento`, `agente.clase/nombre` y `archivos.modelo` como lista en el
+  manifest; `episodios.csv` (dataset) y `evaluacion.json` (evaluación detallada) en cada ejecución; registro
+  en MLflow (`mlflow.db` + `mlruns/`).

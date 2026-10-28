@@ -61,7 +61,8 @@ def git_info():
         except (OSError, subprocess.CalledProcessError):
             return None
     return {"commit": git("rev-parse", "--short=12", "HEAD"), "branch": git("rev-parse", "--abbrev-ref", "HEAD"),
-            "cambios_sin_commit": bool(git("status", "--porcelain", "--untracked-files=no"))}
+            # mlflow.db y mlruns/ cambian durante el propio entrenamiento (registro en directo): no cuentan
+            "cambios_sin_commit": bool(git("status", "--porcelain", "--untracked-files=no", "--", ".", ":!mlflow.db", ":!mlruns"))}
 
 
 def load_registry():

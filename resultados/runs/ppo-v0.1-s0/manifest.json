@@ -6,7 +6,8 @@
   "git": {
     "commit": "25f0295769b5",
     "branch": "fase-3d",
-    "cambios_sin_commit": true
+    "cambios_sin_commit": false,
+    "nota": "marca corregida: solo habían cambiado mlflow.db y mlruns/ por el registro en directo"
   },
   "ambiente": {
     "id": "RocketLanding3D-v0",
@@ -44,7 +45,8 @@
       "clip_range": 0.2,
       "ent_coef": 0.0,
       "eval_every": 20000
-    }
+    },
+    "accion": "cruda: los 5 valores del entorno"
   },
   "config": {
     "total_timesteps": 400000,

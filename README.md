@@ -63,27 +63,42 @@ python experimento1.py               # agente aleatorio vs. controlador heuríst
 python visualizar_experimento1.py    # genera experimento1.html con esas épocas en 3D
 ```
 
-## Agente Q-learning y CLI
+## Experimentos
 
-El agente ([agente_qlearning.py](agente_qlearning.py)) usa dos tablas Q: una para el motor (según altitud y velocidad vertical) y otra para la dirección (según hacia dónde deriva respecto a la plataforma). [cli.py](cli.py) es la forma de trabajar con él desde la terminal:
+| | Experimento 1 | Experimento 2 |
+|---|---|---|
+| Modelo | Q-learning con dos tablas ([agente_qlearning.py](agente_qlearning.py)) | PPO, red neuronal con Stable-Baselines3 ([agente_ppo.py](agente_ppo.py)) |
+| Entrenar | `python cli.py entrenar` (~2 min) | `python cli.py entrenar-ppo` (~11 min en CPU) |
+| Aterrizajes en 200 épocas de evaluación | 157 (78 %) | 194 (97 %) |
+| Documento | [docs/ambiente-v0.1.md](docs/ambiente-v0.1.md) | [docs/experimento-2.md](docs/experimento-2.md) |
+
+El ambiente es el mismo (versión 0.1) en los dos, para que los resultados sean comparables.
+
+## CLI y páginas
 
 ```bash
-python cli.py entrenar                            # entrena 5000 épocas (~2 min) y dice cuántas tarda en aterrizar
-python cli.py entrenar --epochs 10000 --detalle   # más épocas, una línea por época
-python cli.py ver                                 # una época del modelo entrenado, paso a paso
-python cli.py ver --agente heuristico --lento 0.3 # el controlador hecho a mano, con pausa entre pasos
-python cli.py ver --viento 15                     # con viento lateral fuerte
+python cli.py entrenar                            # exp. 1: Q-learning; dice cuántas épocas tarda en aterrizar
+python cli.py entrenar-ppo --run-id mi-ppo        # exp. 2: PPO; acepta las opciones de entrenar_ppo.py
+python cli.py runs                                # ejecuciones guardadas: experimento, commit y métricas
+python cli.py ver                                 # una época del último modelo, paso a paso
+python cli.py ver --run base-v0.1-s0 --lento 0.3  # cualquier ejecución; --agente heuristico|aleatorio
 python cli.py evaluar --viento 15                 # métricas en condiciones normales y con la perturbación
 python cli.py transiciones                        # las cinco primeras transiciones en detalle
+python panel.py                                   # panel.html: compara todas las ejecuciones
+python entrenar.py --solo-pagina --run <id>       # regenera aprendizaje.html y aprendizaje3d.html
 ```
 
-`entrenar` guarda la ejecución en `resultados/runs/<id>/` (ver *Versionado*) y genera dos páginas: `aprendizaje.html`, con las curvas de aprendizaje y la repetición de épocas, y `aprendizaje3d.html`, la escena three.js que reproduce las épocas grabadas (cada 100) y muestra cómo va aprendiendo el agente. `python entrenar.py` hace lo mismo sin la salida interactiva; `python entrenar.py --solo-pagina` regenera la página sin volver a entrenar.
+Cada entrenamiento genera `aprendizaje.html` (curvas y repetición de épocas) y `aprendizaje3d.html`
+(escena three.js que reproduce los vuelos grabados y muestra cómo aprende el agente). `panel.py` genera
+`panel.html`, el panel de experimentos.
 
 ## Versionado
 
-Todo se versiona en git: código, ficha, modelos y datos de entrenamiento.
+Todo se versiona en git: código, fichas, modelos, datos de entrenamiento y el registro de MLflow.
 
-- **Ambiente**: `RocketLanding3DEnv.VERSION` (hoy `0.1`, la de la ficha). Cualquier cambio de reglas o constantes sube la versión y se anota en [docs/CHANGELOG.md](docs/CHANGELOG.md).
-- **Ejecuciones de entrenamiento**: cada `python cli.py entrenar` crea `resultados/runs/<id>/` con `manifest.json` (commit de git, versión del ambiente, configuración, versiones de software y métricas), `modelo.npz` (tablas Q), `entrenamiento.json` (todas las épocas) y `vuelos.json.gz` (épocas grabadas). `resultados/registro.json` es el índice y apunta a la última. `python cli.py runs` las lista; `--run <id>` en `ver`, `evaluar`, `transiciones` o `entrenar.py --solo-pagina` usa una concreta.
-- **Reproducibilidad**: el entrenamiento es determinista. Con el mismo commit, la misma versión del ambiente y la misma configuración (`--seed`, `--epochs`, …) sale exactamente la misma ejecución.
-- **Páginas HTML**: se generan a partir de una ejecución y no se versionan (`python entrenar.py --solo-pagina --run <id>` las regenera).
+- **Ambiente**: `RocketLanding3DEnv.VERSION` (hoy `0.1`). Cualquier cambio de reglas o constantes sube la versión y se anota en [docs/CHANGELOG.md](docs/CHANGELOG.md).
+- **Ejecuciones**: cada entrenamiento crea `resultados/runs/<id>/` con `manifest.json` (commit de git, versión del ambiente, configuración, software y métricas), el modelo, `entrenamiento.json` (todas las épocas), `episodios.csv` (dataset: una fila por época), `vuelos.json.gz` (épocas grabadas) y `evaluacion.json` (200 épocas normales + 200 con viento). `resultados/registro.json` es el índice.
+- **MLflow** ([seguimiento.py](seguimiento.py)): `mlflow.db` (SQLite) y `mlruns/` dentro del repo. Cada ejecución es una *run* del experimento correspondiente con parámetros, métricas, el dataset `episodios.csv` como entrada y el modelo registrado (`rocket-landing-qlearning`, `rocket-landing-ppo`) como modelo *pyfunc* cargable con `mlflow.pyfunc.load_model("models:/rocket-landing-ppo/3")`. Interfaz: `mlflow ui --backend-store-uri sqlite:///mlflow.db`. Con `MLFLOW_TRACKING_URI` se apunta a un servidor compartido (DagsHub) sin tocar código.
+- **Hugging Face Hub** ([publicar_hf.py](publicar_hf.py)): `huggingface-cli login` y `python publicar_hf.py --repo usuario/alpha-centauri-rocket-landing --run ppo-v2-v0.1-s0` sube la ejecución con su tarjeta de modelo.
+- **Reproducibilidad**: los entrenamientos son deterministas. Con el mismo commit, la misma versión del ambiente y la misma configuración sale exactamente la misma ejecución.
+- **Páginas HTML**: se generan a partir de las ejecuciones y no se versionan.

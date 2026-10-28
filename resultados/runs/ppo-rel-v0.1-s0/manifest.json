@@ -6,7 +6,8 @@
   "git": {
     "commit": "5b55ff723ef5",
     "branch": "fase-3d",
-    "cambios_sin_commit": true
+    "cambios_sin_commit": false,
+    "nota": "marca corregida: solo habían cambiado mlflow.db y mlruns/ por el registro en directo"
   },
   "ambiente": {
     "id": "RocketLanding3D-v0",
@@ -32,7 +33,7 @@
     "nombre": "PPO (red neuronal)",
     "tipo": "PPO (Stable-Baselines3): red neuronal MLP sobre la acción continua del entorno",
     "red": "[128, 128]",
-    "accion": "relativa: empuje/peso e inclinación (3 valores)",
+    "accion": "relativa v1: empuje/peso en [0, 1.6] e inclinación ±0.3",
     "hiperparametros": {
       "total_timesteps": 600000,
       "n_envs": 8,
