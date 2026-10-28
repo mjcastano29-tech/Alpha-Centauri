@@ -110,7 +110,12 @@
   .stepcount .bar div { height: 100%; background: var(--hud-accent); width: 0; }
   .legend3d { position: absolute; right: 14px; bottom: 12px; padding: 8px 12px; display: grid; gap: 3px; font-size: 11px; color: var(--hud-muted); }
   .legend3d i { display: inline-block; width: 12px; height: 3px; margin-right: 6px; vertical-align: 2px; border-radius: 2px; }
-  @media (max-width: 820px) { .sensors, .legend3d, .objective { display: none; } .stepcount { left: auto; right: 14px; transform: none; } }
+  @media (max-width: 820px) {
+    .sensors, .legend3d, .objective { display: none; }
+    .topbar { top: 58px; max-width: calc(100% - 28px); }
+    .badge { bottom: 70px; }
+    .stepcount { left: 14px; right: 14px; transform: none; min-width: 0; }
+  }
 
   .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 12px; border-top: 1px solid var(--line); }
   .controls button, .mode button, .mode select {
