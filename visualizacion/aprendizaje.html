@@ -1,0 +1,778 @@
+<title>Alpha Centauri Aprendizaje</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  /* Layout: informe de entrenamiento — cifras clave, curvas de aprendizaje y reglas arriba; debajo, consola de repetición de épocas con vista 3D, cenital y telemetría */
+  :root {
+    --bg: #eceff2;
+    --panel: #fbfcfd;
+    --ink: #17212c;
+    --muted: #5a6775;
+    --line: #d2d9e0;
+    --grid: #dde3e9;
+    --thrust: #d9581a;
+    --wind: #2c6fb8;
+    --pad: #1d8f62;
+    --good: #1d8a5b;
+    --bad: #c4372c;
+    --o-land: #1d8a5b;
+    --o-off: #c08a12;
+    --o-crash: #c4372c;
+    --o-steps: #6b7a8c;
+    --o-zone: #7a4fb5;
+    --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+    --font-body: "IBM Plex Sans", system-ui, sans-serif;
+    --font-data: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f151c; --panel: #151d26; --ink: #e3e9ef; --muted: #8d9aa8; --line: #253140; --grid: #1f2a36;
+      --thrust: #ff8b42; --wind: #6ba9ee; --pad: #3cc38c; --good: #4fc791; --bad: #f0695c;
+      --o-land: #4fc791; --o-off: #e6b440; --o-crash: #f0695c; --o-steps: #8d9aa8; --o-zone: #b08ae8; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f151c; --panel: #151d26; --ink: #e3e9ef; --muted: #8d9aa8; --line: #253140; --grid: #1f2a36;
+    --thrust: #ff8b42; --wind: #6ba9ee; --pad: #3cc38c; --good: #4fc791; --bad: #f0695c;
+    --o-land: #4fc791; --o-off: #e6b440; --o-crash: #f0695c; --o-steps: #8d9aa8; --o-zone: #b08ae8; color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 14px/1.5 var(--font-body);
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 24px 40px;
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; display: grid; gap: 20px; }
+  header { display: grid; gap: 4px; }
+  .eyebrow { font: 500 12px/1 var(--font-data); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  h1 { font: 600 clamp(30px, 5vw, 44px)/1.05 var(--font-display); margin: 4px 0 0; letter-spacing: .01em; text-wrap: balance; }
+  h2.section { font: 600 24px/1.1 var(--font-display); margin: 12px 0 0; letter-spacing: .01em; }
+  header p, .lead { margin: 4px 0 0; max-width: 72ch; color: var(--muted); }
+
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+  .panel-title { font: 600 15px/1 var(--font-display); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0; }
+
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .kpi { padding: 14px 16px; display: grid; gap: 2px; }
+  .kpi span:first-child { font-size: 12px; color: var(--muted); }
+  .kpi strong { font: 600 32px/1.1 var(--font-display); font-variant-numeric: tabular-nums; }
+  .kpi span:last-child { font-size: 12px; color: var(--muted); }
+
+  .learn { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 12px; }
+  .learn .big { grid-row: span 2; }
+  .lchart { padding: 12px; display: grid; gap: 6px; min-width: 0; }
+  .lchart canvas { width: 100%; display: block; height: 150px; }
+  .lchart.big canvas { height: 330px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+  .learn-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+
+  .rules { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+  .rules .panel { padding: 14px 16px; display: grid; gap: 10px; align-content: start; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-weight: 500; color: var(--muted); font-size: 12px; }
+  td.pts { font: 500 13px var(--font-data); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .rules p, .rules li { margin: 0; color: var(--muted); font-size: 13px; }
+  .rules ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+  .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; }
+
+  .episodes { display: flex; flex-wrap: wrap; gap: 8px; }
+  .ep {
+    display: grid; gap: 2px; text-align: left; cursor: pointer;
+    background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 6px;
+    padding: 8px 12px; font: inherit; min-width: 120px;
+  }
+  .ep:hover { border-color: var(--muted); }
+  .ep[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+  .ep:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--wind); outline-offset: 2px; }
+  .ep-agent { font-weight: 600; }
+  .ep-seed { font: 12px var(--font-data); color: var(--muted); }
+  .pill { justify-self: start; font: 500 11px/1 var(--font-data); padding: 4px 6px; border-radius: 3px; margin-top: 4px; letter-spacing: .03em; }
+
+  .stage { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+  .view3d { display: grid; }
+  .view3d canvas { width: 100%; height: clamp(340px, 62vh, 620px); display: block; touch-action: none; cursor: grab; }
+  .view3d canvas:active { cursor: grabbing; }
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 10px 12px; border-top: 1px solid var(--line); }
+  .controls button, .controls select {
+    font: 500 13px var(--font-body); color: var(--ink); background: var(--bg);
+    border: 1px solid var(--line); border-radius: 5px; padding: 6px 12px; cursor: pointer;
+  }
+  .controls input[type="range"] { flex: 1 1 160px; min-width: 0; accent-color: var(--thrust); }
+  .clock { font: 500 13px var(--font-data); font-variant-numeric: tabular-nums; min-width: 9ch; text-align: right; }
+  .hint { font-size: 12px; color: var(--muted); padding: 0 12px 10px; }
+
+  .side { display: grid; gap: 16px; min-width: 0; }
+  .plan { padding: 12px; display: grid; gap: 8px; }
+  .plan canvas { width: 100%; aspect-ratio: 1; max-width: 100%; display: block; }
+  .stepbox { padding: 12px; display: grid; gap: 8px; }
+  .stepline { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .stepline strong { font: 600 28px/1 var(--font-display); font-variant-numeric: tabular-nums; }
+  .stepbar { height: 6px; border-radius: 3px; background: var(--grid); overflow: hidden; }
+  .stepbar div { height: 100%; background: var(--ink); width: 0; }
+  .action { font: 500 14px var(--font-data); }
+  .readouts { padding: 12px; display: grid; gap: 10px; }
+  .readouts dl { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; }
+  .readouts div, .stepbox div.kv { display: grid; gap: 1px; min-width: 0; }
+  .readouts dt, .kv dt { font-size: 12px; color: var(--muted); }
+  .readouts dd, .kv dd { margin: 0; font: 500 16px var(--font-data); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .kvs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; margin: 0; }
+  .engine-on { color: var(--thrust); }
+  .engine-off { color: var(--muted); }
+
+  .summary { padding: 14px 16px; display: grid; gap: 10px; }
+  .summary dl { margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px 20px; }
+  .summary div { display: grid; gap: 1px; }
+  .summary dt { font-size: 12px; color: var(--muted); }
+  .summary dd { margin: 0; font: 500 15px var(--font-data); font-variant-numeric: tabular-nums; }
+
+  .charts { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  .chart { padding: 10px 12px 8px; display: grid; gap: 4px; min-width: 0; }
+  .chart-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .chart-head span:first-child { font-size: 13px; font-weight: 500; }
+  .chart-head span:last-child { font: 500 13px var(--font-data); font-variant-numeric: tabular-nums; }
+  .chart canvas { width: 100%; height: 120px; display: block; }
+
+  footer { color: var(--muted); font-size: 13px; max-width: 80ch; }
+  footer ul { margin: 6px 0 0; padding-left: 18px; }
+
+  @media (max-width: 900px) {
+    .stage, .learn, .rules { grid-template-columns: minmax(0, 1fr); }
+    .learn .big { grid-row: auto; }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Alpha Centauri · rama experimento1 · RocketLanding3D-v0</span>
+    <h1>Así aprende el agente a aterrizar</h1>
+    <p id="intro"></p>
+  </header>
+
+  <section class="kpis" aria-label="Cifras clave">
+    <div class="panel kpi"><span>Épocas de entrenamiento</span><strong id="k-epochs"></strong><span id="k-epochs-sub"></span></div>
+    <div class="panel kpi"><span>Primer aterrizaje</span><strong id="k-first"></strong><span>la primera vez que lo consigue</span></div>
+    <div class="panel kpi"><span>Aterrizajes al final del entrenamiento</span><strong id="k-late"></strong><span id="k-late-sub"></span></div>
+    <div class="panel kpi"><span>Modelo final sin explorar</span><strong id="k-final"></strong><span id="k-final-sub"></span></div>
+  </section>
+
+  <section class="learn" aria-label="Curvas de aprendizaje">
+    <div class="panel lchart big">
+      <h2 class="panel-title">Recompensa por época</h2>
+      <div class="legend" id="legend-outcomes"></div>
+      <canvas id="l-reward" aria-label="Recompensa de cada época con su media móvil"></canvas>
+    </div>
+    <div class="panel lchart">
+      <h2 class="panel-title">% de aterrizajes</h2>
+      <div class="legend"><span><i style="background:var(--o-land)"></i>durante el entrenamiento</span><span><i style="background:var(--ink);border-radius:50%"></i>evaluación sin explorar</span></div>
+      <canvas id="l-rate" aria-label="Porcentaje de aterrizajes, media móvil"></canvas>
+    </div>
+    <div class="panel lchart">
+      <h2 class="panel-title">Exploración (ε)</h2>
+      <canvas id="l-eps" aria-label="Probabilidad de elegir una acción al azar"></canvas>
+    </div>
+  </section>
+  <section class="learn-row">
+    <div class="panel lchart">
+      <h2 class="panel-title">Cómo terminan las épocas</h2>
+      <canvas id="l-blocks" aria-label="Resultado de las épocas por bloques"></canvas>
+    </div>
+    <div class="panel lchart">
+      <h2 class="panel-title">Pasos usados por época</h2>
+      <canvas id="l-steps" aria-label="Pasos usados por época, media móvil"></canvas>
+    </div>
+    <div class="panel lchart">
+      <h2 class="panel-title">Combustible gastado por época</h2>
+      <canvas id="l-fuel" aria-label="Combustible gastado por época, media móvil"></canvas>
+    </div>
+  </section>
+
+  <section class="rules">
+    <div class="panel">
+      <h2 class="panel-title">Puntos al terminar la época</h2>
+      <table>
+        <thead><tr><th>Resultado</th><th>Cuándo</th><th style="text-align:right">Puntos</th></tr></thead>
+        <tbody id="rules-body"></tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <h2 class="panel-title">Puntos en cada paso</h2>
+      <ul>
+        <li>Suma acercarse a la plataforma y bajar a la <strong>velocidad segura</strong> para su altura: rápido arriba (hasta 30 m/s), despacio cerca del suelo (1,5 m/s).</li>
+        <li>Resta alejarse, moverse de lado, ir más rápido o más lento que la velocidad segura y gastar combustible (−0,1 por kg).</li>
+        <li id="rules-steps"></li>
+      </ul>
+      <p>La recompensa de una época es la suma de los puntos de todos sus pasos más los puntos del resultado final.</p>
+    </div>
+  </section>
+
+  <h2 class="section">Repetir una época</h2>
+  <p class="lead">Elige una época del entrenamiento para ver qué hacía el agente en ese momento. Los puntos sobre la trayectoria marcan cada paso: una decisión cada 20 m.</p>
+  <nav class="episodes" id="episodes" aria-label="Épocas grabadas"></nav>
+
+  <section class="stage">
+    <div class="panel view3d">
+      <canvas id="view3d" aria-label="Vista 3D de la trayectoria del cohete"></canvas>
+      <div class="controls">
+        <button type="button" id="play">Pausa</button>
+        <button type="button" id="restart">Reiniciar</button>
+        <input type="range" id="scrub" min="0" max="1" step="1" value="0" aria-label="Tiempo de la época">
+        <span class="clock" id="clock">0.0 s</span>
+        <select id="speed" aria-label="Velocidad de reproducción">
+          <option value="1">1×</option>
+          <option value="2">2×</option>
+          <option value="4" selected>4×</option>
+          <option value="8">8×</option>
+        </select>
+      </div>
+      <div class="hint">Arrastra para girar · rueda para acercar · doble clic para volver a la vista inicial · barra espaciadora para pausar</div>
+    </div>
+
+    <div class="side">
+      <div class="panel stepbox">
+        <div class="stepline"><h2 class="panel-title">Paso</h2><strong id="r-step"></strong></div>
+        <div class="stepbar"><div id="r-stepbar"></div></div>
+        <dl class="kvs">
+          <div class="kv" style="grid-column: 1 / -1"><dt>Decisión del agente en este paso</dt><dd class="action" id="r-action"></dd></div>
+          <div class="kv"><dt>Puntos de este paso</dt><dd id="r-steppts"></dd></div>
+          <div class="kv"><dt>Recompensa acumulada</dt><dd id="r-total"></dd></div>
+        </dl>
+      </div>
+      <div class="panel plan">
+        <h2 class="panel-title">Vista cenital</h2>
+        <canvas id="plan" aria-label="Vista desde arriba de la posición respecto a la plataforma"></canvas>
+      </div>
+      <div class="panel readouts">
+        <h2 class="panel-title">Telemetría</h2>
+        <dl>
+          <div><dt>Altitud</dt><dd id="r-alt"></dd></div>
+          <div><dt>Distancia a plataforma</dt><dd id="r-dist"></dd></div>
+          <div><dt>Velocidad vertical</dt><dd id="r-vz"></dd></div>
+          <div><dt>Velocidad horizontal</dt><dd id="r-vh"></dd></div>
+          <div><dt>Motor</dt><dd id="r-motor"></dd></div>
+          <div><dt>Temperatura motor</dt><dd id="r-eng"></dd></div>
+          <div><dt>Combustible</dt><dd id="r-fuel"></dd></div>
+          <div><dt>Viento</dt><dd id="r-wind"></dd></div>
+          <div><dt>Aire</dt><dd id="r-air"></dd></div>
+          <div><dt>Presión</dt><dd id="r-pres"></dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel summary">
+    <h2 class="panel-title" id="s-title">Resumen de la época</h2>
+    <dl>
+      <div><dt>Resultado</dt><dd id="s-result"></dd></div>
+      <div><dt>Pasos usados</dt><dd id="s-steps"></dd></div>
+      <div><dt>Recompensa total</dt><dd id="s-reward"></dd></div>
+      <div><dt>Duración</dt><dd id="s-dur"></dd></div>
+      <div><dt>Combustible gastado</dt><dd id="s-fuel"></dd></div>
+      <div><dt>Toque: vel. vertical</dt><dd id="s-vz"></dd></div>
+      <div><dt>Toque: distancia</dt><dd id="s-dist"></dd></div>
+      <div><dt>Suelo: temperatura</dt><dd id="s-gt"></dd></div>
+      <div><dt>Suelo: presión</dt><dd id="s-gp"></dd></div>
+      <div><dt>Viento a 10 m</dt><dd id="s-wind"></dd></div>
+    </dl>
+  </section>
+
+  <section class="charts" id="charts" aria-label="Gráficas de telemetría"></section>
+
+  <footer>
+    Cómo aprende el agente (Q-learning):
+    <ul>
+      <li>Guarda dos tablas de valores: una para el motor (según altitud y velocidad vertical) y otra para la dirección (según hacia dónde deriva respecto a la plataforma).</li>
+      <li>En cada paso elige la acción con más valor, salvo una fracción ε de las veces en que prueba una al azar para explorar. ε empieza en 1 (todo al azar) y baja con las épocas.</li>
+      <li>Después de cada paso ajusta el valor de la acción elegida con los puntos recibidos más el valor de la mejor acción siguiente.</li>
+      <li id="foot-best"></li>
+      <li id="foot-params"></li>
+    </ul>
+  </footer>
+</div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const $ = (s) => document.querySelector(s);
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const state = { ep: 0, t: 0, playing: false, speed: 4, yaw: -0.75, pitch: 0.32, zoom: 1, dirty: true };
+
+const fmt = (v, d = 1) => (Math.abs(v) < 0.05 && d <= 1 ? 0 : v).toFixed(d).replace("-", "−");
+const color = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const cur = () => DATA.episodes[state.ep];
+const idx = () => Math.min(Math.round(state.t), cur().f.t.length - 1);
+const compass = (deg) => ["E", "NE", "N", "NO", "O", "SO", "S", "SE"][Math.round(deg / 45) % 8];
+const OUT_TOKEN = { "aterrizaje": "--o-land", "fuera de plataforma": "--o-off", "choque": "--o-crash", "sin pasos": "--o-steps", "fuera de zona": "--o-zone" };
+const OUT_WHEN = {
+  "aterrizaje": "Toca el suelo a ≤ 3 m/s en vertical, ≤ 2 m/s en horizontal y a menos de 10 m del centro.",
+  "fuera de plataforma": "Toca el suelo suave pero fuera de la plataforma.",
+  "choque": "Toca el suelo demasiado rápido.",
+  "sin pasos": `Agota los ${DATA.max_steps} pasos sin llegar al suelo.`,
+  "fuera de zona": "Se aleja más de 300 m de la plataforma o sube por encima de 1200 m.",
+};
+const L = DATA.log, N = L.reward.length;
+const outName = (k) => DATA.outcomes[k];
+const pillStyle = (name) => { const c = color(OUT_TOKEN[name]); return `color:${c};background:color-mix(in srgb, ${c} 14%, transparent)`; };
+
+// ---------- textos y cifras ----------
+const windowN = Math.max(20, Math.round(N / 50));
+const lateN = Math.max(1, Math.round(N / 10));
+const lateLand = L.outcome.slice(-lateN).filter((o) => outName(o) === "aterrizaje").length;
+const earlyLand = L.outcome.slice(0, lateN).filter((o) => outName(o) === "aterrizaje").length;
+$("#intro").textContent = `Un agente Q-learning entrenado durante ${N.toLocaleString("es")} épocas. Cada época es un intento completo desde ${DATA.start_altitude} m de altura; el agente toma una decisión cada ${DATA.step_altitude} m de desplazamiento vertical y tiene un máximo de ${DATA.max_steps} pasos. Al principio actúa casi al azar; con la experiencia aprende qué decisiones dan más puntos.`;
+$("#k-epochs").textContent = N.toLocaleString("es");
+$("#k-epochs-sub").textContent = `${windowN} épocas por punto en las medias móviles`;
+$("#k-first").textContent = DATA.first_landing ? `época ${DATA.first_landing.toLocaleString("es")}` : "ninguno";
+$("#k-late").textContent = `${Math.round((100 * lateLand) / lateN)} %`;
+$("#k-late-sub").textContent = `últimas ${lateN} épocas · primeras ${lateN}: ${Math.round((100 * earlyLand) / lateN)} %`;
+const evalTotal = Object.values(DATA.evaluation).reduce((a, b) => a + b, 0);
+$("#k-final").textContent = `${DATA.evaluation["aterrizaje"]} / ${evalTotal}`;
+$("#k-final-sub").textContent = `aterrizajes · mejor versión: época ${DATA.best_epoch.toLocaleString("es")}`;
+$("#rules-steps").textContent = `Cada ${DATA.step_altitude} m de subida o bajada cuenta como un paso (o cada 2 s si no recorre esos metros). Máximo ${DATA.max_steps} pasos por época.`;
+const P = DATA.params;
+$("#foot-params").textContent = `Parámetros: tasa de aprendizaje α de ${P.alpha} a ${P.alpha_end}, descuento γ = ${P.gamma}, ε baja de 1 a ${P.epsilon_end} durante el ${Math.round(P.epsilon_decay * 100)} % de las épocas.`;
+$("#foot-best").textContent = `Cada ${DATA.checks.epoch[0].toLocaleString("es")} épocas se evalúa el agente sin explorar en ${DATA.check_episodes} épocas; el modelo final es la versión que más aterrizó (época ${DATA.best_epoch.toLocaleString("es")}). Después se prueba en ${evalTotal} épocas con meteorología que no vio al entrenar.`;
+DATA.outcomes.forEach((name) => {
+  const tr = document.createElement("tr");
+  const pts = DATA.rewards[name];
+  tr.innerHTML = `<td><span class="dot" style="background:${color(OUT_TOKEN[name])}"></span>${name}</td><td>${OUT_WHEN[name]}</td><td class="pts" style="color:${color(pts > 0 ? "--good" : "--bad")}">${pts > 0 ? "+" : "−"}${Math.abs(pts)}</td>`;
+  $("#rules-body").append(tr);
+  const lg = document.createElement("span");
+  lg.innerHTML = `<i style="background:${color(OUT_TOKEN[name])}"></i>${name}`;
+  $("#legend-outcomes").append(lg);
+});
+
+// ---------- canvas helpers ----------
+function prep(canvas) {
+  const r = canvas.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+  const w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+  if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, r.width, r.height);
+  return { ctx, W: r.width, H: r.height };
+}
+function arrow(ctx, x0, y0, x1, y1, head = 7) {
+  const a = Math.atan2(y1 - y0, x1 - x0);
+  ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+  if (Math.hypot(x1 - x0, y1 - y0) < 3) return;
+  ctx.beginPath(); ctx.moveTo(x1, y1);
+  ctx.lineTo(x1 - head * Math.cos(a - 0.45), y1 - head * Math.sin(a - 0.45));
+  ctx.lineTo(x1 - head * Math.cos(a + 0.45), y1 - head * Math.sin(a + 0.45));
+  ctx.closePath(); ctx.fill();
+}
+function movingAvg(v, w) {
+  const out = []; let s = 0;
+  for (let i = 0; i < v.length; i++) { s += v[i]; if (i >= w) s -= v[i - w]; out.push(s / Math.min(i + 1, w)); }
+  return out;
+}
+function niceTicks(lo, hi, n = 4) {
+  const raw = (hi - lo) / n, mag = Math.pow(10, Math.floor(Math.log10(raw || 1)));
+  const step = [1, 2, 2.5, 5, 10].map((m) => m * mag).find((s) => s >= raw) || raw;
+  const out = []; for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(+v.toFixed(6));
+  return out;
+}
+// Marco de gráfica por época: eje x = épocas, eje y con marcas "bonitas"
+function epochFrame(canvas, lo, hi, unit = "") {
+  const { ctx, W, H } = prep(canvas);
+  const Lm = 44, R = 8, T = 8, B = 20;
+  const X = (e) => Lm + ((e - 1) / Math.max(1, N - 1)) * (W - Lm - R);
+  const Y = (v) => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
+  ctx.font = `10px ${color("--font-data")}`; ctx.fillStyle = color("--muted"); ctx.strokeStyle = color("--grid"); ctx.lineWidth = 1;
+  niceTicks(lo, hi).forEach((g) => {
+    ctx.beginPath(); ctx.moveTo(Lm, Y(g)); ctx.lineTo(W - R, Y(g)); ctx.stroke();
+    ctx.textAlign = "right"; ctx.fillText(`${fmt(g, 0)}${unit}`, Lm - 5, Y(g) + 3);
+  });
+  ctx.textAlign = "center";
+  niceTicks(1, N, 5).filter((e) => e >= 1).forEach((e) => ctx.fillText(e.toLocaleString("es"), X(e), H - 6));
+  return { ctx, W, H, X, Y, Lm, R, T, B };
+}
+
+// ---------- curvas de aprendizaje ----------
+function drawLearning() {
+  // recompensa
+  {
+    const lo = Math.min(...L.reward), hi = Math.max(...L.reward);
+    const pad = (hi - lo) * 0.05;
+    const { ctx, X, Y, H, T, B } = epochFrame($("#l-reward"), lo - pad, hi + pad);
+    const r = N > 3000 ? 1.2 : 1.8;
+    L.reward.forEach((v, i) => {
+      ctx.fillStyle = color(OUT_TOKEN[outName(L.outcome[i])]); ctx.globalAlpha = 0.45;
+      ctx.fillRect(X(i + 1) - r / 2, Y(v) - r / 2, r, r);
+    });
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = color("--ink"); ctx.lineWidth = 2; ctx.lineJoin = "round";
+    ctx.beginPath(); movingAvg(L.reward, windowN).forEach((v, i) => (i ? ctx.lineTo(X(i + 1), Y(v)) : ctx.moveTo(X(i + 1), Y(v)))); ctx.stroke();
+    // épocas grabadas
+    ctx.fillStyle = color("--muted"); ctx.strokeStyle = color("--muted");
+    DATA.episodes.forEach((e, k) => {
+      if (!e.epoch) return;
+      const x = X(e.epoch);
+      ctx.globalAlpha = k === state.ep ? 1 : 0.35; ctx.setLineDash([2, 3]);
+      ctx.beginPath(); ctx.moveTo(x, T); ctx.lineTo(x, H - B); ctx.stroke(); ctx.setLineDash([]);
+    });
+    ctx.globalAlpha = 1;
+    ctx.font = `11px ${color("--font-body")}`; ctx.textAlign = "left"; ctx.fillStyle = color("--ink");
+    ctx.fillText(`línea: media de ${windowN} épocas · puntos: cada época, color = resultado`, 50, T + 12);
+  }
+  // % aterrizajes
+  {
+    const rate = movingAvg(L.outcome.map((o) => (outName(o) === "aterrizaje" ? 100 : 0)), windowN);
+    const { ctx, X, Y } = epochFrame($("#l-rate"), 0, 100, " %");
+    const c = color("--o-land");
+    ctx.beginPath(); rate.forEach((v, i) => (i ? ctx.lineTo(X(i + 1), Y(v)) : ctx.moveTo(X(i + 1), Y(v))));
+    ctx.save(); ctx.lineTo(X(N), Y(0)); ctx.lineTo(X(1), Y(0)); ctx.closePath(); ctx.fillStyle = c; ctx.globalAlpha = 0.15; ctx.fill(); ctx.restore();
+    ctx.beginPath(); rate.forEach((v, i) => (i ? ctx.lineTo(X(i + 1), Y(v)) : ctx.moveTo(X(i + 1), Y(v))));
+    ctx.strokeStyle = c; ctx.lineWidth = 2; ctx.stroke();
+    const ck = DATA.checks, pct = ck.landings.map((v) => (100 * v) / DATA.check_episodes);
+    ctx.strokeStyle = color("--ink"); ctx.lineWidth = 1; ctx.globalAlpha = 0.5;
+    ctx.beginPath(); pct.forEach((v, j) => (j ? ctx.lineTo(X(ck.epoch[j]), Y(v)) : ctx.moveTo(X(ck.epoch[j]), Y(v)))); ctx.stroke();
+    ctx.globalAlpha = 1;
+    pct.forEach((v, j) => {
+      const isBest = ck.epoch[j] === DATA.best_epoch;
+      ctx.beginPath(); ctx.arc(X(ck.epoch[j]), Y(v), isBest ? 4.5 : 3, 0, 2 * Math.PI);
+      ctx.fillStyle = color("--ink"); ctx.fill();
+      if (isBest) { ctx.strokeStyle = color("--panel"); ctx.lineWidth = 1.5; ctx.stroke(); ctx.textAlign = "center"; ctx.fillText("mejor", X(ck.epoch[j]), Math.max(18, Y(v) - 8)); }
+    });
+  }
+  // epsilon
+  {
+    const { ctx, X, Y } = epochFrame($("#l-eps"), 0, 1);
+    ctx.strokeStyle = color("--wind"); ctx.lineWidth = 2;
+    ctx.beginPath(); L.epsilon.forEach((v, i) => (i ? ctx.lineTo(X(i + 1), Y(v)) : ctx.moveTo(X(i + 1), Y(v)))); ctx.stroke();
+  }
+  // resultados por bloque (barras apiladas)
+  {
+    const blocks = 25, size = Math.ceil(N / blocks);
+    const { ctx, W, H } = prep($("#l-blocks"));
+    const Lm = 44, R = 8, T = 8, B = 20, bw = (W - Lm - R) / blocks;
+    const Y = (p) => T + (1 - p) * (H - T - B);
+    ctx.font = `10px ${color("--font-data")}`; ctx.fillStyle = color("--muted"); ctx.textAlign = "right";
+    [0, 0.5, 1].forEach((p) => ctx.fillText(`${p * 100} %`, Lm - 5, Y(p) + 3));
+    for (let b = 0; b < blocks; b++) {
+      const part = L.outcome.slice(b * size, (b + 1) * size); if (!part.length) continue;
+      let acc = 0;
+      DATA.outcomes.forEach((name, k) => {
+        const frac = part.filter((o) => o === k).length / part.length; if (!frac) return;
+        ctx.fillStyle = color(OUT_TOKEN[name]);
+        ctx.fillRect(Lm + b * bw + 1, Y(acc + frac), bw - 2, Y(acc) - Y(acc + frac));
+        acc += frac;
+      });
+    }
+    ctx.fillStyle = color("--muted"); ctx.textAlign = "left"; ctx.fillText("época 1", Lm, H - 6);
+    ctx.textAlign = "right"; ctx.fillText(`${N.toLocaleString("es")}`, W - R, H - 6);
+    ctx.textAlign = "center"; ctx.fillText(`bloques de ${size}`, (Lm + W - R) / 2, H - 6);
+  }
+  // pasos
+  {
+    const { ctx, X, Y } = epochFrame($("#l-steps"), 0, DATA.max_steps + 2);
+    ctx.strokeStyle = color("--bad"); ctx.setLineDash([4, 3]);
+    ctx.beginPath(); ctx.moveTo(X(1), Y(DATA.max_steps)); ctx.lineTo(X(N), Y(DATA.max_steps)); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = color("--bad"); ctx.textAlign = "right"; ctx.fillText(`máximo ${DATA.max_steps}`, X(N), Y(DATA.max_steps) - 4);
+    ctx.strokeStyle = color("--ink"); ctx.lineWidth = 2;
+    ctx.beginPath(); movingAvg(L.steps, windowN).forEach((v, i) => (i ? ctx.lineTo(X(i + 1), Y(v)) : ctx.moveTo(X(i + 1), Y(v)))); ctx.stroke();
+  }
+  // combustible
+  {
+    const { ctx, X, Y } = epochFrame($("#l-fuel"), 0, 500, "");
+    ctx.strokeStyle = color("--thrust"); ctx.lineWidth = 2;
+    ctx.beginPath(); movingAvg(L.fuel, windowN).forEach((v, i) => (i ? ctx.lineTo(X(i + 1), Y(v)) : ctx.moveTo(X(i + 1), Y(v)))); ctx.stroke();
+    ctx.fillStyle = color("--muted"); ctx.textAlign = "left"; ctx.fillText("kg", 4, 12);
+  }
+}
+
+// ---------- épocas grabadas ----------
+DATA.episodes.forEach((e, k) => {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "ep"; b.id = "ep-" + k;
+  const title = e.epoch ? `Época ${e.epoch.toLocaleString("es")}` : `Modelo final ${k - DATA.episodes.findIndex((x) => !x.epoch) + 1}`;
+  const note = e.epoch === DATA.first_landing ? "primer aterrizaje" : e.epoch ? `ε = ${L.epsilon[e.epoch - 1].toFixed(2)}` : "sin explorar";
+  b.innerHTML = `<span class="ep-agent">${title}</span><span class="ep-seed">${note} · ${e.steps} pasos</span><span class="pill" style="${pillStyle(e.reason)}">${e.reason}</span>`;
+  b.addEventListener("click", () => selectEpisode(k, true));
+  $("#episodes").append(b);
+});
+
+function selectEpisode(k, play) {
+  state.ep = k; state.t = 0; state.playing = play && !reduceMotion;
+  const e = cur(), f = e.f, n = f.t.length;
+  if (!state.playing) state.t = n - 1;
+  e.maxZ = Math.max(...f.z, 100);
+  e.maxH = Math.max(...f.x.map(Math.abs), ...f.y.map(Math.abs), 30);
+  document.querySelectorAll(".ep").forEach((b, j) => b.setAttribute("aria-pressed", String(j === k)));
+  $("#scrub").max = n - 1;
+  $("#s-title").textContent = e.epoch ? `Resumen · época ${e.epoch.toLocaleString("es")}` : "Resumen · modelo final";
+  const res = $("#s-result");
+  res.textContent = e.reason; res.style.color = color(OUT_TOKEN[e.reason]);
+  $("#s-steps").textContent = `${e.steps} / ${DATA.max_steps}`;
+  $("#s-reward").textContent = fmt(e.reward, 1);
+  $("#s-dur").textContent = `${e.duration.toFixed(1)} s`;
+  $("#s-fuel").textContent = `${e.fuel_used.toFixed(1)} kg`;
+  $("#s-vz").textContent = e.final_dist !== undefined && f.z[n - 1] <= 0.01 ? `${fmt(e.final_vz, 2)} m/s` : "no tocó suelo";
+  $("#s-dist").textContent = `${e.final_dist.toFixed(1)} m`;
+  $("#s-gt").textContent = `${fmt(e.ground_temp_c, 1)} °C`;
+  $("#s-gp").textContent = `${e.ground_pressure_kpa.toFixed(1)} kPa`;
+  $("#s-wind").textContent = `${e.wind_speed.toFixed(1)} m/s hacia ${compass(e.wind_dir_deg)}`;
+  updatePlay(); state.dirty = true; learnDirty = true;
+}
+
+// paso actual a partir del índice de la trayectoria
+function stepAt(i) {
+  const marks = cur().step_marks;
+  let k = marks.findIndex((m) => m.i >= i);
+  if (k < 0) k = marks.length - 1;
+  if (i === 0) k = 0;
+  return k;
+}
+
+// ---------- controles ----------
+function updatePlay() { $("#play").textContent = state.playing ? "Pausa" : "Reproducir"; }
+$("#play").addEventListener("click", () => {
+  if (!state.playing && idx() >= cur().f.t.length - 1) state.t = 0;
+  state.playing = !state.playing; updatePlay(); state.dirty = true;
+});
+$("#restart").addEventListener("click", () => { state.t = 0; state.playing = true; updatePlay(); state.dirty = true; });
+$("#scrub").addEventListener("input", (ev) => { state.t = +ev.target.value; state.playing = false; updatePlay(); state.dirty = true; });
+$("#speed").addEventListener("change", (ev) => { state.speed = +ev.target.value; });
+document.addEventListener("keydown", (ev) => {
+  if (ev.code === "Space" && ev.target === document.body) { ev.preventDefault(); $("#play").click(); }
+});
+
+// ---------- vista 3D ----------
+const c3d = $("#view3d");
+function draw3D() {
+  const { ctx, W, H } = prep(c3d);
+  const e = cur(), f = e.f, i = idx();
+  const ext = Math.max(100, Math.ceil((e.maxH + 30) / 50) * 50);
+  const tz = e.maxZ * 0.45, dist = (2.3 * e.maxZ) / state.zoom, focal = 1.55 * H;
+  const cy = Math.cos(state.yaw), sy = Math.sin(state.yaw), cp = Math.cos(state.pitch), sp = Math.sin(state.pitch);
+  const Pj = (x, y, z) => {
+    const x1 = x * cy - y * sy, y1 = x * sy + y * cy, zz = z - tz;
+    const depth = y1 * cp - zz * sp, up = y1 * sp + zz * cp, d = Math.max(dist + depth, 1);
+    return [W / 2 + (x1 * focal) / d, H * 0.52 - (up * focal) / d];
+  };
+  const line = (pts) => { ctx.beginPath(); pts.forEach(([x, y], k) => (k ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.stroke(); };
+  const ink = color("--ink"), muted = color("--muted"), grid = color("--grid"), padC = color("--pad");
+  ctx.lineCap = "round"; ctx.lineJoin = "round";
+
+  ctx.strokeStyle = grid; ctx.lineWidth = 1;
+  const step = ext / 4;
+  for (let g = -ext; g <= ext + 1e-6; g += step) { line([Pj(g, -ext, 0), Pj(g, ext, 0)]); line([Pj(-ext, g, 0), Pj(ext, g, 0)]); }
+  const ring = (r) => Array.from({ length: 49 }, (_, k) => Pj(r * Math.cos((k / 48) * 2 * Math.PI), r * Math.sin((k / 48) * 2 * Math.PI), 0));
+  ctx.fillStyle = padC; ctx.globalAlpha = 0.85;
+  ctx.beginPath(); ring(DATA.pad_radius).forEach(([x, y], k) => (k ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.fill();
+  ctx.globalAlpha = 1; ctx.strokeStyle = padC; ctx.setLineDash([4, 4]); line(ring(DATA.pad_radius * 3)); ctx.setLineDash([]);
+
+  ctx.strokeStyle = muted; ctx.fillStyle = muted; ctx.font = `11px ${color("--font-data")}`;
+  line([Pj(-ext, ext, 0), Pj(-ext, ext, e.maxZ)]);
+  const zStep = e.maxZ > 800 ? 250 : 100;
+  for (let z = 0; z <= e.maxZ; z += zStep) {
+    const [x, y] = Pj(-ext, ext, z);
+    ctx.beginPath(); ctx.moveTo(x - 4, y); ctx.lineTo(x + 4, y); ctx.stroke();
+    ctx.textAlign = "right"; ctx.fillText(`${z} m`, x - 7, y + 4);
+  }
+  const o = Pj(-ext, -ext, 0);
+  ctx.textAlign = "center";
+  [["x", Pj(-ext + ext * 0.5, -ext, 0)], ["y", Pj(-ext, -ext + ext * 0.5, 0)]].forEach(([lbl, p]) => {
+    arrow(ctx, o[0], o[1], p[0], p[1], 6); ctx.fillText(lbl, p[0] + (p[0] - o[0]) * 0.15, p[1] + (p[1] - o[1]) * 0.15 + 4);
+  });
+
+  const pts = f.x.map((_, k) => Pj(f.x[k], f.y[k], f.z[k]));
+  ctx.strokeStyle = muted; ctx.globalAlpha = 0.35; ctx.lineWidth = 1; line(pts); ctx.globalAlpha = 1;
+  ctx.strokeStyle = ink; ctx.lineWidth = 2; line(pts.slice(0, i + 1));
+  // marcas de paso (cada 20 m)
+  e.step_marks.forEach((m) => {
+    const [x, y] = pts[m.i];
+    ctx.beginPath(); ctx.arc(x, y, m.i <= i ? 2.6 : 2, 0, 2 * Math.PI);
+    ctx.fillStyle = m.i <= i ? ink : muted; ctx.globalAlpha = m.i <= i ? 1 : 0.4; ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+
+  const [rx, ry] = pts[i], g0 = Pj(f.x[i], f.y[i], 0);
+  ctx.strokeStyle = muted; ctx.lineWidth = 1; ctx.setLineDash([3, 4]); line([pts[i], g0]); ctx.setLineDash([]);
+  ctx.beginPath(); ctx.arc(g0[0], g0[1], 3, 0, 2 * Math.PI); ctx.fillStyle = muted; ctx.fill();
+
+  const vis = e.maxZ * 0.09;
+  if (f.on[i] && f.thr[i] > 0) {
+    const Lf = vis * (0.3 + f.thr[i]);
+    const tip = Pj(f.x[i] - f.dx[i] * Lf, f.y[i] - f.dy[i] * Lf, f.z[i] - f.dz[i] * Lf);
+    ctx.strokeStyle = color("--thrust"); ctx.lineWidth = 5; ctx.globalAlpha = 0.9; line([pts[i], tip]); ctx.globalAlpha = 1;
+  }
+  const ws = e.maxZ * 0.008;
+  const wt = Pj(f.x[i] + f.wx[i] * ws, f.y[i] + f.wy[i] * ws, f.z[i] + f.wz[i] * ws);
+  ctx.strokeStyle = color("--wind"); ctx.fillStyle = color("--wind"); ctx.lineWidth = 2;
+  arrow(ctx, rx, ry, wt[0], wt[1]);
+  ctx.textAlign = "left"; ctx.fillText("viento", wt[0] + 6, wt[1]);
+  ctx.beginPath(); ctx.arc(rx, ry, 5.5, 0, 2 * Math.PI); ctx.fillStyle = ink; ctx.fill();
+  ctx.strokeStyle = color("--panel"); ctx.lineWidth = 2; ctx.stroke();
+
+  ctx.font = `12px ${color("--font-body")}`; ctx.textAlign = "left";
+  [["--ink", "trayectoria · punto = paso"], ["--thrust", "empuje del motor"], ["--wind", "viento"], ["--pad", "plataforma (radio 10 m)"]].forEach(([c, t], k) => {
+    ctx.fillStyle = color(c); ctx.fillRect(12, 14 + k * 18, 12, 4); ctx.fillStyle = muted; ctx.fillText(t, 30, 19 + k * 18);
+  });
+}
+let drag = null;
+c3d.addEventListener("pointerdown", (ev) => { drag = { x: ev.clientX, y: ev.clientY }; c3d.setPointerCapture(ev.pointerId); });
+c3d.addEventListener("pointermove", (ev) => {
+  if (!drag) return;
+  state.yaw += (ev.clientX - drag.x) * 0.008;
+  state.pitch = Math.min(1.35, Math.max(0.02, state.pitch + (ev.clientY - drag.y) * 0.005));
+  drag = { x: ev.clientX, y: ev.clientY }; state.dirty = true;
+});
+c3d.addEventListener("pointerup", () => (drag = null));
+c3d.addEventListener("pointercancel", () => (drag = null));
+c3d.addEventListener("wheel", (ev) => {
+  ev.preventDefault(); state.zoom = Math.min(5, Math.max(0.5, state.zoom * Math.exp(-ev.deltaY * 0.001))); state.dirty = true;
+}, { passive: false });
+c3d.addEventListener("dblclick", () => { state.yaw = -0.75; state.pitch = 0.32; state.zoom = 1; state.dirty = true; });
+
+// ---------- vista cenital ----------
+function drawPlan() {
+  const { ctx, W, H } = prep($("#plan"));
+  const e = cur(), f = e.f, i = idx();
+  const niceSteps = [10, 20, 25, 50, 100, 200];
+  const R = e.maxH + 15, s = (Math.min(W, H) / 2 - 14) / R, cx = W / 2, cy = H / 2;
+  const M = (x, y) => [cx + x * s, cy - y * s];
+  const ringStep = niceSteps.find((n) => R / n <= 4) || 250;
+  const muted = color("--muted");
+  ctx.font = `11px ${color("--font-data")}`;
+  ctx.strokeStyle = color("--grid"); ctx.lineWidth = 1; ctx.fillStyle = muted; ctx.textAlign = "left";
+  for (let r = ringStep; r <= R; r += ringStep) {
+    ctx.beginPath(); ctx.arc(cx, cy, r * s, 0, 2 * Math.PI); ctx.stroke();
+    ctx.fillText(`${r} m`, cx + r * s * 0.707 + 3, cy - r * s * 0.707 - 3);
+  }
+  ctx.beginPath(); ctx.moveTo(cx - R * s, cy); ctx.lineTo(cx + R * s, cy); ctx.moveTo(cx, cy - R * s); ctx.lineTo(cx, cy + R * s); ctx.stroke();
+  ctx.fillText("x", cx + R * s - 8, cy - 5); ctx.fillText("y", cx + 5, cy - R * s + 10);
+  ctx.beginPath(); ctx.arc(cx, cy, DATA.pad_radius * s, 0, 2 * Math.PI);
+  ctx.fillStyle = color("--pad"); ctx.globalAlpha = 0.3; ctx.fill(); ctx.globalAlpha = 1; ctx.strokeStyle = color("--pad"); ctx.stroke();
+
+  const pts = f.x.map((_, k) => M(f.x[k], f.y[k]));
+  const path = (arr) => { ctx.beginPath(); arr.forEach(([x, y], k) => (k ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.stroke(); };
+  ctx.lineJoin = "round";
+  ctx.strokeStyle = muted; ctx.globalAlpha = 0.35; path(pts); ctx.globalAlpha = 1;
+  ctx.strokeStyle = color("--ink"); ctx.lineWidth = 2; path(pts.slice(0, i + 1));
+  const [px, py] = pts[i], wl = 4;
+  ctx.strokeStyle = color("--wind"); ctx.fillStyle = color("--wind"); ctx.lineWidth = 2;
+  arrow(ctx, px, py, px + f.wx[i] * wl, py - f.wy[i] * wl);
+  ctx.beginPath(); ctx.arc(px, py, 5, 0, 2 * Math.PI); ctx.fillStyle = color("--ink"); ctx.fill();
+}
+
+// ---------- gráficas de telemetría ----------
+const CHARTS = [
+  { label: "Altitud", unit: "m", key: "z", c: "--ink", d: 0 },
+  { label: "Velocidad vertical", unit: "m/s", key: "vz", c: "--ink", d: 1, limit: () => -DATA.max_vz },
+  { label: "Acelerador", unit: "%", get: (f) => f.thr.map((v) => v * 100), c: "--thrust", d: 0, area: true, range: [0, 100] },
+  { label: "Temperatura del motor", unit: "K", key: "eng_t", c: "--thrust", d: 0, limit: () => DATA.max_engine_temp },
+  { label: "Combustible", unit: "kg", key: "fuel", c: "--ink", d: 0, range: [0, 500] },
+  { label: "Viento horizontal", unit: "m/s", key: "wh", c: "--wind", d: 1 },
+  { label: "Temperatura del aire", unit: "°C", key: "air_t", c: "--wind", d: 1 },
+  { label: "Presión del aire", unit: "kPa", key: "p", c: "--wind", d: 1 },
+];
+CHARTS.forEach((ch, k) => {
+  const el = document.createElement("div");
+  el.className = "panel chart";
+  el.innerHTML = `<div class="chart-head"><span>${ch.label}</span><span id="cv-${k}"></span></div><canvas id="cc-${k}" aria-label="${ch.label}"></canvas>`;
+  $("#charts").append(el);
+});
+function series(ch, e) {
+  e.cache = e.cache || {};
+  return (e.cache[ch.label] = e.cache[ch.label] || (ch.get ? ch.get(e.f) : e.f[ch.key]));
+}
+function drawChart(ch, k) {
+  const { ctx, W, H } = prep($("#cc-" + k));
+  const e = cur(), v = series(ch, e), t = e.f.t, i = idx(), T = t[t.length - 1] || 1;
+  let lo, hi;
+  if (ch.range) [lo, hi] = ch.range;
+  else {
+    lo = Math.min(...v); hi = Math.max(...v);
+    if (ch.limit) { lo = Math.min(lo, ch.limit()); hi = Math.max(hi, ch.limit()); }
+    const pad = (hi - lo || 1) * 0.08; lo -= pad; hi += pad;
+  }
+  const Lm = 46, R = 6, Tp = 6, B = 18;
+  const X = (x) => Lm + (x / T) * (W - Lm - R), Y = (y) => Tp + (1 - (y - lo) / (hi - lo)) * (H - Tp - B);
+  const muted = color("--muted");
+  ctx.font = `10px ${color("--font-data")}`; ctx.fillStyle = muted; ctx.strokeStyle = color("--grid"); ctx.lineWidth = 1;
+  [lo, (lo + hi) / 2, hi].forEach((g) => {
+    ctx.beginPath(); ctx.moveTo(Lm, Y(g)); ctx.lineTo(W - R, Y(g)); ctx.stroke();
+    ctx.textAlign = "right"; ctx.fillText(fmt(g, Math.abs(hi - lo) < 10 ? 1 : 0), Lm - 5, Y(g) + 3);
+  });
+  ctx.textAlign = "left"; ctx.fillText("0 s", Lm, H - 4);
+  ctx.textAlign = "right"; ctx.fillText(`${T.toFixed(0)} s`, W - R, H - 4);
+  if (ch.limit) {
+    ctx.strokeStyle = color("--bad"); ctx.setLineDash([4, 3]);
+    ctx.beginPath(); ctx.moveTo(Lm, Y(ch.limit())); ctx.lineTo(W - R, Y(ch.limit())); ctx.stroke(); ctx.setLineDash([]);
+  }
+  const c = color(ch.c);
+  ctx.beginPath(); v.forEach((y, j) => (j ? ctx.lineTo(X(t[j]), Y(y)) : ctx.moveTo(X(t[j]), Y(y))));
+  if (ch.area) {
+    ctx.save(); ctx.lineTo(X(T), Y(lo)); ctx.lineTo(X(0), Y(lo)); ctx.closePath();
+    ctx.fillStyle = c; ctx.globalAlpha = 0.18; ctx.fill(); ctx.restore();
+    ctx.beginPath(); v.forEach((y, j) => (j ? ctx.lineTo(X(t[j]), Y(y)) : ctx.moveTo(X(t[j]), Y(y))));
+  }
+  ctx.strokeStyle = c; ctx.lineWidth = 1.5; ctx.lineJoin = "round"; ctx.stroke();
+  ctx.strokeStyle = muted; ctx.globalAlpha = 0.6;
+  ctx.beginPath(); ctx.moveTo(X(t[i]), Tp); ctx.lineTo(X(t[i]), H - B); ctx.stroke(); ctx.globalAlpha = 1;
+  ctx.beginPath(); ctx.arc(X(t[i]), Y(v[i]), 3.5, 0, 2 * Math.PI); ctx.fillStyle = c; ctx.fill();
+  $("#cv-" + k).textContent = `${fmt(v[i], ch.d)} ${ch.unit}`;
+}
+
+// ---------- lecturas ----------
+function drawReadouts() {
+  const e = cur(), f = e.f, i = idx();
+  const k = stepAt(i), marks = e.step_marks;
+  const done = i === 0 ? 0 : k + 1;
+  $("#r-step").textContent = `${done} / ${DATA.max_steps}`;
+  $("#r-stepbar").style.width = `${(100 * done) / DATA.max_steps}%`;
+  $("#r-action").textContent = i === 0 ? "—" : marks[k].label;
+  $("#r-steppts").textContent = i === 0 ? "—" : fmt(marks[k].r, 2);
+  const total = marks.filter((m) => m.i <= i).reduce((a, m) => a + m.r, 0);
+  $("#r-total").textContent = fmt(total, 1);
+  $("#r-alt").textContent = `${fmt(f.z[i], 1)} m`;
+  $("#r-dist").textContent = `${Math.hypot(f.x[i], f.y[i]).toFixed(1)} m`;
+  $("#r-vz").textContent = `${fmt(f.vz[i], 1)} m/s`;
+  $("#r-vh").textContent = `${Math.hypot(f.vx[i], f.vy[i]).toFixed(1)} m/s`;
+  const m = $("#r-motor");
+  m.textContent = f.on[i] ? `ON · ${(f.thr[i] * 100).toFixed(0)} %` : "OFF";
+  m.className = f.on[i] ? "engine-on" : "engine-off";
+  $("#r-eng").textContent = `${f.eng_t[i].toFixed(0)} K`;
+  $("#r-fuel").textContent = `${f.fuel[i].toFixed(1)} kg`;
+  $("#r-wind").textContent = `${f.wh[i].toFixed(1)} m/s`;
+  $("#r-air").textContent = `${fmt(f.air_t[i], 1)} °C`;
+  $("#r-pres").textContent = `${f.p[i].toFixed(2)} kPa`;
+  $("#clock").textContent = `${f.t[i].toFixed(1)} s`;
+  $("#scrub").value = i;
+}
+
+// ---------- bucle ----------
+let prev = null, learnDirty = true;
+function tick(ts) {
+  const e = cur(), n = e.f.t.length;
+  if (state.playing && prev !== null) {
+    state.t += ((ts - prev) / 1000 / DATA.dt) * state.speed;
+    if (state.t >= n - 1) { state.t = n - 1; state.playing = false; updatePlay(); }
+    state.dirty = true;
+  }
+  prev = ts;
+  if (learnDirty) { learnDirty = false; drawLearning(); }
+  if (state.dirty) {
+    state.dirty = false;
+    draw3D(); drawPlan(); drawReadouts(); CHARTS.forEach(drawChart);
+  }
+  requestAnimationFrame(tick);
+}
+const redraw = () => { state.dirty = true; learnDirty = true; };
+new ResizeObserver(redraw).observe(document.body);
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", redraw);
+new MutationObserver(redraw).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+document.fonts?.ready.then(redraw);
+
+// Arranca mostrando la última época grabada del entrenamiento, completa
+const lastTraining = DATA.episodes.map((e) => e.epoch).lastIndexOf(Math.max(...DATA.episodes.map((e) => e.epoch || 0)));
+selectEpisode(lastTraining, false);
+requestAnimationFrame(tick);
+</script>

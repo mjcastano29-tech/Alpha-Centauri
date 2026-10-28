@@ -2,6 +2,7 @@
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
-experimento1.html
-resultados/
-aprendizaje.html
+/experimento1.html
+/aprendizaje.html
+/aprendizaje3d.html
+/resultados/
