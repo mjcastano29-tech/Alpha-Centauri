@@ -25,14 +25,14 @@ from stable_baselines3.common.vec_env import DummyVecEnv, VecMonitor, VecNormali
 
 import rocket_env  # noqa: F401  (registra RocketLanding3D-v0)
 import seguimiento
-from agente_ppo import PPOAgent
+from agente_ppo import AccionRelativa, PPOAgent
 from entrenamiento import CHECK_EPISODES, EVAL_SEED_BASE, OUTCOMES, episode_record, evaluate, run_epoch
 from entrenar import FINAL_EPISODES, save_run, write_pages
 from rocket_env.rocket_landing import RocketLanding3DEnv
 
 EXPERIMENTO = "experimento-2-ppo"
 DEFAULTS = {
-    "total_timesteps": 400_000,
+    "total_timesteps": 600_000,
     "n_envs": 8,
     "n_steps": 256,  # por entorno; 8 × 256 = 2048 pasos por actualización
     "batch_size": 256,
@@ -41,16 +41,19 @@ DEFAULTS = {
     "gamma": 0.99,
     "gae_lambda": 0.95,
     "clip_range": 0.2,
-    "ent_coef": 0.0,
+    "ent_coef": 0.005,
     "net_arch": [128, 128],
     "eval_every": 20_000,  # pasos entre evaluaciones sin ruido
     "seed": 0,
+    "accion": "relativa",  # relativa (empuje/peso e inclinación) o cruda (los 5 valores del entorno)
 }
 
 
-def make_env(seed):
+def make_env(seed, accion="relativa"):
     def _init():
         env = gym.make("RocketLanding3D-v0")
+        if accion == "relativa":
+            env = AccionRelativa(env)
         env.reset(seed=seed)
         return env
     return _init
@@ -124,6 +127,8 @@ def main(argv=None):
     for key, value in DEFAULTS.items():
         if key == "net_arch":
             parser.add_argument("--net-arch", type=int, nargs="+", default=value, help="neuronas por capa oculta")
+        elif key == "accion":
+            parser.add_argument("--accion", choices=["relativa", "cruda"], default=value, help="parametrización de la acción")
         else:
             parser.add_argument("--" + key.replace("_", "-"), type=type(value), default=value)
     parser.add_argument("--run-id", help="nombre de la ejecución (por defecto fecha-hora-semilla)")
@@ -131,7 +136,7 @@ def main(argv=None):
     config = {k: getattr(args, k) for k in DEFAULTS}
 
     torch.manual_seed(config["seed"])
-    venv = DummyVecEnv([make_env(config["seed"] * 1_000_000 + k) for k in range(config["n_envs"])])
+    venv = DummyVecEnv([make_env(config["seed"] * 1_000_000 + k, config["accion"]) for k in range(config["n_envs"])])
     venv = VecNormalize(VecMonitor(venv), norm_obs=True, norm_reward=True, clip_obs=10.0, gamma=config["gamma"])
     eval_env = gym.make("RocketLanding3D-v0")
     model = PPO(
@@ -142,7 +147,7 @@ def main(argv=None):
         policy_kwargs={"net_arch": list(config["net_arch"])},
     )
     run_id = args.run_id or f"{time.strftime('%Y%m%d-%H%M%S')}-ppo-s{config['seed']}"
-    print(f"Experimento 2 · PPO · red {config['net_arch']} · {config['total_timesteps']} pasos en {config['n_envs']} entornos "
+    print(f"Experimento 2 · PPO · acción {config['accion']} · red {config['net_arch']} · {config['total_timesteps']} pasos en {config['n_envs']} entornos "
           f"· evaluación cada {config['eval_every']} pasos · ejecución {run_id}\n")
 
     seguimiento.experimento(EXPERIMENTO)
@@ -158,7 +163,7 @@ def main(argv=None):
         normalizer = VecNormalize.load(str(Path(tmp) / "mejor_normalizador.pkl"), DummyVecEnv([make_env(0)]))
         normalizer.training = False
         normalizer.norm_reward = False
-        agent = PPOAgent(best, normalizer, hiperparametros={k: v for k, v in config.items() if k not in ("seed", "net_arch")})
+        agent = PPOAgent(best, normalizer, hiperparametros={k: v for k, v in config.items() if k not in ("seed", "net_arch", "accion")})
         print(f"\nMejor versión: época {callback.best[1]} ({callback.best[0]}/{CHECK_EPISODES} aterrizajes en la evaluación)")
         evaluation = evaluate(eval_env, agent, FINAL_EPISODES)
         print(f"Modelo final ({FINAL_EPISODES} épocas sin ruido): {evaluation['outcomes']}")
