@@ -152,11 +152,6 @@ def cmd_entrenar(args):
     print(f"Página 3D (three.js) de cómo aprende: {page3d}")
 
 
-def cmd_entrenar_ppo(args):
-    from entrenar_ppo import main as ppo_main  # import tardío: carga PyTorch
-    ppo_main(args.resto)
-
-
 def print_metrics(title, ev):
     print(bold(title))
     print(f"  Aterrizajes seguros ........ {ev['outcomes']['aterrizaje']}/{ev['episodes']} ({ev['landing_rate']:.0%})")
@@ -261,6 +256,10 @@ def cmd_runs(args):
 
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "entrenar-ppo":  # sus opciones las interpreta entrenar_ppo.py
+        from entrenar_ppo import main as ppo_main  # import tardío: carga PyTorch
+        ppo_main(sys.argv[2:])
+        return
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="command", required=True)
 
@@ -269,9 +268,7 @@ def main():
     p.add_argument("--detalle", action="store_true", help="una línea por época en vez de la barra de progreso")
     p.set_defaults(func=cmd_entrenar)
 
-    p = sub.add_parser("entrenar-ppo", help="experimento 2: entrena el PPO (red neuronal); acepta las opciones de entrenar_ppo.py")
-    p.add_argument("resto", nargs=argparse.REMAINDER)
-    p.set_defaults(func=cmd_entrenar_ppo)
+    sub.add_parser("entrenar-ppo", help="experimento 2: entrena el PPO (red neuronal); acepta las opciones de entrenar_ppo.py")
 
     agents = ["modelo", "heuristico", "aleatorio", "qlearning", "ppo"]
     p = sub.add_parser("ver", help="juega una época y muestra cada paso")
