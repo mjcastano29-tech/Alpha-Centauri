@@ -54,6 +54,7 @@ class RocketLanding3DEnv(gym.Env):
     """
 
     metadata = {"render_modes": ["ansi"], "render_fps": 10}
+    VERSION = "0.1"  # versión de las reglas; súbela si cambias constantes o reglas (ver docs/CHANGELOG.md)
 
     DT = 0.1  # paso de la simulación física (s)
     STEP_ALTITUDE = 20.0  # m de desplazamiento vertical por paso del agente

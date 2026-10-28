@@ -6,6 +6,8 @@ Ejemplos:
     python cli.py ver --agente aleatorio        # lo mismo con un agente al azar
     python cli.py evaluar --viento 15           # métricas con y sin viento lateral fuerte
     python cli.py transiciones                  # las primeras transiciones en detalle
+    python cli.py runs                          # ejecuciones guardadas, con commit y métricas
+    python cli.py ver --run 20261028-180000-s0  # cualquier comando con una ejecución concreta
 """
 import argparse
 import sys
@@ -18,10 +20,8 @@ import numpy as np
 import rocket_env  # noqa: F401  (registra RocketLanding3D-v0)
 from agente_qlearning import QLearningAgent, action_label, to_env_action
 from entrenamiento import CHECK_EPISODES, EVAL_SEED_BASE, OUTCOMES, epochs_to_rate, evaluate, train
-from entrenar import FINAL_EPISODES, add_train_args, config_from_args, save_results
+from entrenar import FINAL_EPISODES, add_train_args, config_from_args, load_registry, model_path, save_run, write_pages
 from rocket_env.rocket_landing import RocketLanding3DEnv
-
-MODEL = Path(__file__).parent / "resultados" / "q_tablas.npz"
 
 # ---------- colores (solo si la salida es una terminal) ----------
 IS_TTY = sys.stdout.isatty()
@@ -42,13 +42,11 @@ def bold(text):
 
 
 # ---------- agentes para `ver` y `transiciones` ----------
-def make_policy(name, model_path):
+def make_policy(name, run_id=None):
     """Devuelve una función obs -> (acción continua, etiqueta legible)."""
     if name == "qlearning":
-        if not Path(model_path).exists():
-            sys.exit(f"No encuentro el modelo {model_path}. Entrena primero con: python cli.py entrenar")
         agent = QLearningAgent()
-        agent.load(model_path)
+        agent.load(model_path(run_id))
 
         def policy(env, obs):
             engine, direction = agent.choose(obs, greedy=True)
@@ -131,7 +129,7 @@ def cmd_entrenar(args):
         announce(f"  · evaluación sin explorar en la época {epoch}: {landings}/{CHECK_EPISODES} aterrizajes{mark}")
 
     result_first = [None]
-    result = train(config, record_epochs={1, 10, 50, 100, 250, 500, n} | set(range(1000, n, 1000)),
+    result = train(config, record_epochs={1, 10, 50, 100, 250, 500, n} | set(range(100, n, 100)),
                    on_epoch=on_epoch, on_check=on_check)
     print("\n" if IS_TTY else "")
 
@@ -147,9 +145,11 @@ def cmd_entrenar(args):
 
     evaluation = evaluate(result["env"], result["agent"], FINAL_EPISODES)
     print_metrics(f"Modelo final en {FINAL_EPISODES} épocas nuevas sin explorar", evaluation)
-    page = save_results(result, evaluation)
-    print(f"\nModelo guardado en {MODEL}")
+    path = save_run(result, evaluation, args.run_id)
+    print(f"\nEjecución guardada en {path}: modelo, datos de entrenamiento, vuelos grabados y manifest")
+    page, page3d = write_pages(path.name)
     print(f"Página con las curvas de aprendizaje: {page}")
+    print(f"Página 3D (three.js) de cómo aprende: {page3d}")
 
 
 def print_metrics(title, ev):
@@ -165,12 +165,13 @@ def print_metrics(title, ev):
 def cmd_ver(args):
     env = gym.make("RocketLanding3D-v0")
     rocket = env.unwrapped
-    policy = make_policy(args.agente, args.modelo)
+    policy = make_policy(args.agente, args.run)
     options = {"viento": args.viento} if args.viento is not None else None
     obs, info = env.reset(seed=args.semilla, options=options)
     atm = rocket.atmosphere
     wind = np.hypot(*atm.ground_wind[:2])
-    print(bold(f"Época con el agente {args.agente} · semilla {args.semilla}"))
+    run_note = f" · ejecución {model_path(args.run).parent.name}" if args.agente == "qlearning" else ""
+    print(bold(f"Época con el agente {args.agente}{run_note} · semilla {args.semilla}"))
     print(f"Meteorología: suelo {atm.t0 - 273.15:.1f} °C, {atm.p0 / 1000:.1f} kPa, viento a 10 m {wind:.1f} m/s")
     print(f"Salida: altitud {obs[2]:.0f} m, a {np.hypot(obs[0], obs[1]):.1f} m de la plataforma, "
           f"bajando a {-obs[5]:.1f} m/s\n")
@@ -200,11 +201,11 @@ def cmd_ver(args):
 
 
 def cmd_evaluar(args):
-    if not Path(args.modelo).exists():
-        sys.exit(f"No encuentro el modelo {args.modelo}. Entrena primero con: python cli.py entrenar")
+    path = model_path(args.run)
     env = gym.make("RocketLanding3D-v0")
     agent = QLearningAgent()
-    agent.load(args.modelo)
+    agent.load(path)
+    print(bold(f"Ejecución {path.parent.name}") + "\n")
     normal = evaluate(env, agent, args.episodios)
     print_metrics(f"Condiciones normales (viento 0–10 m/s) · {args.episodios} épocas", normal)
     if args.viento is not None:
@@ -217,7 +218,7 @@ def cmd_evaluar(args):
 
 def cmd_transiciones(args):
     env = gym.make("RocketLanding3D-v0")
-    policy = make_policy(args.agente, args.modelo)
+    policy = make_policy(args.agente, args.run)
     obs, _ = env.reset(seed=args.semilla)
 
     def describe(o):
@@ -240,6 +241,22 @@ def cmd_transiciones(args):
             break
 
 
+def cmd_runs(args):
+    registry = load_registry()
+    if not registry["ejecuciones"]:
+        print("No hay ejecuciones. Entrena con: python cli.py entrenar")
+        return
+    print(bold(f"{'ejecución':26s} {'fecha':19s} {'commit':14s} {'amb.':5s} {'épocas':>6s} {'sem.':>4s} "
+               f"{'1er aterr.':>10s} {'aterrizajes':>11s} {'contacto':>8s} {'error':>7s}"))
+    for r in registry["ejecuciones"]:
+        mark = paint("  ← última", "32") if r["run_id"] == registry["ultimo"] else ""
+        contact = f"{r['velocidad_contacto']:.2f}" if r["velocidad_contacto"] is not None else "—"
+        first = str(r["primer_aterrizaje"]) if r.get("primer_aterrizaje") else "nunca"
+        print(f"{r['run_id']:26s} {r['fecha'][:19]:19s} {r['commit']:14s} {r['ambiente']:5s} {r['epochs']:6d} {r['seed']:4d} "
+              f"{first:>10s} {r['aterrizajes']:10.0%} {contact:>6s} m {r['error_posicion']:5.1f} m{mark}")
+    print(paint("\ncommit con * = había cambios sin commit al entrenar", "2"))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -252,24 +269,27 @@ def main():
     agents = ["qlearning", "heuristico", "aleatorio"]
     p = sub.add_parser("ver", help="juega una época y muestra cada paso")
     p.add_argument("--agente", choices=agents, default="qlearning")
-    p.add_argument("--modelo", default=str(MODEL))
+    p.add_argument("--run", help="id de la ejecución (por defecto la última)")
     p.add_argument("--semilla", type=int, default=EVAL_SEED_BASE, help="semilla de la meteorología y la salida")
     p.add_argument("--viento", type=float, help="fija la velocidad del viento (m/s)")
     p.add_argument("--lento", type=float, default=0.0, help="segundos de pausa entre pasos")
     p.set_defaults(func=cmd_ver)
 
     p = sub.add_parser("evaluar", help="métricas del modelo, opcionalmente con viento lateral fuerte")
-    p.add_argument("--modelo", default=str(MODEL))
+    p.add_argument("--run", help="id de la ejecución (por defecto la última)")
     p.add_argument("--episodios", type=int, default=FINAL_EPISODES)
     p.add_argument("--viento", type=float, help="velocidad del viento para la perturbación (m/s)")
     p.set_defaults(func=cmd_evaluar)
 
     p = sub.add_parser("transiciones", help="muestra las primeras transiciones en detalle")
     p.add_argument("--agente", choices=agents, default="qlearning")
-    p.add_argument("--modelo", default=str(MODEL))
+    p.add_argument("--run", help="id de la ejecución (por defecto la última)")
     p.add_argument("--semilla", type=int, default=EVAL_SEED_BASE)
     p.add_argument("--n", type=int, default=5)
     p.set_defaults(func=cmd_transiciones)
+
+    p = sub.add_parser("runs", help="lista las ejecuciones guardadas en resultados/runs")
+    p.set_defaults(func=cmd_runs)
 
     args = parser.parse_args()
     args.func(args)

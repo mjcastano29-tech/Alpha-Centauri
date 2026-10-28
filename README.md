@@ -77,4 +77,13 @@ python cli.py evaluar --viento 15                 # métricas en condiciones nor
 python cli.py transiciones                        # las cinco primeras transiciones en detalle
 ```
 
-`entrenar` guarda el modelo en `resultados/q_tablas.npz` y genera `aprendizaje.html`, con las curvas de aprendizaje y la repetición de épocas en 3D. `python entrenar.py` hace lo mismo sin la salida interactiva; `python entrenar.py --solo-pagina` regenera la página sin volver a entrenar.
+`entrenar` guarda la ejecución en `resultados/runs/<id>/` (ver *Versionado*) y genera dos páginas: `aprendizaje.html`, con las curvas de aprendizaje y la repetición de épocas, y `aprendizaje3d.html`, la escena three.js que reproduce las épocas grabadas (cada 100) y muestra cómo va aprendiendo el agente. `python entrenar.py` hace lo mismo sin la salida interactiva; `python entrenar.py --solo-pagina` regenera la página sin volver a entrenar.
+
+## Versionado
+
+Todo se versiona en git: código, ficha, modelos y datos de entrenamiento.
+
+- **Ambiente**: `RocketLanding3DEnv.VERSION` (hoy `0.1`, la de la ficha). Cualquier cambio de reglas o constantes sube la versión y se anota en [docs/CHANGELOG.md](docs/CHANGELOG.md).
+- **Ejecuciones de entrenamiento**: cada `python cli.py entrenar` crea `resultados/runs/<id>/` con `manifest.json` (commit de git, versión del ambiente, configuración, versiones de software y métricas), `modelo.npz` (tablas Q), `entrenamiento.json` (todas las épocas) y `vuelos.json.gz` (épocas grabadas). `resultados/registro.json` es el índice y apunta a la última. `python cli.py runs` las lista; `--run <id>` en `ver`, `evaluar`, `transiciones` o `entrenar.py --solo-pagina` usa una concreta.
+- **Reproducibilidad**: el entrenamiento es determinista. Con el mismo commit, la misma versión del ambiente y la misma configuración (`--seed`, `--epochs`, …) sale exactamente la misma ejecución.
+- **Páginas HTML**: se generan a partir de una ejecución y no se versionan (`python entrenar.py --solo-pagina --run <id>` las regenera).
