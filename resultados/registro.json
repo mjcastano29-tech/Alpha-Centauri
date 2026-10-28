@@ -12,7 +12,9 @@
       "aterrizajes": 0.785,
       "velocidad_contacto": 1.9505930632744906,
       "error_posicion": 5.517376205096453,
-      "primer_aterrizaje": 1785
+      "primer_aterrizaje": 1785,
+      "experimento": "experimento-1-qlearning",
+      "agente": "Q-learning"
     }
   ]
 }

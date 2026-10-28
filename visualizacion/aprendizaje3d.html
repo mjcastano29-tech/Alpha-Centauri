@@ -274,7 +274,7 @@ const state = { ep: sequence[0], t: 0, playing: !reduceMotion, speed: 8, mode: "
 // ---------- textos ----------
 const gaps = training.slice(1).map((k, j) => EP[k].epoch - EP[training[j]].epoch);
 const interval = gaps.sort((a, b) => gaps.filter((v) => v === a).length - gaps.filter((v) => v === b).length).pop() || N;
-$("#intro").textContent = `Un agente Q-learning entrenado ${N.toLocaleString("es")} épocas. Se grabó un vuelo completo cada ${interval.toLocaleString("es")} épocas (${training.length} en total); la secuencia los reproduce en orden y deja la trayectoria de cada uno como fantasma, así se ve cómo pasa de estrellarse en cualquier sitio a converger en la plataforma. El cohete está dibujado a mayor tamaño del real para que se vea desde lejos.`;
+$("#intro").textContent = `Un agente ${DATA.agente || "Q-learning"} entrenado ${N.toLocaleString("es")} épocas. Se grabó un vuelo completo cada ${interval.toLocaleString("es")} épocas (${training.length} en total); la secuencia los reproduce en orden y deja la trayectoria de cada uno como fantasma, así se ve cómo pasa de estrellarse en cualquier sitio a converger en la plataforma. El cohete está dibujado a mayor tamaño del real para que se vea desde lejos.`;
 const run = DATA.run || {};
 $("#foot").textContent = `Primer aterrizaje en la época ${DATA.first_landing ? DATA.first_landing.toLocaleString("es") : "—"}. Modelo final: ${DATA.evaluation["aterrizaje"]} aterrizajes en ${Object.values(DATA.evaluation).reduce((a, b) => a + b, 0)} épocas nuevas sin explorar.` +
   (run.id ? ` Ejecución ${run.id} (${run.fecha ? run.fecha.slice(0, 10) : ""}, commit ${run.commit || "—"}, ambiente v${run.ambiente}).` : "") + " Escena con three.js r128.";
@@ -523,7 +523,7 @@ function selectEpisode(k, play) {
   buildTrail(e); plife.fill(0);
   $("#epoch").value = k; $("#scrub").max = e.f.t.length - 1;
   $("#o-epoch").textContent = epochName(e, k);
-  $("#o-sub").textContent = e.epoch ? `exploración ε = ${L.epsilon[e.epoch - 1].toFixed(2)} · ${e.steps} pasos · recompensa ${fmt(e.reward, 0)}` : `sin explorar · ${e.steps} pasos · recompensa ${fmt(e.reward, 0)}`;
+  $("#o-sub").textContent = e.epoch ? `${L.epsilon ? "exploración ε = " + L.epsilon[e.epoch - 1].toFixed(2) + " · " : ""}${e.steps} pasos · recompensa ${fmt(e.reward, 0)}` : `sin explorar · ${e.steps} pasos · recompensa ${fmt(e.reward, 0)}`;
   const pill = $("#o-pill"); pill.textContent = e.reason; pill.style.background = `#${OUT_HEX[e.reason].toString(16).padStart(6, "0")}`;
   updatePlay(); updateSeqText(); drawCurve(); state.dirty = true;
 }
@@ -610,9 +610,12 @@ function drawReadouts() {
   $("#h-tilt").textContent = `${(Math.acos(Math.max(-1, Math.min(1, f.dz[i]))) * 180 / Math.PI).toFixed(1)}°`;
   $("#h-wind").textContent = `${f.wh[i].toFixed(1)} m/s`; $("#h-vz").textContent = `${fmt(f.vz[i], 1)} m/s`;
   // decisión: nivel de empuje y dirección, leídos de la etiqueta de la acción
-  const mt = label.match(/×([\d.]+)/), thrust = label.startsWith("motor") ? 0 : mt ? +mt[1] : -1;
-  $("#h-bars").querySelectorAll("i").forEach((b, j) => b.classList.toggle("on", THRUSTS[j] === thrust));
-  $("#h-dirs").querySelectorAll("span").forEach((s, j) => s.classList.toggle("on", thrust > 0 && label.endsWith(DIRS[j].replace("−", "-"))));
+  // empuje real respecto al peso y dirección del empuje, calculados de la telemetría (vale para cualquier agente)
+  const twr = f.on[i] ? f.thr[i] * (27000 - f.p[i] * 1000 * 0.02) / ((1000 + f.fuel[i]) * 9.80665) : 0;
+  $("#h-bars").querySelectorAll("i").forEach((b, j) => b.classList.toggle("on", twr > 0 ? THRUSTS[j] > 0 && THRUSTS[j] <= twr + 0.05 : j === 0));
+  const lateral = Math.hypot(f.dx[i], f.dy[i]);
+  const dir = !f.on[i] || lateral < 0.03 ? 0 : Math.abs(f.dx[i]) >= Math.abs(f.dy[i]) ? (f.dx[i] > 0 ? 1 : 2) : (f.dy[i] > 0 ? 3 : 4);
+  $("#h-dirs").querySelectorAll("span").forEach((s, j) => s.classList.toggle("on", j === dir));
   if ($("#h-vzchart").offsetParent) drawVzChart(i);
 }
 

@@ -286,14 +286,8 @@
   <section class="charts" id="charts" aria-label="Gráficas de telemetría"></section>
 
   <footer>
-    Cómo aprende el agente (Q-learning):
-    <ul>
-      <li>Guarda dos tablas de valores: una para el motor (según altitud y velocidad vertical) y otra para la dirección (según hacia dónde deriva respecto a la plataforma).</li>
-      <li>En cada paso elige la acción con más valor, salvo una fracción ε de las veces en que prueba una al azar para explorar. ε empieza en 1 (todo al azar) y baja con las épocas.</li>
-      <li>Después de cada paso ajusta el valor de la acción elegida con los puntos recibidos más el valor de la mejor acción siguiente.</li>
-      <li id="foot-best"></li>
-      <li id="foot-params"></li>
-    </ul>
+    <span id="foot-title"></span>
+    <ul id="foot-notes"></ul>
   </footer>
 </div>
 
@@ -325,7 +319,7 @@ const windowN = Math.max(20, Math.round(N / 50));
 const lateN = Math.max(1, Math.round(N / 10));
 const lateLand = L.outcome.slice(-lateN).filter((o) => outName(o) === "aterrizaje").length;
 const earlyLand = L.outcome.slice(0, lateN).filter((o) => outName(o) === "aterrizaje").length;
-$("#intro").textContent = `Un agente Q-learning entrenado durante ${N.toLocaleString("es")} épocas. Cada época es un intento completo desde ${DATA.start_altitude} m de altura; el agente toma una decisión cada ${DATA.step_altitude} m de desplazamiento vertical y tiene un máximo de ${DATA.max_steps} pasos. Al principio actúa casi al azar; con la experiencia aprende qué decisiones dan más puntos.`;
+$("#intro").textContent = `Un agente ${DATA.agente || "Q-learning"} entrenado durante ${N.toLocaleString("es")} épocas. Cada época es un intento completo desde ${DATA.start_altitude} m de altura; el agente toma una decisión cada ${DATA.step_altitude} m de desplazamiento vertical y tiene un máximo de ${DATA.max_steps} pasos. Al principio actúa casi al azar; con la experiencia aprende qué decisiones dan más puntos.`;
 $("#k-epochs").textContent = N.toLocaleString("es");
 $("#k-epochs-sub").textContent = `${windowN} épocas por punto en las medias móviles`;
 $("#k-first").textContent = DATA.first_landing ? `época ${DATA.first_landing.toLocaleString("es")}` : "ninguno";
@@ -336,7 +330,10 @@ $("#k-final").textContent = `${DATA.evaluation["aterrizaje"]} / ${evalTotal}`;
 $("#k-final-sub").textContent = `aterrizajes · mejor versión: época ${DATA.best_epoch.toLocaleString("es")}`;
 $("#rules-steps").textContent = `Cada ${DATA.step_altitude} m de subida o bajada cuenta como un paso (o cada 2 s si no recorre esos metros). Máximo ${DATA.max_steps} pasos por época.`;
 const P = DATA.params;
-$("#foot-params").textContent = `Parámetros: tasa de aprendizaje α de ${P.alpha} a ${P.alpha_end}, descuento γ = ${P.gamma}, ε baja de 1 a ${P.epsilon_end} durante el ${Math.round(P.epsilon_decay * 100)} % de las épocas.`;
+$("#foot-title").textContent = `Cómo aprende el agente (${DATA.agente || "Q-learning"}):`;
+(DATA.agente_notas || []).forEach((t) => { const li = document.createElement("li"); li.textContent = t; $("#foot-notes").append(li); });
+["foot-best", "foot-params"].forEach((id) => { const li = document.createElement("li"); li.id = id; $("#foot-notes").append(li); });
+$("#foot-params").textContent = "Parámetros: " + Object.entries(P).map(([k, v]) => `${k} = ${Array.isArray(v) ? v.join("×") : v}`).join(", ") + ".";
 $("#foot-best").textContent = `Cada ${DATA.checks.epoch[0].toLocaleString("es")} épocas se evalúa el agente sin explorar en ${DATA.check_episodes} épocas; el modelo final es la versión que más aterrizó (época ${DATA.best_epoch.toLocaleString("es")}). Después se prueba en ${evalTotal} épocas con meteorología que no vio al entrenar.`;
 DATA.outcomes.forEach((name) => {
   const tr = document.createElement("tr");
@@ -444,8 +441,10 @@ function drawLearning() {
   // epsilon
   {
     const { ctx, X, Y } = epochFrame($("#l-eps"), 0, 1);
-    ctx.strokeStyle = color("--wind"); ctx.lineWidth = 2;
-    ctx.beginPath(); L.epsilon.forEach((v, i) => (i ? ctx.lineTo(X(i + 1), Y(v)) : ctx.moveTo(X(i + 1), Y(v)))); ctx.stroke();
+    if (L.epsilon) {
+      ctx.strokeStyle = color("--wind"); ctx.lineWidth = 2;
+      ctx.beginPath(); L.epsilon.forEach((v, i) => (i ? ctx.lineTo(X(i + 1), Y(v)) : ctx.moveTo(X(i + 1), Y(v)))); ctx.stroke();
+    } else { ctx.fillStyle = color("--muted"); ctx.textAlign = "left"; ctx.fillText("no aplica: este agente explora con el ruido de su política", X(1) + 4, Y(0.5)); }
   }
   // resultados por bloque (barras apiladas)
   {
@@ -492,7 +491,7 @@ DATA.episodes.forEach((e, k) => {
   const b = document.createElement("button");
   b.type = "button"; b.className = "ep"; b.id = "ep-" + k;
   const title = e.epoch ? `Época ${e.epoch.toLocaleString("es")}` : `Modelo final ${k - DATA.episodes.findIndex((x) => !x.epoch) + 1}`;
-  const note = e.epoch === DATA.first_landing ? "primer aterrizaje" : e.epoch ? `ε = ${L.epsilon[e.epoch - 1].toFixed(2)}` : "sin explorar";
+  const note = e.epoch === DATA.first_landing ? "primer aterrizaje" : e.epoch ? (L.epsilon ? `ε = ${L.epsilon[e.epoch - 1].toFixed(2)}` : "modelo en esa época") : "sin explorar";
   b.innerHTML = `<span class="ep-agent">${title}</span><span class="ep-seed">${note} · ${e.steps} pasos</span><span class="pill" style="${pillStyle(e.reason)}">${e.reason}</span>`;
   b.addEventListener("click", () => selectEpisode(k, true));
   $("#episodes").append(b);

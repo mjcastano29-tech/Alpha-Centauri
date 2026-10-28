@@ -6,7 +6,7 @@ import gymnasium as gym
 import numpy as np
 
 import rocket_env  # noqa: F401  (registra RocketLanding3D-v0)
-from agente_qlearning import QLearningAgent, action_label, to_env_action
+from agente_qlearning import QLearningAgent
 from rocket_env.rocket_landing import RocketLanding3DEnv
 from visualizacion.datos import summary, trajectory_columns, weather
 
@@ -37,13 +37,13 @@ def run_epoch(env, agent, seed, learn=True, greedy=False, options=None, on_step=
     steps = []
     total_reward = 0.0
     while True:
-        action = agent.choose(obs, greedy=greedy)
-        next_obs, reward, terminated, truncated, info = env.step(to_env_action(obs, *action))
+        env_action, raw_action, label = agent.act(obs, greedy=greedy)
+        next_obs, reward, terminated, truncated, info = env.step(env_action)
         if learn:
-            agent.learn(obs, action, reward, next_obs, terminated)
+            agent.learn(obs, raw_action, reward, next_obs, terminated)
         frames.extend(info["trajectory"])
         total_reward += reward
-        steps.append({"i": len(frames) - 1, "label": action_label(*action), "r": round(reward, 2)})
+        steps.append({"i": len(frames) - 1, "label": label, "r": round(reward, 2)})
         if on_step:
             on_step(len(steps), obs, action, reward, next_obs, info)
         obs = next_obs

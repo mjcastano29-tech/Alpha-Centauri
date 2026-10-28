@@ -13,6 +13,8 @@ tabla conjunta el agente no llegaba a aprender a aterrizar en pocos miles de ép
 El empuje relativo se traduce a acelerador con el combustible y la presión observados, así
 la misma acción significa lo mismo con el depósito lleno o casi vacío.
 """
+from pathlib import Path
+
 import numpy as np
 
 from rocket_env.atmosphere import G0
@@ -72,6 +74,8 @@ def direction_state(obs):
 
 
 class QLearningAgent:
+    TIPO = "qlearning"
+
     def __init__(self, alpha=0.1, gamma=0.99, epsilon=1.0, seed=0):
         self.q_engine = np.zeros((len(ALTITUDE_BINS) + 1, len(VERTICAL_SPEED_BINS) + 1, len(ENGINE_ACTIONS)))
         self.q_direction = np.zeros((len(DRIFT_BINS) + 1, len(DRIFT_BINS) + 1, len(DIRECTION_ACTIONS)))
@@ -102,9 +106,29 @@ class QLearningAgent:
             target = reward if terminated else reward + self.gamma * table[state_fn(next_obs)].max()
             table[index] += self.alpha * (target - table[index])
 
-    def save(self, path):
-        np.savez(path, q_engine=self.q_engine, q_direction=self.q_direction)
+    def act(self, obs, greedy=False):
+        """Devuelve (acción para el entorno, acción discreta, etiqueta)."""
+        action = self.choose(obs, greedy)
+        return to_env_action(obs, *action), action, action_label(*action)
 
-    def load(self, path):
-        data = np.load(path)
-        self.q_engine, self.q_direction = data["q_engine"], data["q_direction"]
+    def info(self):
+        return {
+            "clase": self.TIPO,
+            "nombre": "Q-learning",
+            "tipo": "Q-learning con dos tablas (motor y dirección)",
+            "acciones_motor": ENGINE_ACTIONS, "inclinacion_lateral": TILT, "direcciones": DIRECTION_NAMES,
+            "intervalos": {"altitud": ALTITUDE_BINS, "velocidad_vertical": VERTICAL_SPEED_BINS,
+                           "deriva": DRIFT_BINS, "tiempo_prediccion": PREDICTION_TIME},
+        }
+
+    def save(self, path):
+        """Guarda <path>.npz. Devuelve los nombres de archivo."""
+        np.savez(str(path) + ".npz", q_engine=self.q_engine, q_direction=self.q_direction)
+        return [Path(str(path)).name + ".npz"]
+
+    @classmethod
+    def load(cls, path):
+        data = np.load(str(path) + ".npz" if not str(path).endswith(".npz") else str(path))
+        agent = cls()
+        agent.q_engine, agent.q_direction = data["q_engine"], data["q_direction"]
+        return agent

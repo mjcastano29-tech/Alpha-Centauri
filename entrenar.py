@@ -12,6 +12,7 @@ Para seguir el entrenamiento en la terminal, usa `python cli.py entrenar`.
 """
 import argparse
 import collections
+import csv
 import gzip
 import json
 import platform
@@ -22,7 +23,6 @@ from pathlib import Path
 import gymnasium as gym
 import numpy as np
 
-import agente_qlearning as agente
 from entrenamiento import CHECK_EPISODES, EVAL_SEED_BASE, OUTCOMES, TrainConfig, episode_record, evaluate, run_epoch, train
 from rocket_env.rocket_landing import RocketLanding3DEnv
 from visualizacion.datos import write_page
@@ -81,22 +81,55 @@ def run_dir(run_id=None):
     return path
 
 
-def model_path(run_id=None):
-    return run_dir(run_id) / "modelo.npz"
+def load_agent(run_id=None):
+    """Carga el modelo de una ejecución, sea Q-learning o PPO. Devuelve (agente, carpeta)."""
+    path = run_dir(run_id)
+    manifest = json.loads((path / "manifest.json").read_text(encoding="utf-8"))
+    clase = manifest["agente"].get("clase", "qlearning")
+    if clase == "ppo":
+        from agente_ppo import PPOAgent  # import tardío: carga PyTorch solo si hace falta
+        return PPOAgent.load(path / "modelo"), path
+    from agente_qlearning import QLearningAgent
+    return QLearningAgent.load(path / "modelo"), path
 
 
-def save_run(result, evaluation, run_id=None):
+NOTAS_AGENTE = {
+    "qlearning": [
+        "Guarda dos tablas de valores: una para el motor (según altitud y velocidad vertical) y otra para la dirección (según hacia dónde deriva respecto a la plataforma).",
+        "En cada paso elige la acción con más valor, salvo una fracción ε de las veces en que prueba una al azar para explorar. ε empieza en 1 (todo al azar) y baja con las épocas.",
+        "Después de cada paso ajusta el valor de la acción elegida con los puntos recibidos más el valor de la mejor acción siguiente.",
+    ],
+    "ppo": [
+        "Una red neuronal (perceptrón multicapa) recibe la observación normalizada y produce la media de una distribución sobre las 5 acciones continuas; otra cabeza de la red estima cuánto vale el estado.",
+        "Juega en 8 entornos a la vez y cada 2048 pasos ajusta la red con PPO: sube la probabilidad de las acciones que salieron mejor de lo previsto, sin alejarse demasiado de la política anterior.",
+        "La exploración viene del ruido de la distribución, no de una ε: por eso la gráfica de ε no aplica.",
+        "Cada 20 000 pasos se evalúa sin ruido en 50 épocas y se conserva la mejor versión.",
+    ],
+}
+
+
+def save_run(result, evaluation, run_id=None, experimento="experimento-1-qlearning", software_extra=None):
     """Guarda la ejecución en resultados/runs/<id>/ y la apunta en el registro. Devuelve su carpeta."""
     env, agent, config = result["env"], result["agent"], result["config"]
-    run_id = run_id or f"{time.strftime('%Y%m%d-%H%M%S')}-s{config['seed']}"
+    run_id = run_id or f"{time.strftime('%Y%m%d-%H%M%S')}-s{config.get('seed', 0)}"
     path = RUNS / run_id
     if path.exists():
         raise SystemExit(f"Ya existe la ejecución {run_id}; elige otro --run-id")
     path.mkdir(parents=True)
 
-    agent.save(path / "modelo.npz")
+    model_files = agent.save(path / "modelo")
     (path / "entrenamiento.json").write_text(
         json.dumps({"log": result["log"], "checks": result["checks"]}), encoding="utf-8")
+    log = result["log"]
+    with (path / "episodios.csv").open("w", newline="", encoding="utf-8") as f:
+        columns = ["epoca", "recompensa", "pasos", "resultado", "combustible_kg"] + (["epsilon"] if log.get("epsilon") else [])
+        writer = csv.writer(f)
+        writer.writerow(columns)
+        for k in range(len(log["reward"])):
+            row = [k + 1, log["reward"][k], log["steps"][k], OUTCOMES[log["outcome"][k]], log["fuel"][k]]
+            if log.get("epsilon"):
+                row.append(log["epsilon"][k])
+            writer.writerow(row)
     final_runs = []
     for k in range(3):
         meta, frames, steps = run_epoch(env, agent, seed=EVAL_SEED_BASE + k, learn=False, greedy=True)
@@ -107,6 +140,7 @@ def save_run(result, evaluation, run_id=None):
     rocket = RocketLanding3DEnv
     manifest = {
         "run_id": run_id,
+        "experimento": experimento,
         "fecha": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "formato": DATA_FORMAT,
         "git": git_info(),
@@ -118,29 +152,25 @@ def save_run(result, evaluation, run_id=None):
             "max_landing_horizontal_speed": rocket.MAX_LANDING_HORIZONTAL_SPEED,
             "max_landing_tilt": rocket.MAX_LANDING_TILT, "rewards": rocket.REWARDS,
         },
-        "agente": {
-            "tipo": "Q-learning con dos tablas (motor y dirección)",
-            "acciones_motor": agente.ENGINE_ACTIONS, "inclinacion_lateral": agente.TILT,
-            "direcciones": agente.DIRECTION_NAMES,
-            "intervalos": {"altitud": agente.ALTITUDE_BINS, "velocidad_vertical": agente.VERTICAL_SPEED_BINS,
-                           "deriva": agente.DRIFT_BINS, "tiempo_prediccion": agente.PREDICTION_TIME},
-        },
+        "agente": agent.info(),
         "config": config,
-        "software": {"python": platform.python_version(), "gymnasium": gym.__version__, "numpy": np.__version__},
+        "software": {"python": platform.python_version(), "gymnasium": gym.__version__, "numpy": np.__version__,
+                     **(software_extra or {})},
         "resultado": {
             "primer_aterrizaje": result["first_landing"], "mejor_epoca": result["best_epoch"],
             "evaluacion": evaluation, "epocas_grabadas": len(result["replays"]),
         },
-        "archivos": {"modelo": "modelo.npz", "entrenamiento": "entrenamiento.json", "vuelos": "vuelos.json.gz"},
+        "archivos": {"modelo": model_files, "entrenamiento": "entrenamiento.json", "episodios": "episodios.csv",
+                     "vuelos": "vuelos.json.gz"},
     }
     (path / "manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False, default=float), encoding="utf-8")
 
     registry = load_registry()
     git = manifest["git"]
     registry["ejecuciones"].append({
-        "run_id": run_id, "fecha": manifest["fecha"],
+        "run_id": run_id, "experimento": experimento, "agente": agent.info().get("nombre", ""), "fecha": manifest["fecha"],
         "commit": (git["commit"] or "—") + ("*" if git["cambios_sin_commit"] else ""),
-        "ambiente": rocket.VERSION, "epochs": config["epochs"], "seed": config["seed"],
+        "ambiente": rocket.VERSION, "epochs": len(log["reward"]), "seed": config.get("seed"),
         "aterrizajes": evaluation["landing_rate"], "velocidad_contacto": evaluation["contact_speed"],
         "error_posicion": evaluation["position_error"], "primer_aterrizaje": result["first_landing"],
     })
@@ -175,8 +205,10 @@ def page_data(run_id=None):
         "log": training["log"],
         "evaluation": manifest["resultado"]["evaluacion"]["outcomes"],
         "episodes": flights["episodes"],
-        "run": {"id": manifest["run_id"], "fecha": manifest["fecha"], "commit": manifest["git"]["commit"],
-                "ambiente": manifest["ambiente"]["version"]},
+        "agente": manifest["agente"].get("nombre", "Q-learning"),
+        "agente_notas": NOTAS_AGENTE.get(manifest["agente"].get("clase", "qlearning"), []),
+        "run": {"id": manifest["run_id"], "experimento": manifest.get("experimento"), "fecha": manifest["fecha"],
+                "commit": manifest["git"]["commit"], "ambiente": manifest["ambiente"]["version"]},
     }
 
 
@@ -222,6 +254,8 @@ def main():
     print(f"Modelo final ({FINAL_EPISODES} épocas sin explorar): {evaluation['outcomes']}")
     path = save_run(result, evaluation, args.run_id)
     print(f"Ejecución guardada en {path}")
+    import seguimiento  # import tardío: MLflow tarda en cargar
+    seguimiento.registrar_ejecucion(path)
     for page in write_pages(path.name):
         print(f"Página guardada en {page}")
 

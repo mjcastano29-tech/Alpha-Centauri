@@ -27,6 +27,8 @@
     }
   },
   "agente": {
+    "clase": "qlearning",
+    "nombre": "Q-learning",
     "tipo": "Q-learning con dos tablas (motor y dirección)",
     "acciones_motor": [
       0.0,
@@ -103,6 +105,8 @@
   "archivos": {
     "modelo": "modelo.npz",
     "entrenamiento": "entrenamiento.json",
-    "vuelos": "vuelos.json.gz"
-  }
+    "vuelos": "vuelos.json.gz",
+    "episodios": "episodios.csv"
+  },
+  "experimento": "experimento-1-qlearning"
 }
