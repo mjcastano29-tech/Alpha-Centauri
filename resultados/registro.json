@@ -1,6 +1,6 @@
 {
   "formato": 1,
-  "ultimo": "base-v0.1-s0",
+  "ultimo": "ppo-v0.1-s0",
   "ejecuciones": [
     {
       "run_id": "base-v0.1-s0",
@@ -15,6 +15,20 @@
       "primer_aterrizaje": 1785,
       "experimento": "experimento-1-qlearning",
       "agente": "Q-learning"
+    },
+    {
+      "run_id": "ppo-v0.1-s0",
+      "experimento": "experimento-2-ppo",
+      "agente": "PPO (red neuronal)",
+      "fecha": "2026-10-28T17:26:41",
+      "commit": "25f0295769b5*",
+      "ambiente": "0.1",
+      "epochs": 14443,
+      "seed": 0,
+      "aterrizajes": 0.0,
+      "velocidad_contacto": 11.932136757851262,
+      "error_posicion": 8.117636984220098,
+      "primer_aterrizaje": null
     }
   ]
 }
