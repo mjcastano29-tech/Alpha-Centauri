@@ -15,15 +15,24 @@ import rocket_env  # noqa: F401  (registra RocketLanding3D-v0)
 from rocket_env.atmosphere import G0
 from rocket_env.rocket_landing import RocketLanding3DEnv as Rocket
 
-# Acción relativa: (empuje / peso actual, inclinación en x, inclinación en y). ×1.0 es flotar, con el
-# depósito lleno o vacío. Es la misma idea que hizo aprendible el Q-learning del experimento 1.
-ACCION_RELATIVA = gym.spaces.Box(low=np.array([0.0, -0.3, -0.3], dtype=np.float32),
-                                 high=np.array([1.6, 0.3, 0.3], dtype=np.float32))
+# Acción relativa (v2): la red emite 3 valores en [-1, 1]. El primero es el empuje alrededor de flotar
+# (0 -> ×1.0 el peso, -1 -> motor apagado, +0.6 -> ×1.6); los otros dos, la inclinación en x e y hasta
+# ±TILT_MAX por eje, que combinados no superan el límite de 10° del aterrizaje. Es la misma idea que
+# hizo aprendible el Q-learning del experimento 1, y la red arranca flotando en vez de cayendo.
+ACCION_RELATIVA = gym.spaces.Box(low=-np.ones(3, dtype=np.float32), high=np.ones(3, dtype=np.float32))
+TILT_MAX = 0.12
+TWR_MAX = 1.6
+# v1 (ejecución ppo-rel-v0.1-s0): la red emitía el empuje/peso directo en [0, 1.6] e inclinación ±0.3
+ACCION_RELATIVA_V1 = gym.spaces.Box(low=np.array([0.0, -0.3, -0.3], dtype=np.float32),
+                                    high=np.array([1.6, 0.3, 0.3], dtype=np.float32))
 
 
-def accion_relativa_a_entorno(obs, a):
-    """Convierte (empuje/peso, incl. x, incl. y) en la acción continua de 5 valores del entorno."""
-    twr, tx, ty = float(a[0]), float(a[1]), float(a[2])
+def accion_relativa_a_entorno(obs, a, v1=False):
+    """Convierte la acción relativa de la red en la acción continua de 5 valores del entorno."""
+    if v1:
+        twr, tx, ty = float(a[0]), float(a[1]), float(a[2])
+    else:
+        twr, tx, ty = min(TWR_MAX, 1.0 + float(a[0])), float(a[1]) * TILT_MAX, float(a[2]) * TILT_MAX
     if twr < 0.05:
         return np.array([-1.0, 0.0, 0.0, 0.0, 1.0], dtype=np.float32)
     mass = Rocket.DRY_MASS + float(obs[12]) * Rocket.FUEL_MASS
@@ -79,6 +88,7 @@ class PPOAgent:
         self.normalizer = normalizer  # VecNormalize: la red ve la observación normalizada
         self.hiperparametros = hiperparametros or {}
         self.relativa = model.action_space.shape[0] == 3  # acción relativa (3) o cruda del entorno (5)
+        self.v1 = self.relativa and float(model.action_space.high[0]) > 1.0  # parametrización antigua
 
     def act(self, obs, greedy=False):
         """Devuelve (acción para el entorno, acción de la red, etiqueta). greedy=True quita el ruido."""
@@ -88,8 +98,9 @@ class PPOAgent:
         action, _ = self.model.predict(o, deterministic=greedy)
         action = np.asarray(action[0], dtype=np.float32)
         if self.relativa:
-            env_action = accion_relativa_a_entorno(obs, action)
-            label = "motor apagado" if action[0] < 0.05 else f"empuje ×{action[0]:.2f} · " + describe_action(env_action).split(" · ")[1]
+            env_action = accion_relativa_a_entorno(obs, action, self.v1)
+            twr = float(action[0]) if self.v1 else min(TWR_MAX, 1.0 + float(action[0]))
+            label = "motor apagado" if twr < 0.05 else f"empuje ×{twr:.2f} · " + describe_action(env_action).split(" · ")[1]
             return env_action, action, label
         return action, action, describe_action(action)
 
@@ -102,7 +113,9 @@ class PPOAgent:
             "nombre": "PPO (red neuronal)",
             "tipo": "PPO (Stable-Baselines3): red neuronal MLP sobre la acción continua del entorno",
             "red": str(getattr(self.model, "policy_kwargs", {}).get("net_arch")),
-            "accion": "relativa: empuje/peso e inclinación (3 valores)" if self.relativa else "cruda: los 5 valores del entorno",
+            "accion": ("relativa v1: empuje/peso en [0, 1.6] e inclinación ±0.3" if self.v1 else
+                       f"relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. {TWR_MAX}), inclinación = a1, a2 × {TILT_MAX}")
+                      if self.relativa else "cruda: los 5 valores del entorno",
             "hiperparametros": self.hiperparametros,
         }
 

@@ -43,6 +43,7 @@ DEFAULTS = {
     "clip_range": 0.2,
     "ent_coef": 0.005,
     "net_arch": [128, 128],
+    "log_std_init": -0.5,  # desviación inicial de la política (exp(-0.5) ≈ 0.6 en acciones de [-1, 1])
     "eval_every": 20_000,  # pasos entre evaluaciones sin ruido
     "seed": 0,
     "accion": "relativa",  # relativa (empuje/peso e inclinación) o cruda (los 5 valores del entorno)
@@ -144,7 +145,7 @@ def main(argv=None):
         n_steps=config["n_steps"], batch_size=config["batch_size"], n_epochs=config["n_epochs"],
         learning_rate=config["learning_rate"], gamma=config["gamma"], gae_lambda=config["gae_lambda"],
         clip_range=config["clip_range"], ent_coef=config["ent_coef"],
-        policy_kwargs={"net_arch": list(config["net_arch"])},
+        policy_kwargs={"net_arch": list(config["net_arch"]), "log_std_init": config["log_std_init"]},
     )
     run_id = args.run_id or f"{time.strftime('%Y%m%d-%H%M%S')}-ppo-s{config['seed']}"
     print(f"Experimento 2 · PPO · acción {config['accion']} · red {config['net_arch']} · {config['total_timesteps']} pasos en {config['n_envs']} entornos "
