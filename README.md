@@ -92,6 +92,12 @@ Cada entrenamiento genera `aprendizaje.html` (curvas y repetición de épocas) y
 (escena three.js que reproduce los vuelos grabados y muestra cómo aprende el agente). `panel.py` genera
 `panel.html`, el panel de experimentos.
 
+En `aprendizaje3d.html` (plantilla: [visualizacion/aprendizaje3d.html](visualizacion/aprendizaje3d.html)) se elige el
+cohete (nave de acero o propulsor), la cámara (seguimiento, torre con teleobjetivo o a bordo), las guías, el sonido del
+motor y la calidad (la ligera quita sombras y posproceso para equipos lentos). Es un *replay*: la posición se interpola
+entre las muestras grabadas cada 0,1 s y nada de la escena cambia los datos; el giro suave del cohete, el vuelco tras un
+choque y los sonidos son solo visuales.
+
 ## Versionado
 
 Todo se versiona en git: código, fichas, modelos, datos de entrenamiento y el registro de MLflow.
