@@ -41,3 +41,6 @@ y se anota aquí. Los modelos entrenados con versiones distintas del ambiente no
 - Mismo día, ampliación compatible: `experimento`, `agente.clase/nombre` y `archivos.modelo` como lista en el
   manifest; `episodios.csv` (dataset) y `evaluacion.json` (evaluación detallada) en cada ejecución; registro
   en MLflow (`mlflow.db` + `mlruns/`).
+- 2026-10-30, ampliación compatible: `sha256` en el manifest (huella de la configuración resuelta y de cada archivo
+  de `archivos`), comprobable con `python cli.py verificar`. Las cuatro ejecuciones anteriores recibieron sus
+  huellas ese día, con una nota que lo indica; sus copias en `mlruns/` conservan el manifest sin huellas.

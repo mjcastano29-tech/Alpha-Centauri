@@ -102,5 +102,17 @@
     "entrenamiento": "entrenamiento.json",
     "episodios": "episodios.csv",
     "vuelos": "vuelos.json.gz"
+  },
+  "sha256": {
+    "algoritmo": "sha256",
+    "config": "ae22fa4140b9b22487221ac9dfc191bf67d1adb4ad54c7f9555436fa5e847fdd",
+    "archivos": {
+      "modelo.zip": "dd5d2f87be2bbb430c59a56c385678392599c68b48d81b668567948f13c3d616",
+      "modelo_normalizador.pkl": "92c3285a0c53237138f527868c80a57b504f420c33562e65449f8b955c32aec8",
+      "entrenamiento.json": "6280ba67096ca9ba9532aac5f6ceb2bc07604209ca1874eb85e7a159c85c3150",
+      "episodios.csv": "0abd2d57eb861c63aeab4e29cd4a5ced074cc12c982f532c12fa08cbd112e55c",
+      "vuelos.json.gz": "d8d117e2e7ea2e91d0dfde6bb398196025edd054a1287a288e6df5d8a76bef20"
+    },
+    "nota": "calculadas el 2026-10-30, después del entrenamiento: esta ejecución es anterior a las huellas en el manifest"
   }
 }
