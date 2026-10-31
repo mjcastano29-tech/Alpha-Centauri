@@ -4,7 +4,8 @@ Proyecto de aterrizaje de cohete (Rocket Landing) con [Gymnasium](https://gymnas
 
 ## Instalación
 
-Requiere Python 3.10+.
+Requiere Python 3.10 a 3.13. Los modelos guardados se entrenaron con Python 3.10.12; `requirements.txt` fija las
+mismas versiones de gymnasium, numpy, PyTorch (CPU) y Stable-Baselines3 para que las evaluaciones se reproduzcan.
 
 ```bash
 git clone https://github.com/mjcastano29-tech/Alpha-Centauri.git
@@ -15,14 +16,23 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-Si la instalación de `box2d` falla al compilar, instala `swig` (`sudo apt install swig` en Linux, `brew install swig` en macOS) y repite el último paso.
-
 ## Comprobar el entorno
 
 ```bash
-python check_env.py            # sin ventana
-python check_env.py --render   # con ventana de la simulación
+python -m pytest               # contrato del ambiente y modelos guardados (~5 s)
+python cli.py verificar        # huellas SHA-256 de los modelos y datos de cada ejecución
 ```
+
+Las pruebas comprueban la interfaz de Gymnasium, la reproducibilidad con semilla, cada forma de terminar una época
+con su recompensa, y que cada modelo guardado repite el resultado de misión de las primeras 20 épocas de su evaluación
+registrada y su recompensa media. En otra máquina, la recompensa de una época concreta de `ppo-rel-v0.1-s0` puede
+variar unos puntos por redondeo numérico (esa política vuela al límite de inclinación), sin cambiar el resultado; las
+otras tres ejecuciones dan la misma recompensa al décimo. Una prueba
+está marcada como pendiente: en la versión 0.1 agotar los 50 pasos devuelve `terminated`, y la guía del curso pide
+`truncated` para el límite externo; cambiarlo es una versión nueva del ambiente.
+
+`check_env.py` es la comprobación inicial con LunarLander; necesita además `pip install "gymnasium[box2d]==1.4.0"`
+(y `swig` si box2d no compila).
 
 ## Entorno RocketLanding3D-v0
 
@@ -104,7 +114,8 @@ Todo se versiona en git: código, fichas, modelos, datos de entrenamiento y el r
 
 - **Ambiente**: `RocketLanding3DEnv.VERSION` (hoy `0.1`). Cualquier cambio de reglas o constantes sube la versión y se anota en [docs/CHANGELOG.md](docs/CHANGELOG.md).
 - **Ejecuciones**: cada entrenamiento crea `resultados/runs/<id>/` con `manifest.json` (commit de git, versión del ambiente, configuración, software y métricas), el modelo, `entrenamiento.json` (todas las épocas), `episodios.csv` (dataset: una fila por época), `vuelos.json.gz` (épocas grabadas) y `evaluacion.json` (200 épocas normales + 200 con viento). `resultados/registro.json` es el índice.
+- **Huellas**: el manifest guarda en `sha256` la huella de la configuración resuelta y de cada archivo de la ejecución (modelo, normalizador, datos). `python cli.py verificar` las recalcula y avisa si algún artefacto cambió.
 - **MLflow** ([seguimiento.py](seguimiento.py)): `mlflow.db` (SQLite) y `mlruns/` dentro del repo. Cada ejecución es una *run* del experimento correspondiente con parámetros, métricas, el dataset `episodios.csv` como entrada y el modelo registrado (`rocket-landing-qlearning`, `rocket-landing-ppo`) como modelo *pyfunc* cargable con `mlflow.pyfunc.load_model("models:/rocket-landing-ppo/3")`. Interfaz: `mlflow ui --backend-store-uri sqlite:///mlflow.db`. Con `MLFLOW_TRACKING_URI` se apunta a un servidor compartido (DagsHub) sin tocar código.
 - **Hugging Face Hub** ([publicar_hf.py](publicar_hf.py)): `huggingface-cli login` y `python publicar_hf.py --repo usuario/alpha-centauri-rocket-landing --run ppo-v2-v0.1-s0` sube la ejecución con su tarjeta de modelo.
-- **Reproducibilidad**: los entrenamientos son deterministas. Con el mismo commit, la misma versión del ambiente y la misma configuración sale exactamente la misma ejecución.
+- **Reproducibilidad**: los entrenamientos son deterministas. Con el mismo commit, la misma versión del ambiente, la misma configuración y las versiones de `requirements.txt` sale exactamente la misma ejecución.
 - **Páginas HTML**: se generan a partir de las ejecuciones y no se versionan.
