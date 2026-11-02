@@ -98,6 +98,33 @@ motor y la calidad (la ligera quita sombras y posproceso para equipos lentos). E
 entre las muestras grabadas cada 0,1 s y nada de la escena cambia los datos; el giro suave del cohete, el vuelco tras un
 choque y los sonidos son solo visuales.
 
+## Web y API (entrega del proyecto final)
+
+```
+┌────────────────────────────┐   HTTPS + CORS   ┌──────────────────────────────────┐
+│ web/  Vite + TypeScript +  │ ───────────────► │ api/  FastAPI + Uvicorn (Python   │
+│ Three.js, publicada en     │  catálogo,       │ es la autoridad): mismo ambiente, │
+│ Vercel (Root Directory web)│  evaluar, replay │ mismos modelos y evaluación que   │
+└────────────────────────────┘                  │ el entrenamiento                  │
+                                                │  resultados/runs/ · catalogo.json │
+                                                │  mlflow.db (versiones de modelo)  │
+                                                └──────────────────────────────────┘
+```
+
+- **API** ([api/main.py](api/main.py)): `GET /version` (commit, catálogo y software servidos), `GET /catalogo`, `GET /ejecuciones/{id}` (+ `/manifest`, `/evaluacion`, `/vuelos`), `GET /comparar?runs=a,b`, `POST /evaluar` (modelo congelado en el ambiente, modo `evaluacion`, trayectorias para replay). Documentación interactiva en `/docs`.
+  ```bash
+  pip install -r requirements-api.txt
+  uvicorn api.main:app --reload --port 8000
+  python -m pytest tests/test_api.py
+  ```
+- **Catálogo y rollback** ([catalogo.py](catalogo.py), [catalogo.json](catalogo.json)): `python catalogo.py recomendar <run_id> --motivo "…"` promueve un modelo; `python catalogo.py restaurar --motivo "…"` es el rollback al anterior. Ambos se versionan con un commit y `GET /version` confirma qué catálogo y qué commit se sirven.
+- **Web** ([web/](web/)): catálogo con estado de cada modelo (recomendado, anterior, histórico), detalle con identidad (commit, huellas, versión en MLflow), comparación, evaluación en vivo contra la API y replay 3D con la etiqueta de modo (replay de vuelos grabados o evaluación en vivo).
+  ```bash
+  cd web && npm ci && npm run dev        # http://localhost:5173, usa VITE_API_BASE_URL de .env.development
+  npm run build && npm run preview       # compila a dist/
+  ```
+- **Despliegue**: Vercel con Root Directory `web`, Build Command `npm run build`, Output Directory `dist` y la variable `VITE_API_BASE_URL` apuntando a la API HTTPS. API en Render con [render.yaml](render.yaml) (o Railway / Hugging Face Spaces con el mismo comando de arranque); variables en [.env.example](.env.example). Versiones verificadas: Node 24, npm 11, Vite 8, three 0.187, FastAPI 0.162, Uvicorn 0.54.
+
 ## Versionado
 
 Todo se versiona en git: código, fichas, modelos, datos de entrenamiento y el registro de MLflow.

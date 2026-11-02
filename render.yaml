@@ -1,0 +1,17 @@
+# Blueprint de Render para la API (https://render.com/docs/blueprint-spec). La web va en Vercel.
+# Alternativas equivalentes: Railway o un Space de Hugging Face con el mismo comando de arranque.
+services:
+  - type: web
+    name: alpha-centauri-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements-api.txt
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /salud
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.12
+      - key: CORS_ORIGENES
+        value: https://alpha-centauri.vercel.app,http://localhost:5173
+      - key: MAX_EPISODIOS
+        value: "50"
