@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "actualizado": "2026-11-02T11:37:58",
+  "recomendado": "ppo-v2-v0.1-s0",
+  "anterior": "base-v0.1-s0",
+  "historial": [
+    {
+      "version": 1,
+      "fecha": "2026-11-02T11:37:57",
+      "accion": "recomendar",
+      "run_id": "base-v0.1-s0",
+      "motivo": "baseline aprendido del nivel 1 (Q-learning, 78 % en la suite v1)",
+      "commit_base": "68414c15f55471c0c5a91438b5bbdf1461ba0f8f"
+    },
+    {
+      "version": 2,
+      "fecha": "2026-11-02T11:37:58",
+      "accion": "recomendar",
+      "run_id": "ppo-v2-v0.1-s0",
+      "motivo": "PPO con acción relativa v2: 97 % en la suite v1 y 63 % con viento de 15 m/s, frente a 78 % y 38 % del Q-learning",
+      "commit_base": "68414c15f55471c0c5a91438b5bbdf1461ba0f8f"
+    }
+  ]
+}
