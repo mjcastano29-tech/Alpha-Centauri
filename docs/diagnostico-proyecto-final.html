@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diagnóstico Alpha Centauri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+  /* Layout: una columna de lectura de 76ch con tablas anchas desplazables; informe de trabajo, sin hero */
+  :root {
+    color-scheme: light;
+    --bg: #f6f5f1; --paper: #fdfdfb; --ink: #1d2126; --muted: #5d6572; --line: #d9d7cf; --accent: #1f6f5c; --accent-soft: #e4efeb; --warn: #9a5b12;
+    --display: "Fraunces", Georgia, serif; --body: "Source Sans 3", "Segoe UI", system-ui, sans-serif; --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { color-scheme: dark; --bg: #121518; --paper: #1a1e22; --ink: #e8e8e3; --muted: #a0a7b1; --line: #2d333a; --accent: #5fc2a6; --accent-soft: #1d3a32; --warn: #e2a24a; } }
+  :root[data-theme="dark"] { color-scheme: dark; --bg: #121518; --paper: #1a1e22; --ink: #e8e8e3; --muted: #a0a7b1; --line: #2d333a; --accent: #5fc2a6; --accent-soft: #1d3a32; --warn: #e2a24a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 var(--body); padding: 32px max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px)); }
+  main { max-width: 980px; margin: 0 auto; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 36px clamp(18px, 4vw, 48px) 44px; }
+  h1 { font: 600 clamp(28px, 4vw, 38px)/1.15 var(--display); margin: 0 0 12px; text-wrap: balance; letter-spacing: -.01em; }
+  h2 { font: 600 22px/1.2 var(--display); margin: 40px 0 12px; padding-top: 18px; border-top: 1px solid var(--line); }
+  h2:first-of-type { border-top: 0; padding-top: 0; }
+  p, li { max-width: 76ch; }
+  p:first-of-type strong { color: var(--muted); font-weight: 600; }
+  a { color: var(--accent); }
+  code { font: 0.88em var(--mono); background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; }
+  strong { font-weight: 600; }
+  .tbl { overflow-x: auto; margin: 14px 0 20px; border: 1px solid var(--line); border-radius: 8px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+  th { background: var(--accent-soft); color: var(--ink); font-weight: 600; white-space: nowrap; }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { white-space: nowrap; }
+  ol, ul { padding-left: 22px; }
+  li { margin: 4px 0; }
+  @media (max-width: 700px) { td:first-child { white-space: normal; } }
+</style>
+</head>
+<body><main>
+<h1>Diagnóstico frente al enunciado del proyecto final</h1>
+<p><strong>Equipo Alpha Centauri · Rocket Landing · 2 de noviembre de 2026 · rama <code>fase-3d</code> (commit <code>c0058c4</code>) + rama <code>isaias/arreglos-rapidos</code> sin fusionar</strong></p>
+<p>Contraste entre lo que pide el enunciado del proyecto final de MLOps (30 de octubre de 2026) y lo que hay en el repositorio hoy. Cada afirmación remite a un archivo o a un comando; lo que no se ha podido comprobar se dice.</p>
+<h2>1. Resumen</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Hito del enunciado</th>
+<th>Resultado verificable que pide</th>
+<th>Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 · Reproducir</td>
+<td>contrato, baseline, primer run y despliegue inicial</td>
+<td><strong>Casi completo</strong>: contrato, baselines (aleatorio, regla, Q-learning) y 4 runs. Falta el despliegue inicial.</td>
+</tr>
+<tr>
+<td>2 · Experimentar</td>
+<td>niveles, hipótesis, catálogo y modelos históricos</td>
+<td><strong>A medias</strong>: 4 configuraciones recuperables y registradas en MLflow, pero sin hipótesis escritas, sin niveles N1/N2/N3 declarados y sin catálogo web.</td>
+</tr>
+<tr>
+<td>3 · Operar</td>
+<td>pipeline, comparaciones y detección de degradación</td>
+<td><strong>Empezado</strong>: comparación y degradación con viento medidas (<code>panel.html</code>); no hay pipeline orquestado, API ni web en Vercel.</td>
+</tr>
+<tr>
+<td>4 · Recuperar y defender</td>
+<td>intervención, rollback, release e informe</td>
+<td><strong>No empezado</strong>.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Cobertura estimada por criterio de la rúbrica (peso entre paréntesis): versionamiento y recuperación (30 %) ≈ 60 %; diseño experimental y análisis (25 %) ≈ 55 %; pipeline, despliegue, monitoreo y rollback (20 %) ≈ 10 %; contrato y funcionamiento del ambiente/agente (10 %) ≈ 85 %; defensa (15 %) por preparar. <strong>El bloque que más pesa y menos tenemos es el de operación: web en Vercel + API + pipeline + rollback.</strong></p>
+<h2>2. Lo que ya cumple, con su evidencia</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>Exigencia del enunciado</th>
+<th>Evidencia en el repositorio</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ambiente Gymnasium con <code>reset</code>/<code>step</code>, espacios y contrato documentado</td>
+<td><code>rocket_env/rocket_landing.py</code> (<code>RocketLanding3DEnv</code>, <code>VERSION = "0.1"</code>), <code>check_env</code> pasa; ficha en <code>docs/ambiente-v0.1.md</code> con unidades, rangos, paso físico (0,1 s), frecuencia de decisión (cada 20 m o 2 s), éxito, fallos y simplificaciones.</td>
+</tr>
+<tr>
+<td>Referencias aleatoria, de regla y baseline aprendido</td>
+<td><code>cli.py ver --agente aleatorio</code>, <code>experimento1.py</code> (controlador heurístico, 20/20), Q-learning <code>base-v0.1-s0</code> (78 %).</td>
+</tr>
+<tr>
+<td>PPO con Stable-Baselines3 + PyTorch como política de referencia</td>
+<td><code>agente_ppo.py</code>, <code>entrenar_ppo.py</code>; <code>ppo-v2-v0.1-s0</code>: 194/200 aterrizajes. Red MLP 128×128 sobre observaciones numéricas, como pide la guía.</td>
+</tr>
+<tr>
+<td>Q-learning tabular con la pérdida de resolución documentada</td>
+<td>intervalos de discretización en <code>agente_qlearning.py</code> y en la ficha (sección <em>Observaciones y acciones</em>).</td>
+</tr>
+<tr>
+<td>Curvas de entrenamiento (con exploración) y de evaluación (sin ella) por separado</td>
+<td><code>aprendizaje.html</code> y <code>panel.html</code> (curva de tramos vs. evaluación periódica sin ruido).</td>
+</tr>
+<tr>
+<td>Experimentos y modelos en MLflow; modelos identificados</td>
+<td><code>seguimiento.py</code>: <code>mlflow.db</code> + <code>mlruns/</code>; experimentos <code>experimento-1-qlearning</code> y <code>experimento-2-ppo</code>; modelos registrados <code>rocket-landing-qlearning</code> v1 y <code>rocket-landing-ppo</code> v1–v3 (pyfunc cargable).</td>
+</tr>
+<tr>
+<td>Conservar los intentos que no mejoraron</td>
+<td><code>ppo-v0.1-s0</code> y <code>ppo-rel-v0.1-s0</code> (0/200) están en el registro, en MLflow y en <code>docs/experimento-2.md</code> con su diagnóstico.</td>
+</tr>
+<tr>
+<td>Snapshot por run: commit, configuración, ambiente, semillas, software, métricas</td>
+<td><code>resultados/runs/&lt;id&gt;/manifest.json</code>; <code>episodios.csv</code> (una fila por época), <code>evaluacion.json</code> (200 épocas normales + 200 con viento).</td>
+</tr>
+<tr>
+<td>Huellas SHA-256 de artefactos y configuración; comprobación</td>
+<td>rama <code>isaias/arreglos-rapidos</code>: <code>sha256</code> en el manifest, <code>python cli.py verificar</code> (las 4 ejecuciones OK).</td>
+</tr>
+<tr>
+<td>Pruebas del contrato y de recuperación de modelos</td>
+<td>misma rama: <code>tests/test_ambiente.py</code>, <code>tests/test_modelos.py</code>; <code>python -m pytest</code>: 19 pasan, 1 xfail esperado.</td>
+</tr>
+<tr>
+<td>Dependencias fijadas</td>
+<td>misma rama: <code>requirements.txt</code> con versiones exactas e índice CPU de PyTorch.</td>
+</tr>
+<tr>
+<td>Perturbación pertinente medida antes/después</td>
+<td>viento lateral de 15 m/s: Q-learning 78 % → 38 %; PPO v2 97 % → 63 % (<code>panel.html</code>, <code>evaluacion.json</code>).</td>
+</tr>
+<tr>
+<td>Vista Three.js conectada al estado real, identificada como replay</td>
+<td><code>visualizacion/aprendizaje3d.html</code> (reproduce vuelos grabados; el README de Isaías lo declara <em>replay</em>).</td>
+</tr>
+<tr>
+<td>Determinismo: misma configuración, misma ejecución</td>
+<td>comprobado dos veces para <code>base-v0.1-s0</code> (157/200, primer aterrizaje 1785).</td>
+</tr>
+</tbody>
+</table></div>
+<h2>3. Brechas, ordenadas por peso en la rúbrica</h2>
+<div class="tbl"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Brecha</th>
+<th>Qué exige el enunciado</th>
+<th>Estado hoy</th>
+<th>Qué hacer</th>
+<th>Esfuerzo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Web en Vercel</strong></td>
+<td>URL funcional con catálogo, carga de modelos históricos, comparación y evaluación ejecutable por el docente; frontend Vite + TypeScript + Three.js con lockfile</td>
+<td>Páginas HTML estáticas generadas en Python; no hay <code>web/</code>, ni Vite, ni Vercel</td>
+<td>Crear <code>web/</code> (Vite vanilla-ts), mover la escena 3D y el panel a componentes que lean el catálogo de la API; desplegar en Vercel con <code>VITE_API_BASE_URL</code></td>
+<td>Alto</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>API HTTPS (FastAPI)</strong></td>
+<td>Si Python es la autoridad: endpoints de catálogo, carga de modelo, evaluación y telemetría; versión del modelo y errores; CORS</td>
+<td>No existe. El ambiente es Python, así que la ruta de API es la natural (exportar la red al navegador obligaría a portar el ambiente a TypeScript y validar la equivalencia)</td>
+<td><code>api/</code> con FastAPI + Uvicorn: <code>GET /catalogo</code>, <code>GET /ejecuciones/{id}</code>, <code>POST /evaluar</code> (N épocas, semillas, viento), <code>GET /replay/{id}</code>; servirla fuera de Vercel (Render, Railway, Hugging Face Spaces o un equipo del grupo); acordar con el docente</td>
+<td>Alto</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Pipeline orquestado</strong></td>
+<td>Prefect o Airflow con 8 etapas: validar, probar, entrenar, evaluar, registrar, decidir, publicar catálogo, comprobar versión servida; evidencia de ejecución</td>
+<td>Scripts CLI sueltos (<code>entrenar</code>, <code>entrenar-ppo</code>, <code>panel.py</code>, <code>verificar</code>) sin orquestación ni criterio de selección explícito</td>
+<td><code>pipelines/flujo.py</code> con Prefect encadenando lo que ya existe; criterio de aceptación fijado (p. ej. ≥ 90 % de aterrizajes en la suite y ≤ 2,5 m/s de contacto); registro de cada ejecución del flujo</td>
+<td>Medio</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Rollback y versión servida</strong></td>
+<td>Catálogo con modelo recomendado; restaurar una versión anterior identificada y comprobar que funciona</td>
+<td>No hay noción de "recomendado" ni de versión servida</td>
+<td><code>catalogo.json</code> versionado con <code>recomendado</code> y <code>anterior</code>; endpoint <code>GET /version</code> que diga qué modelo sirve; procedimiento y prueba de rollback documentados</td>
+<td>Medio</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Tres niveles de dificultad</strong></td>
+<td>N1 misión base, N2 más decisiones, N3 operación exigente; cada modelo conserva su ambiente; nueva familia si cambian observaciones/acciones</td>
+<td>Todo es N1 (ambiente 0.1). El viento de 15 m/s es un N3 medido pero no declarado como nivel ni entrenado</td>
+<td>Declarar <code>nivel</code> en la configuración y el manifest (N1 = 0.1 actual). Definir N2 = ambiente 0.2 con una decisión nueva (candidatas: rotación con torque real, plataforma desplazada, combustible más justo) → nueva familia de modelos. N3 = viento 0–15 m/s + ráfagas fuertes</td>
+<td>Alto</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Hipótesis por configuración y estado</strong></td>
+<td>≥ 4 configuraciones con hipótesis, cambio frente al baseline, presupuesto y estado (seleccionado / rechazado / recuperado) en MLflow</td>
+<td>Tenemos 4 ejecuciones, pero la hipótesis solo está en prosa en <code>docs/experimento-2.md</code>; MLflow no tiene etiquetas <code>hipotesis</code>, <code>cambio</code>, <code>estado</code></td>
+<td>Añadir esas etiquetas a <code>seguimiento.registrar_ejecucion</code> y a los 4 runs existentes; <code>configs/</code> con un YAML por configuración</td>
+<td>Bajo</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Manifiesto con el formato del enunciado</strong></td>
+<td><code>run_id</code>, <code>level_id</code>, <code>environment_version</code>, <code>git_commit</code> (SHA completo), <code>config_sha256</code>, <code>model_uri</code>, <code>model_sha256</code>, <code>normalization_uri</code>, <code>runtime_ref</code>, <code>evaluation_suite_id</code>, <code>seed</code>, <code>parent_run_id</code></td>
+<td>Nuestro manifest cubre commit (corto), ambiente, configuración, semilla, software, métricas y (en la rama de Isaías) SHA-256; faltan <code>level_id</code>, <code>model_uri</code>, <code>normalization_uri</code>, <code>runtime_ref</code>, <code>evaluation_suite_id</code>, <code>parent_run_id</code> y el SHA completo</td>
+<td>Generar <code>manifests/&lt;run_id&gt;.json</code> con exactamente esas claves a partir del manifest actual (<code>model_uri</code> = <code>models:/rocket-landing-ppo/3</code>, <code>runtime_ref</code> = <code>requirements.txt@commit</code>)</td>
+<td>Bajo</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>Tres semillas para los finalistas</strong></td>
+<td>Dos finalistas × 3 semillas de entrenamiento; distinguir de los episodios de evaluación</td>
+<td>Una semilla por configuración</td>
+<td>Entrenar <code>base-v0.1-s1/s2</code> (2 min cada uno) y <code>ppo-v2-v0.1-s1/s2</code> (11 min cada uno); reportar media ± desviación</td>
+<td>Medio (tiempo de CPU)</td>
+</tr>
+<tr>
+<td>9</td>
+<td><strong>Suite de evaluación versionada y test final reservado</strong></td>
+<td>Casos, métricas, número de episodios y versión de suite; el test reservado fuera del ajuste y del repo público</td>
+<td>La suite es implícita: semillas <code>10 000 000 + k</code>, 200 épocas, viento 0–10 y 15 m/s. No hay suite con nombre ni test reservado</td>
+<td><code>configs/suites/v1.yaml</code> (semillas, episodios, condiciones) y <code>evaluation_suite_id</code> en el manifest; un conjunto de semillas reservado que no se publica</td>
+<td>Bajo</td>
+</tr>
+<tr>
+<td>10</td>
+<td><strong><code>terminated</code> vs <code>truncated</code></strong></td>
+<td>Éxito o fallo de misión → <code>terminated</code>; agotar el presupuesto externo → <code>truncated</code>; registrar ambas</td>
+<td>Nuestro "sin pasos" (50 pasos) devuelve <code>terminated</code></td>
+<td>Devolver <code>truncated=True</code> para "sin pasos" (misma recompensa −100) y registrarlo; conviene hacerlo junto con el cambio a 0.2 para no abrir dos familias de modelos</td>
+<td>Bajo</td>
+</tr>
+<tr>
+<td>11</td>
+<td><strong>Incidente controlado con intervención</strong></td>
+<td>Medir antes/después, proponer una intervención y aceptarla o rechazarla con evidencia</td>
+<td>Degradación medida (viento 15 m/s); no hay intervención</td>
+<td>Candidato: PPO v2 entrenado con viento 0–15 m/s; comparar en la suite; decidir y registrar el estado</td>
+<td>Medio</td>
+</tr>
+<tr>
+<td>12</td>
+<td><strong>README, release y arquitectura</strong></td>
+<td>README con instalación, ejecución, variables, arquitectura y reproducción; release/tag identificable; <code>.env.example</code></td>
+<td>README actualizado para lo que existe; sin tag, sin sección de arquitectura ni variables de entorno</td>
+<td><code>git tag -a v0.2.0</code> tras fusionar la rama de Isaías; secciones de arquitectura y variables cuando exista la API</td>
+<td>Bajo</td>
+</tr>
+<tr>
+<td>13</td>
+<td><strong>Estructura sugerida del repositorio</strong></td>
+<td><code>envs/ configs/ pipelines/ tests/ web/ manifests/ docs/</code></td>
+<td>Hoy: <code>rocket_env/</code>, scripts en la raíz, <code>visualizacion/</code>, <code>resultados/</code>, <code>docs/</code>; <code>tests/</code> llega con la rama de Isaías</td>
+<td>No es obligatoria: documentar la correspondencia en el README y crear solo las que faltan (<code>configs/</code>, <code>pipelines/</code>, <code>web/</code>, <code>manifests/</code>)</td>
+<td>Bajo</td>
+</tr>
+<tr>
+<td>14</td>
+<td><strong>Python 3.12 de referencia; DVC para artefactos grandes</strong></td>
+<td>3.12 "probado en el piloto"; artefactos grandes recuperables (DVC o mecanismo acordado)</td>
+<td>Python 3.10.12; artefactos de ~1,3 MB por ejecución en git (manejable); <code>mlruns/</code> también en git</td>
+<td>Documentar 3.10 como versión verificada (o migrar a 3.12 y re-verificar las huellas); DVC solo si los artefactos crecen o el docente lo exige</td>
+<td>Bajo</td>
+</tr>
+<tr>
+<td>15</td>
+<td><strong>Modo visible en la interfaz</strong></td>
+<td>La animación debe decir si es manual, aleatorio, referencia, evaluación o entrenamiento</td>
+<td>La escena 3D muestra replays de épocas grabadas (entrenamiento con exploración y modelo final sin ruido) sin una etiqueta de modo explícita en pantalla</td>
+<td>Etiqueta de modo en el HUD; en la web, modo "evaluación en vivo" cuando la API ejecute el modelo</td>
+<td>Bajo</td>
+</tr>
+<tr>
+<td>16</td>
+<td><strong>Informe breve y presentación</strong></td>
+<td>Decisiones, resultados, límites y contribuciones; guion de defensa</td>
+<td><code>docs/experimento-2.md</code> cubre parte; no hay informe ni presentación</td>
+<td>Hito 4</td>
+<td>Medio</td>
+</tr>
+</tbody>
+</table></div>
+<h2>4. Plan propuesto</h2>
+<p><strong>Esta semana (cerrar hito 1 y preparar el 2)</strong>
+1. Fusionar <code>isaias/arreglos-rapidos</code> en <code>fase-3d</code> mediante PR (tests, huellas, <code>verificar</code>, dependencias) y fusionar <code>fase-3d</code> en <code>main</code>; <code>git tag -a v0.2.0</code>.
+2. Etiquetas <code>hipotesis</code>, <code>cambio</code>, <code>presupuesto</code>, <code>estado</code> en MLflow para los 4 runs; <code>configs/*.yaml</code>; <code>manifests/*.json</code> con el formato del enunciado.
+3. Suite <code>v1</code> con nombre y semillas; conjunto reservado fuera del repo.
+4. API FastAPI local con catálogo, carga y evaluación (reutiliza <code>load_agent</code>, <code>evaluate</code>, <code>run_epoch</code>).</p>
+<p><strong>Semana siguiente (hito 2 y 3)</strong>
+5. <code>web/</code> con Vite + TypeScript: catálogo, comparación (datos del panel), replay 3D (escena actual) y botón "evaluar" contra la API; despliegue en Vercel; backend en el hosting acordado.
+6. Nivel N2 = ambiente 0.2 con la decisión nueva acordada; <code>nivel</code> en configuración y manifest; nueva familia de modelos (Q-learning y PPO).
+7. Pipeline Prefect de 8 etapas con criterio de aceptación; <code>catalogo.json</code> con recomendado/anterior.</p>
+<p><strong>Después (hito 4)</strong>
+8. Incidente N3: viento fuerte → intervención (PPO entrenado con viento 0–15) → decisión registrada.
+9. Tres semillas por finalista; rollback demostrado desde la web; release final; informe y ensayo de la defensa.</p>
+<h2>5. Dudas y dificultades para el profesor</h2>
+<ol>
+<li><strong>Backend</strong>: el ambiente y los modelos son Python. ¿Podemos servir la API desde un hosting gratuito (Render, Railway o Hugging Face Spaces) o desde un equipo del grupo durante la revisión? Vercel Functions no puede cargar PyTorch con holgura.</li>
+<li><strong>Q-learning como baseline</strong>: está documentada la discretización. ¿Vale como "baseline aprendido" del nivel 1, siendo PPO el candidato?</li>
+<li><strong>Decisiones cada 20 m</strong>: nuestra frecuencia de decisión es por desplazamiento vertical (20 m o 2 s), no por tiempo fijo. ¿Es aceptable como "frecuencia de decisiones" del contrato?</li>
+<li><strong>Truncamiento</strong>: agotar los 50 pasos lo tratamos como fallo de misión (<code>terminated</code>, −100). ¿Debe ser <code>truncated</code> aunque tenga penalización?</li>
+<li><strong>Test final reservado</strong>: ¿lo define el equipo (semillas no publicadas) o lo aporta el docente por escenario?</li>
+<li><strong>DVC</strong>: nuestros artefactos pesan 1–2 MB por ejecución y están en git con huella SHA-256. ¿Es necesario DVC igualmente?</li>
+<li><strong>Python</strong>: los modelos se entrenaron con 3.10.12 y las dependencias están fijadas. ¿Es obligatorio 3.12?</li>
+<li><strong>Prefect o Airflow</strong>: ¿cuál se acordó en clase? Proponemos Prefect por ser más ligero en local.</li>
+<li><strong>Vista 3D</strong>: ¿la escena actual (replay de vuelos grabados) sirve como vista "conectada al estado real" si la web además permite una evaluación en vivo contra la API?</li>
+</ol>
+<h2>6. Riesgos</h2>
+<ul>
+<li><strong>Tiempo de CPU</strong>: cada PPO son 11 min y cada Q-learning 2 min; tres semillas × dos finalistas × dos niveles son unas 2,5 h de cómputo. Hay que repartirlo entre máquinas.</li>
+<li><strong><code>mlflow.db</code> en git</strong>: conflictos si dos personas entrenan a la vez. Mientras no haya servidor compartido, una sola persona entrena por rama y se fusiona con cuidado.</li>
+<li><strong>Dependencia de internet en las páginas</strong>: three.js y los módulos de posproceso se cargan de CDN; en la web de Vercel irán empaquetados por Vite.</li>
+<li><strong>Escena 3D de la rama fusionada</strong>: revisada en código (válida), no renderizada en esta sesión; conviene abrirla en un navegador antes de la demo.</li>
+</ul>
+<h2>Cómo se hizo este diagnóstico</h2>
+<p>Lectura del enunciado (20 páginas) frente a <code>git log</code>, <code>git diff</code> de las ramas remotas, ejecución de <code>python -m pytest</code> y <code>python cli.py verificar</code> en un worktree de la rama de Isaías, y los resultados ya versionados en <code>resultados/runs/</code>.</p>
+</main></body>
+</html>
