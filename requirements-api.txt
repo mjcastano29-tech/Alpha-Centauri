@@ -1,4 +1,12 @@
--r requirements.txt
+# Dependencias de la API (api/main.py), autocontenidas para construir la imagen Docker.
+# Mismas versiones con las que se entrenaron los modelos ("software" en resultados/runs/<id>/manifest.json).
+--extra-index-url https://download.pytorch.org/whl/cpu
+gymnasium==1.4.0
+numpy==2.2.6
+torch==2.14.1
+stable-baselines3==2.9.2
+mlflow==3.17.2
 fastapi>=0.115
 uvicorn[standard]>=0.30
-httpx>=0.27   # TestClient de las pruebas
+httpx>=0.27          # TestClient de tests/test_api.py
+huggingface_hub>=0.24 # desplegar_hf.py y publicar_hf.py
