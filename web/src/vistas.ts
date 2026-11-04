@@ -1,7 +1,7 @@
 // Vistas de la aplicación: catálogo, detalle de una ejecución (con evaluación en vivo), comparación y replay 3D.
 import * as api from './api'
 import type { Catalogo, Detalle, Resumen, ResultadoEvaluacion, Vuelo } from './api'
-import { Reproductor } from './escena'
+import { Reproductor, type Cohete, type ModoCamara } from './escena'
 import { barraResultados, corto, entero, esc, ICONO_RESULTADO, lineaSvg, num, pct, pillDiseno, pillEstado, tabla } from './ui'
 
 const COLORES = ['var(--series-1)', 'var(--series-2)', 'var(--series-3)', 'var(--series-4)']
@@ -217,8 +217,19 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
           <button class="btn" id="rp-play">Pausa</button><button class="btn" id="rp-reiniciar">Reiniciar</button>
           <input type="range" id="rp-scrub" min="0" max="1" value="0" step="1" aria-label="tiempo">
           <span id="rp-clock" class="mono">0,0 s</span>
-          <select id="rp-speed" aria-label="velocidad"><option value="1">1×</option><option value="2">2×</option><option value="4" selected>4×</option><option value="8">8×</option><option value="16">16×</option></select>
-          <label class="check"><input type="checkbox" id="rp-follow" checked> seguir</label>
+          <select id="rp-speed" aria-label="velocidad"><option value="1">1×</option><option value="2">2×</option><option value="4" selected>4×</option><option value="8">8×</option><option value="16">16×</option><option value="32">32×</option></select>
+          <span id="rp-eff" class="muted mono"></span>
+        </div>
+        <div class="controles opciones">
+          <select id="rp-camara" aria-label="cámara"><option value="seguir">Cámara: seguimiento</option><option value="torre">Cámara: torre con teleobjetivo</option><option value="abordo">Cámara: a bordo</option></select>
+          <select id="rp-cohete" aria-label="cohete"><option value="nave">Cohete: nave de acero</option><option value="propulsor">Cohete: propulsor</option></select>
+          <label class="check"><input type="checkbox" id="rp-follow" checked> seguir al cohete</label>
+          <label class="check"><input type="checkbox" id="rp-cine" checked> cámara cinematográfica</label>
+          <label class="check"><input type="checkbox" id="rp-slowmo" checked> cámara lenta al aterrizar</label>
+          <label class="check"><input type="checkbox" id="rp-fantasmas" checked> dejar fantasmas</label>
+          <label class="check"><input type="checkbox" id="rp-guias" checked> guías (trayectoria, viento, zona)</label>
+          <label class="check"><input type="checkbox" id="rp-hq" checked> calidad alta (sombras y brillo)</label>
+          <label class="check"><input type="checkbox" id="rp-escudo"> escudo térmico de la nave</label>
         </div>
       </div>
       <aside class="card lateral">
@@ -226,7 +237,8 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
         <p class="muted">${esc(nota)}</p>
         <p class="muted">Modelo ${esc(r?.agente.nombre ?? '')} · ambiente ${esc(r?.ambiente ?? '')} · commit <code>${corto(r?.git.commit)}</code>${r?.mlflow ? ` · ${esc(r.mlflow.modelo)} v${r.mlflow.version}` : ''}</p>
         <label>vuelo <select id="rp-vuelo">${vuelos.map((v, k) => `<option value="${k}">${esc(etiqueta(v, k))} · ${esc(v.reason)} · ${v.steps} pasos</option>`).join('')}</select></label>
-        <p class="muted">La velocidad de reproducción no cambia las reglas ni el paso físico (0,1 s): solo cuánto tarda en verse. Arrastra para girar la cámara; rueda para acercar.</p>
+        <p class="muted">La velocidad de reproducción no cambia las reglas ni el paso físico (0,1 s): solo cuánto tarda en verse. Entre dos muestras la posición se interpola con las velocidades grabadas. Arrastra para girar la cámara, rueda para acercar, doble clic para recentrar. El cohete se dibuja a tamaño real (42 m); los fantasmas son las trayectorias de los vuelos anteriores, con el color de su resultado.</p>
+        <p class="muted" id="rp-fantasmas-n"></p>
         <dl class="kv" id="rp-telemetria"></dl>
       </aside>
     </div>`
@@ -235,14 +247,15 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
   const sel = el.querySelector<HTMLSelectElement>('#rp-vuelo')!, play = el.querySelector<HTMLButtonElement>('#rp-play')!, scrub = el.querySelector<HTMLInputElement>('#rp-scrub')!
   const telemetria = el.querySelector<HTMLElement>('#rp-telemetria')!
   let actual = vuelos[0]
-  const cargar = (k: number) => { actual = vuelos[k]; rp.cargar(actual); scrub.max = String(rp.total - 1); el.querySelector('#hud-ep')!.textContent = etiqueta(actual, k); el.querySelector('#hud-res')!.textContent = `${ICONO_RESULTADO[actual.reason] ?? ''} ${actual.reason} · recompensa ${num(actual.reward, 0)}` }
+  const cargar = (k: number) => { actual = vuelos[k]; rp.cargar(actual); el.querySelector('#rp-fantasmas-n')!.textContent = rp.numeroFantasmas ? `Fantasmas en escena: ${rp.numeroFantasmas}` : ''; scrub.max = String(rp.total - 1); el.querySelector('#hud-ep')!.textContent = etiqueta(actual, k); el.querySelector('#hud-res')!.textContent = `${ICONO_RESULTADO[actual.reason] ?? ''} ${actual.reason} · recompensa ${num(actual.reward, 0)}` }
   rp.onFrame = (s) => {
     const f = actual.f, i = s.indice
     el.querySelector('#hud-paso')!.textContent = `paso ${s.paso}/50 · ${s.etiqueta}`
     el.querySelector('#hud-rec')!.textContent = `acumulado ${num(s.recompensaAcumulada)}`
     scrub.value = String(i); el.querySelector('#rp-clock')!.textContent = `${num(f.t[i])} s`
     play.textContent = rp.playing ? 'Pausa' : 'Reproducir'
-    telemetria.innerHTML = [['altitud', `${num(f.z[i])} m`], ['velocidad vertical', `${num(f.vz[i])} m/s`], ['velocidad horizontal', `${num(Math.hypot(f.vx[i], f.vy[i]))} m/s`], ['distancia a la plataforma', `${num(Math.hypot(f.x[i], f.y[i]))} m`], ['motor', f.on[i] ? `ON · ${Math.round(f.thr[i] * 100)} %` : 'OFF'], ['inclinación', `${num((Math.acos(Math.max(-1, Math.min(1, f.dz[i]))) * 180) / Math.PI)}°`], ['combustible', `${num(f.fuel[i], 0)} kg`], ['viento', `${num(f.wh[i])} m/s`], ['aire', `${num(f.air_t[i])} °C · ${num(f.p[i])} kPa`]].map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')
+    el.querySelector('#rp-eff')!.textContent = `${num(s.velocidadEfectiva, 1)}×`
+    telemetria.innerHTML = [['altitud', `${num(f.z[i])} m`], ['velocidad vertical', `${num(f.vz[i])} m/s`], ['velocidad horizontal', `${num(Math.hypot(f.vx[i], f.vy[i]))} m/s`], ['distancia a la plataforma', `${num(Math.hypot(f.x[i], f.y[i]))} m`], ['motor', f.on[i] ? `ON · ${Math.round(f.thr[i] * 100)} %` : 'OFF'], ['inclinación', `${num((Math.acos(Math.max(-1, Math.min(1, f.dz[i]))) * 180) / Math.PI)}°`], ['combustible', `${num(f.fuel[i], 0)} kg`], ['motor (temperatura)', `${num(f.eng_t[i], 0)} K`], ['viento', `${num(f.wh[i])} m/s`], ['aire', `${num(f.air_t[i])} °C · ${num(f.p[i])} kPa`]].map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')
   }
   rp.onEnd = () => { if (fuente === 'grabados' && sel.selectedIndex < vuelos.length - 1) setTimeout(() => { sel.selectedIndex += 1; cargar(sel.selectedIndex) }, 900) }
   sel.addEventListener('change', () => cargar(sel.selectedIndex))
@@ -250,7 +263,16 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
   el.querySelector('#rp-reiniciar')!.addEventListener('click', () => rp.reiniciar())
   scrub.addEventListener('input', () => rp.ir(+scrub.value))
   el.querySelector<HTMLSelectElement>('#rp-speed')!.addEventListener('change', (e) => { rp.speed = +(e.target as HTMLSelectElement).value })
-  el.querySelector<HTMLInputElement>('#rp-follow')!.addEventListener('change', (e) => { rp.follow = (e.target as HTMLInputElement).checked })
+  const casilla = (id: string, f: (on: boolean) => void) => el.querySelector<HTMLInputElement>(id)!.addEventListener('change', (e) => f((e.target as HTMLInputElement).checked))
+  casilla('#rp-follow', (on) => { rp.follow = on })
+  casilla('#rp-cine', (on) => { rp.cine = on })
+  casilla('#rp-slowmo', (on) => { rp.slowmo = on })
+  casilla('#rp-fantasmas', (on) => { rp.fantasmas = on; if (!on) { rp.limpiarFantasmas(); el.querySelector('#rp-fantasmas-n')!.textContent = '' } })
+  casilla('#rp-guias', (on) => rp.setGuias(on))
+  casilla('#rp-hq', (on) => rp.setCalidad(on))
+  casilla('#rp-escudo', (on) => rp.setEscudo(on))
+  el.querySelector<HTMLSelectElement>('#rp-camara')!.addEventListener('change', (e) => rp.setCamara((e.target as HTMLSelectElement).value as ModoCamara))
+  el.querySelector<HTMLSelectElement>('#rp-cohete')!.addEventListener('change', (e) => rp.setCohete((e.target as HTMLSelectElement).value as Cohete))
   cargar(0)
   return () => rp.destruir()
 }

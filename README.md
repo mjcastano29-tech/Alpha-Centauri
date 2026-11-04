@@ -151,7 +151,7 @@ choque y los sonidos son solo visuales.
   python -m pytest tests/test_api.py
   ```
 - **Catálogo y rollback** ([catalogo.py](catalogo.py), [catalogo.json](catalogo.json)): `python catalogo.py recomendar <run_id> --motivo "…"` promueve un modelo; `python catalogo.py restaurar --motivo "…"` es el rollback al anterior. Ambos se versionan con un commit y `GET /version` confirma qué catálogo y qué commit se sirven.
-- **Web** ([web/](web/)): catálogo con estado de cada modelo (recomendado, anterior, histórico), detalle con identidad (commit, huellas, versión en MLflow), comparación, evaluación en vivo contra la API y replay 3D con la etiqueta de modo (replay de vuelos grabados o evaluación en vivo).
+- **Web** ([web/](web/)): catálogo con estado de cada modelo (recomendado, anterior, histórico), detalle con identidad (commit, huellas, versión en MLflow), comparación, evaluación en vivo contra la API y replay 3D con la etiqueta de modo (replay de vuelos grabados o evaluación en vivo). El visor 3D ([web/src/escena.ts](web/src/escena.ts)) es la misma escena cinematográfica de la fase 3D: cielo de Alfa Centauri, terreno de regolito, losa de aterrizaje, dos cohetes (nave de acero y propulsor), penacho con diamantes de choque, polvo, bola de fuego al chocar, tres cámaras (seguimiento, torre, a bordo), fantasmas de los vuelos anteriores y posproceso; interpola entre muestras con las velocidades grabadas.
   ```bash
   cd web && npm ci && npm run dev        # http://localhost:5173, usa VITE_API_BASE_URL de .env.development
   npm run build && npm run preview       # compila a dist/
