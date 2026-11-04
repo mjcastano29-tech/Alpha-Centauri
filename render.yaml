@@ -19,13 +19,37 @@ services:
         value: https://alpha-centauri-mlflow.onrender.com
   # Interfaz de MLflow de solo lectura sobre el mlflow.db versionado en el repo (experimentos, runs, etiquetas,
   # métricas y registro de modelos). Los artefactos grandes viven en mlruns/ con rutas locales: se consultan en el repo.
+  # Se arranca la app de MLflow directamente con uvicorn: `mlflow server` levanta 10 procesos (ejecutor de trabajos
+  # en segundo plano, ~1,6 GB) y no cabe en los 512 MB del plan gratuito; así es 1 proceso de ~250 MB.
+  # Las variables _MLFLOW_SERVER_* son las que `mlflow server` le pasa a uvicorn (MLflow 3.17.2).
   - type: web
     name: alpha-centauri-mlflow
     runtime: python
     plan: free
     buildCommand: pip install -r requirements-mlflow.txt
-    startCommand: mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --host 0.0.0.0 --port $PORT --workers 1
+    startCommand: python -m uvicorn --host 0.0.0.0 --port $PORT --workers 1 mlflow.server.fastapi_app:app
     healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
         value: 3.10.12
+      - key: MLFLOW_SERVER_ENABLE_JOB_EXECUTION
+        value: "false"
+      - key: _MLFLOW_SERVER_FILE_STORE
+        value: sqlite:///mlflow.db
+      - key: _MLFLOW_SERVER_REGISTRY_STORE
+        value: sqlite:///mlflow.db
+      - key: MLFLOW_REGISTRY_URI
+        value: sqlite:///mlflow.db
+      - key: _MLFLOW_SERVER_ARTIFACT_ROOT
+        value: ./mlruns
+      - key: _MLFLOW_SERVER_SERVE_ARTIFACTS
+        value: "true"
+      - key: _MLFLOW_SERVER_ARTIFACT_DESTINATION
+        value: ./mlartifacts
+      - key: _MLFLOW_SGI_NAME
+        value: uvicorn
+      # Sin esto MLflow 3 responde 403 a cualquier Host que no sea localhost (protección contra DNS rebinding)
+      - key: MLFLOW_SERVER_ALLOWED_HOSTS
+        value: alpha-centauri-mlflow.onrender.com,localhost,127.0.0.1
+      - key: MLFLOW_SERVER_CORS_ALLOWED_ORIGINS
+        value: https://alpha-centauri-mlflow.onrender.com,https://alpha-centauri-five.vercel.app
