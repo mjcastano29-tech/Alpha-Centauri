@@ -4,11 +4,20 @@
 
 Contraste entre lo que pide el enunciado del proyecto final de MLOps (30 de octubre de 2026) y lo que hay en el repositorio hoy. Cada afirmación remite a un archivo o a un comando; lo que no se ha podido comprobar se dice.
 
+## Actualización · 3 de noviembre de 2026: hito 1 cerrado
+
+- **Web**: https://alpha-centauri-five.vercel.app (Vercel, rama `main`, Root Directory `web`, variable pública `VITE_API_BASE_URL`).
+- **API**: https://alpha-centauri-api.onrender.com (Render, plan gratuito, `render.yaml`; `GET /version` identifica el commit servido). Hugging Face Spaces quedó descartado: exige PRO para contenedores Docker.
+- **Release**: tag `v0.2.0` en `main` tras fusionar los PR #2 (reproducibilidad: dependencias fijadas, huellas SHA-256 y pruebas) y #3 (`fase-3d` → `main`); 28 pruebas pasan.
+- **Comprobaciones de la sección 16 del enunciado, hechas desde fuera** (navegador headless contra la URL pública): la URL abre y muestra el catálogo con el estado de cada modelo; la API usa HTTPS y responde al preflight CORS con el dominio exacto de Vercel; ninguna ruta apunta a localhost; se carga un modelo histórico (`base-v0.1-s0`) con commit, huellas y versión en MLflow y se evalúa en vivo (6 épocas, 1,8 s, 8,2 ms por paso en la CPU de Render); el recomendado (`ppo-v2-v0.1-s0`) se evalúa igual (5/5 aterrizajes); un id inexistente se muestra como error 404; el replay se identifica como *replay* y la evaluación como *evaluación en vivo*; el commit servido coincide con `main`.
+- **Límites del plan gratuito**: la API se duerme tras 15 min sin uso y tarda ~1 min en despertar; 750 h/mes.
+- Lo que sigue es el hito 2 (hipótesis y estado por configuración, manifiestos con el formato de la sección 11, suite de evaluación con nombre y `truncated`, niveles N2/N3).
+
 ## 1. Resumen
 
 | Hito del enunciado | Resultado verificable que pide | Estado |
 |---|---|---|
-| 1 · Reproducir | contrato, baseline, primer run y despliegue inicial | **Casi completo**: contrato, baselines (aleatorio, regla, Q-learning) y 4 runs. Falta el despliegue inicial. |
+| 1 · Reproducir | contrato, baseline, primer run y despliegue inicial | **Completo (3 nov)**: contrato, baselines, 4 runs, release `v0.2.0`, web en Vercel y API en Render verificadas desde fuera. |
 | 2 · Experimentar | niveles, hipótesis, catálogo y modelos históricos | **A medias**: 4 configuraciones recuperables y registradas en MLflow, pero sin hipótesis escritas, sin niveles N1/N2/N3 declarados y sin catálogo web. |
 | 3 · Operar | pipeline, comparaciones y detección de degradación | **Empezado**: comparación y degradación con viento medidas (`panel.html`); no hay pipeline orquestado, API ni web en Vercel. |
 | 4 · Recuperar y defender | intervención, rollback, release e informe | **No empezado**. |
