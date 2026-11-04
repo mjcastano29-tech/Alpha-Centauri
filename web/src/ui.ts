@@ -47,8 +47,9 @@ export function lineaSvg(series: { x: number[]; y: number[]; color: string; nomb
   return `<div class="leyenda">${leyenda}</div><svg viewBox="0 0 ${W} ${H}" class="grafica" role="img">${grid}<line x1="${L}" x2="${W - R}" y1="${Y(lo)}" y2="${Y(lo)}" class="eje"/>${xt}${paths}<text x="${W - R}" y="${H - 8}" text-anchor="end" class="xl">${esc(opciones.xLabel ?? '')}</text></svg>`
 }
 
-export function tabla(cabecera: string[], filas: (string | number)[][]) {
-  return `<div class="tabla"><table><thead><tr>${cabecera.map((h) => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${filas
+/** Tabla simple. Cabeceras y celdas llegan ya escapadas (o con HTML propio); la cabecera puede llevar enlaces. */
+export function tabla(cabecera: string[], filas: (string | number)[][], clase = '') {
+  return `<div class="tabla ${clase}"><table><thead><tr>${cabecera.map((h) => `<th>${h}</th>`).join('')}</tr></thead><tbody>${filas
     .map((f) => `<tr>${f.map((c) => `<td>${typeof c === 'number' ? c : c}</td>`).join('')}</tr>`)
     .join('')}</tbody></table></div>`
 }

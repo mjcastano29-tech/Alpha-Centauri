@@ -223,7 +223,8 @@ def catalogo():
 @app.get("/comparar", summary="Resumen de varias ejecuciones lado a lado")
 def comparar(runs: str = Query(..., description="ids separados por coma")):
     cat = catalogo_git.leer()
-    return {"ejecuciones": [resumen_ejecucion(r.strip(), cat) for r in runs.split(",") if r.strip()]}
+    epocas = {e["run_id"]: e["epochs"] for e in load_registry()["ejecuciones"]}
+    return {"ejecuciones": [resumen_ejecucion(r, cat) | {"epocas": epocas.get(r)} for r in (x.strip() for x in runs.split(",")) if r]}
 
 
 @app.get("/ejecuciones/{run_id}", summary="Detalle de una ejecución: manifest, curva de entrenamiento y evaluaciones")

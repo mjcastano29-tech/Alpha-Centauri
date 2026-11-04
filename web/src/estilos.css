@@ -34,6 +34,9 @@ h2 { font-size: 16px; margin: 18px 0 8px; }
 .hero p { margin: 4px 0; }
 .dos { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 12px 0; }
 .tabla { overflow-x: auto; }
+.tabla.comparar table { table-layout: fixed; }
+.tabla.comparar th:first-child { width: 120px; }
+.tabla.comparar td { overflow-wrap: anywhere; vertical-align: top; }
 table { border-collapse: collapse; width: 100%; font-size: 13px; font-variant-numeric: tabular-nums; }
 th, td { text-align: left; vertical-align: top; padding: 7px 9px; border-bottom: 1px solid var(--line); }
 th { color: var(--muted); font-weight: 500; white-space: nowrap; }

@@ -183,7 +183,7 @@ export async function vistaComparar(el: HTMLElement, ids: string[]) {
       ['commit', ...col((r) => `<code>${corto(r.git.commit)}</code>`)],
       ['MLflow', ...col((r) => (r.mlflow ? `${esc(r.mlflow.modelo)} v${r.mlflow.version}` : '—'))],
       ['decisión', ...col((r) => `${pillDiseno(r.diseno?.estado)}<br>${esc(r.diseno?.decision ?? '—')}`)],
-    ])}`
+    ], 'comparar')}`
 }
 
 // ---------- replay 3D ----------
