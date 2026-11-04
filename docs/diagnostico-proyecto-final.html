@@ -42,6 +42,15 @@
 <h1>Diagnóstico frente al enunciado del proyecto final</h1>
 <p><strong>Equipo Alpha Centauri · Rocket Landing · 2 de noviembre de 2026 · rama <code>fase-3d</code> (commit <code>c0058c4</code>) + rama <code>isaias/arreglos-rapidos</code> sin fusionar</strong></p>
 <p>Contraste entre lo que pide el enunciado del proyecto final de MLOps (30 de octubre de 2026) y lo que hay en el repositorio hoy. Cada afirmación remite a un archivo o a un comando; lo que no se ha podido comprobar se dice.</p>
+<h2>Actualización · 3 de noviembre de 2026: hito 1 cerrado</h2>
+<ul>
+<li><strong>Web</strong>: https://alpha-centauri-five.vercel.app (Vercel, rama <code>main</code>, Root Directory <code>web</code>, variable pública <code>VITE_API_BASE_URL</code>).</li>
+<li><strong>API</strong>: https://alpha-centauri-api.onrender.com (Render, plan gratuito, <code>render.yaml</code>; <code>GET /version</code> identifica el commit servido). Hugging Face Spaces quedó descartado: exige PRO para contenedores Docker.</li>
+<li><strong>Release</strong>: tag <code>v0.2.0</code> en <code>main</code> tras fusionar los PR #2 (reproducibilidad: dependencias fijadas, huellas SHA-256 y pruebas) y #3 (<code>fase-3d</code> → <code>main</code>); 28 pruebas pasan.</li>
+<li><strong>Comprobaciones de la sección 16 del enunciado, hechas desde fuera</strong> (navegador headless contra la URL pública): la URL abre y muestra el catálogo con el estado de cada modelo; la API usa HTTPS y responde al preflight CORS con el dominio exacto de Vercel; ninguna ruta apunta a localhost; se carga un modelo histórico (<code>base-v0.1-s0</code>) con commit, huellas y versión en MLflow y se evalúa en vivo (6 épocas, 1,8 s, 8,2 ms por paso en la CPU de Render); el recomendado (<code>ppo-v2-v0.1-s0</code>) se evalúa igual (5/5 aterrizajes); un id inexistente se muestra como error 404; el replay se identifica como <em>replay</em> y la evaluación como <em>evaluación en vivo</em>; el commit servido coincide con <code>main</code>.</li>
+<li><strong>Límites del plan gratuito</strong>: la API se duerme tras 15 min sin uso y tarda ~1 min en despertar; 750 h/mes.</li>
+<li>Lo que sigue es el hito 2 (hipótesis y estado por configuración, manifiestos con el formato de la sección 11, suite de evaluación con nombre y <code>truncated</code>, niveles N2/N3).</li>
+</ul>
 <h2>1. Resumen</h2>
 <div class="tbl"><table>
 <thead>
@@ -55,7 +64,7 @@
 <tr>
 <td>1 · Reproducir</td>
 <td>contrato, baseline, primer run y despliegue inicial</td>
-<td><strong>Casi completo</strong>: contrato, baselines (aleatorio, regla, Q-learning) y 4 runs. Falta el despliegue inicial.</td>
+<td><strong>Completo (3 nov)</strong>: contrato, baselines, 4 runs, release <code>v0.2.0</code>, web en Vercel y API en Render verificadas desde fuera.</td>
 </tr>
 <tr>
 <td>2 · Experimentar</td>
