@@ -1,5 +1,8 @@
 """Despliega la API en un Space de Hugging Face (contenedor Docker con URL HTTPS).
 
+Aviso (noviembre de 2026): Hugging Face exige suscripción PRO para Spaces con Docker, incluso en la CPU
+básica (responde 402 al crear el repositorio). Con una cuenta gratuita, usa Render con render.yaml.
+
 Es el paso "publicar" del pipeline: sube el código y las ejecuciones del commit actual, fija en el Space la
 variable COMMIT_SHA (lo que luego devuelve GET /version) y espera a que el contenedor arranque. Requiere
 sesión de Hugging Face (`huggingface-cli login`) o la variable HF_TOKEN.

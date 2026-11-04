@@ -5,8 +5,8 @@ gymnasium==1.4.0
 numpy==2.2.6
 torch==2.14.1
 stable-baselines3==2.9.2
-mlflow==3.17.2
 fastapi>=0.115
 uvicorn[standard]>=0.30
 httpx>=0.27          # TestClient de tests/test_api.py
-huggingface_hub>=0.24 # desplegar_hf.py y publicar_hf.py
+# MLflow no hace falta para servir: la API lee las versiones de modelo de mlflow.db con sqlite3.
+# huggingface_hub (desplegar_hf.py, publicar_hf.py) está en requirements.txt.

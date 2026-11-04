@@ -133,7 +133,7 @@ choque y los sonidos son solo visuales.
   cd web && npm ci && npm run dev        # http://localhost:5173, usa VITE_API_BASE_URL de .env.development
   npm run build && npm run preview       # compila a dist/
   ```
-- **Despliegue**: Vercel con Root Directory `web`, Build Command `npm run build`, Output Directory `dist` y la variable `VITE_API_BASE_URL` apuntando a la API HTTPS. La API se sirve como contenedor ([Dockerfile](Dockerfile)): `python desplegar_hf.py` la publica en un Space de Hugging Face fijando `COMMIT_SHA` al commit desplegado (es el paso "publicar" del pipeline); [render.yaml](render.yaml) es la alternativa en Render. Variables en [.env.example](.env.example). Versiones verificadas: Node 24, npm 11, Vite 8, three 0.187, FastAPI 0.162, Uvicorn 0.54.
+- **Despliegue**: Vercel con Root Directory `web`, Build Command `npm run build`, Output Directory `dist` y la variable `VITE_API_BASE_URL` apuntando a la API HTTPS. La API se sirve como contenedor ([Dockerfile](Dockerfile)) o como servicio Python: [render.yaml](render.yaml) la despliega en Render (plan gratuito, 512 MB; por eso la API no importa MLflow y lee `mlflow.db` con sqlite3). `python desplegar_hf.py` haría lo mismo en un Space de Hugging Face, pero los Spaces con Docker exigen suscripción PRO. Variables en [.env.example](.env.example). Versiones verificadas: Node 24, npm 11, Vite 8, three 0.187, FastAPI 0.162, Uvicorn 0.54.
 
 ## Versionado
 

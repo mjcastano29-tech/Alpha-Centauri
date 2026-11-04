@@ -9,10 +9,10 @@ Arranque local:
     uvicorn api.main:app --reload --port 8000        # documentación interactiva en /docs
 Variables de entorno (ver .env.example): CORS_ORIGENES, MAX_EPISODIOS, COMMIT_SHA.
 """
-import gzip
 import json
 import os
 import platform
+import sqlite3
 import subprocess
 import sys
 import time
@@ -79,19 +79,19 @@ def evaluacion_guardada(run_id):
 
 
 def versiones_mlflow():
-    """{run_id: {"modelo": nombre, "version": n}} desde el registro de modelos de MLflow, si está disponible."""
+    """{run_id: {"modelo": nombre, "version": n}} leído de mlflow.db con sqlite3 (sin importar MLflow:
+    la API debe caber en 512 MB). Cada versión registrada apunta a la run cuya etiqueta "ejecucion" es el run_id."""
+    db = ROOT / "mlflow.db"
+    if not db.exists():
+        return {}
     try:
-        import seguimiento  # noqa: F401  (fija la URI de seguimiento)
-        from mlflow import MlflowClient
-        client = MlflowClient()
-        out = {}
-        for modelo in client.search_registered_models():
-            for v in client.search_model_versions(f"name='{modelo.name}'"):
-                ejecucion = client.get_run(v.run_id).data.tags.get("ejecucion")
-                if ejecucion:
-                    out[ejecucion] = {"modelo": modelo.name, "version": int(v.version)}
-        return out
-    except Exception:  # MLflow es opcional para servir
+        con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
+        filas = con.execute("""select t.value, mv.name, mv.version from model_versions mv
+                               join tags t on t.run_uuid = mv.run_id and t.key = 'ejecucion'
+                               order by mv.version""").fetchall()
+        con.close()
+        return {ejecucion: {"modelo": nombre, "version": int(version)} for ejecucion, nombre, version in filas}
+    except sqlite3.Error:  # el registro es informativo: no impide servir
         return {}
 
 
