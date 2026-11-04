@@ -1,0 +1,62 @@
+{
+  "formato": 1,
+  "ultimo": "ppo-v2-v0.1-s0",
+  "ejecuciones": [
+    {
+      "run_id": "base-v0.1-s0",
+      "fecha": "2026-10-28T15:35:57",
+      "commit": "f8f749a4e7cc",
+      "ambiente": "0.1",
+      "epochs": 5000,
+      "seed": 0,
+      "aterrizajes": 0.785,
+      "velocidad_contacto": 1.9505930632744906,
+      "error_posicion": 5.517376205096453,
+      "primer_aterrizaje": 1785,
+      "experimento": "experimento-1-qlearning",
+      "agente": "Q-learning"
+    },
+    {
+      "run_id": "ppo-v0.1-s0",
+      "experimento": "experimento-2-ppo",
+      "agente": "PPO (red neuronal)",
+      "fecha": "2026-10-28T17:26:41",
+      "commit": "25f0295769b5",
+      "ambiente": "0.1",
+      "epochs": 14443,
+      "seed": 0,
+      "aterrizajes": 0.0,
+      "velocidad_contacto": 11.932136757851262,
+      "error_posicion": 8.117636984220098,
+      "primer_aterrizaje": null
+    },
+    {
+      "run_id": "ppo-rel-v0.1-s0",
+      "experimento": "experimento-2-ppo",
+      "agente": "PPO (red neuronal)",
+      "fecha": "2026-10-28T18:04:23",
+      "commit": "5b55ff723ef5",
+      "ambiente": "0.1",
+      "epochs": 19831,
+      "seed": 0,
+      "aterrizajes": 0.0,
+      "velocidad_contacto": 2.573809737447291,
+      "error_posicion": 5.931124915602038,
+      "primer_aterrizaje": 15936
+    },
+    {
+      "run_id": "ppo-v2-v0.1-s0",
+      "experimento": "experimento-2-ppo",
+      "agente": "PPO (red neuronal)",
+      "fecha": "2026-10-28T18:18:05",
+      "commit": "6458e2b0fbb0",
+      "ambiente": "0.1",
+      "epochs": 15942,
+      "seed": 0,
+      "aterrizajes": 0.97,
+      "velocidad_contacto": 1.1975763256094811,
+      "error_posicion": 4.943637642366295,
+      "primer_aterrizaje": 1970
+    }
+  ]
+}

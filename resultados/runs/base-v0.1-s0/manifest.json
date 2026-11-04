@@ -1,0 +1,123 @@
+{
+  "run_id": "base-v0.1-s0",
+  "fecha": "2026-10-28T15:35:57",
+  "formato": 1,
+  "git": {
+    "commit": "f8f749a4e7cc",
+    "branch": "fase-3d",
+    "cambios_sin_commit": false
+  },
+  "ambiente": {
+    "id": "RocketLanding3D-v0",
+    "version": "0.1",
+    "step_altitude": 20.0,
+    "step_time_limit": 2.0,
+    "max_steps": 50,
+    "start_altitude": 600.0,
+    "pad_radius": 10.0,
+    "max_landing_vertical_speed": 3.0,
+    "max_landing_horizontal_speed": 2.0,
+    "max_landing_tilt": 10.0,
+    "rewards": {
+      "aterrizaje": 100.0,
+      "fuera de plataforma": -50.0,
+      "choque": -100.0,
+      "sin pasos": -100.0,
+      "fuera de zona": -100.0
+    }
+  },
+  "agente": {
+    "clase": "qlearning",
+    "nombre": "Q-learning",
+    "tipo": "Q-learning con dos tablas (motor y dirección)",
+    "acciones_motor": [
+      0.0,
+      0.6,
+      0.9,
+      1.0,
+      1.1,
+      1.4
+    ],
+    "inclinacion_lateral": 0.1,
+    "direcciones": [
+      "arriba",
+      "+x",
+      "-x",
+      "+y",
+      "-y"
+    ],
+    "intervalos": {
+      "altitud": [
+        20.0,
+        60.0,
+        150.0,
+        350.0,
+        600.0
+      ],
+      "velocidad_vertical": [
+        -25.0,
+        -12.0,
+        -6.0,
+        -3.0,
+        -1.0,
+        1.0
+      ],
+      "deriva": [
+        -6.0,
+        6.0
+      ],
+      "tiempo_prediccion": 4.0
+    }
+  },
+  "config": {
+    "epochs": 5000,
+    "alpha": 0.1,
+    "alpha_end": 0.01,
+    "gamma": 0.99,
+    "epsilon_end": 0.02,
+    "epsilon_decay": 0.6,
+    "seed": 0
+  },
+  "software": {
+    "python": "3.10.12",
+    "gymnasium": "1.4.0",
+    "numpy": "2.2.6"
+  },
+  "resultado": {
+    "primer_aterrizaje": 1785,
+    "mejor_epoca": 5000,
+    "evaluacion": {
+      "episodes": 200,
+      "outcomes": {
+        "aterrizaje": 157,
+        "fuera de plataforma": 10,
+        "choque": 33,
+        "sin pasos": 0,
+        "fuera de zona": 0
+      },
+      "landing_rate": 0.785,
+      "contact_speed": 1.9505930632744906,
+      "position_error": 5.517376205096453,
+      "fuel_used": 272.2709643287528
+    },
+    "epocas_grabadas": 55
+  },
+  "archivos": {
+    "modelo": "modelo.npz",
+    "entrenamiento": "entrenamiento.json",
+    "vuelos": "vuelos.json.gz",
+    "episodios": "episodios.csv"
+  },
+  "experimento": "experimento-1-qlearning",
+  "sha256": {
+    "algoritmo": "sha256",
+    "config": "3376ea25366a2e76d46153f904c8a827b40051e963336686ec867aed4622a346",
+    "archivos": {
+      "modelo.npz": "e1498f54808d1f0d1e44e37e46fc3319ab760887c1e7f05f5340468b5d337644",
+      "entrenamiento.json": "baf675cedb9e50bd9169c3f09312a66b8426f11274692f7eb71b75f037d959af",
+      "vuelos.json.gz": "90670e19297afb850a04009df771881a877e36f3c807214c4cadda14efc3cc91",
+      "episodios.csv": "e47eed86e9e1a2f0a7b76ac8faa669da7defa8bdb2fa62eb9b2a462ba021a044"
+    },
+    "nota": "calculadas el 2026-10-30, después del entrenamiento: esta ejecución es anterior a las huellas en el manifest"
+  }
+}

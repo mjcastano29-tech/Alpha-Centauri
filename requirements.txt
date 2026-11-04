@@ -1,1 +1,15 @@
-gymnasium[box2d]==1.4.0
+# Versiones fijadas a las del entrenamiento de los modelos guardados ("software" en resultados/runs/<id>/manifest.json).
+# Python 3.10 a 3.13 (los modelos se entrenaron con 3.10.12; numpy 2.2.6 no tiene versión para 3.14).
+# PyTorch en versión CPU: en Linux y Windows pip la toma del índice de PyTorch; en macOS, de PyPI.
+--extra-index-url https://download.pytorch.org/whl/cpu
+gymnasium==1.4.0
+numpy==2.2.6
+torch==2.14.1
+stable-baselines3==2.9.2
+mlflow==3.17.2
+
+# publicar ejecuciones en Hugging Face Hub (publicar_hf.py)
+huggingface_hub>=0.24
+
+# pruebas: python -m pytest
+pytest>=8

@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 660" width="960" height="660" font-family="'IBM Plex Sans', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="11">
+  <defs>
+    <marker id="m-wind" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#2c6fb8"/></marker>
+    <marker id="m-muted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a6775"/></marker>
+    <marker id="m-thrust" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#d9581a"/></marker>
+  </defs>
+  <rect width="960" height="660" fill="#ffffff"/>
+  <text x="24" y="30" font-size="18" font-weight="700" fill="#17212c">Rocket Landing · mapa del ambiente v0.1</text>
+  <text x="24" y="48" fill="#5a6775">Equipo Alpha Centauri · entorno RocketLanding3D-v0 · unidades SI (m, m/s, s, kg) · los dos paneles están a escala, 0,42 px/m</text>
+
+  <!-- ===== VISTA LATERAL (plano x–z) ===== -->
+  <text x="24" y="82" font-size="12" font-weight="700" letter-spacing=".06em" fill="#5a6775">VISTA LATERAL · PLANO x–z</text>
+  <rect x="74" y="96" width="252" height="504" fill="#f3f6f9" stroke="#5a6775" stroke-dasharray="6 4"/>
+  <g stroke="#d2d9e0">
+    <line x1="74" y1="180" x2="326" y2="180"/><line x1="74" y1="264" x2="326" y2="264"/><line x1="74" y1="348" x2="326" y2="348"/>
+    <line x1="74" y1="432" x2="326" y2="432"/><line x1="74" y1="516" x2="326" y2="516"/>
+  </g>
+  <g stroke="#5a6775">
+    <line x1="68" y1="96" x2="74" y2="96"/><line x1="68" y1="180" x2="74" y2="180"/><line x1="68" y1="264" x2="74" y2="264"/><line x1="68" y1="348" x2="74" y2="348"/>
+    <line x1="68" y1="432" x2="74" y2="432"/><line x1="68" y1="516" x2="74" y2="516"/><line x1="68" y1="600" x2="74" y2="600"/>
+  </g>
+  <g font-size="10" fill="#5a6775" text-anchor="end">
+    <text x="64" y="100">1200 m</text><text x="64" y="184">1000</text><text x="64" y="268">800</text><text x="64" y="352">600</text>
+    <text x="64" y="436">400</text><text x="64" y="520">200</text><text x="64" y="604">0</text>
+  </g>
+  <text x="322" y="110" text-anchor="end" font-size="10" fill="#5a6775">techo: 1200 m</text>
+  <text x="322" y="152" text-anchor="end" font-size="10" fill="#5a6775">límite lateral: r = 300 m</text>
+
+  <!-- viento: crece con la altura -->
+  <text x="88" y="126" font-size="10" fill="#2c6fb8">viento: w(z) = w₁₀ · (z/10)^(1/7) + ráfagas</text>
+  <g stroke="#2c6fb8" stroke-width="2" marker-end="url(#m-wind)">
+    <line x1="88" y1="138" x2="119" y2="138"/><line x1="88" y1="222" x2="118" y2="222"/><line x1="88" y1="306" x2="117" y2="306"/>
+    <line x1="88" y1="390" x2="116" y2="390"/><line x1="88" y1="474" x2="114" y2="474"/><line x1="88" y1="558" x2="110" y2="558"/>
+  </g>
+
+  <!-- escalera de pasos de 20 m -->
+  <line x1="330" y1="348" x2="330" y2="600.6" stroke="#17212c" stroke-width="8" stroke-dasharray="1.2 7.2" opacity=".55"/>
+  <text transform="rotate(90 340 372)" x="340" y="372" font-size="10" fill="#5a6775">1 paso = 20 m (30 hasta el suelo, máx. 50)</text>
+
+  <!-- inicio y cohete -->
+  <text x="200" y="312" text-anchor="middle" font-size="11" font-weight="700" fill="#17212c">INICIO · z = 600 m</text>
+  <text x="200" y="324" text-anchor="middle" font-size="10" fill="#5a6775">x, y ∈ [−50, 50] m · vz ∈ [−20, −15] m/s</text>
+  <rect x="179" y="346" width="42" height="4" fill="#17212c" opacity=".25"/>
+  <polygon points="200,330 196,338 204,338" fill="#17212c"/>
+  <rect x="196.5" y="338" width="7" height="13" fill="#17212c"/>
+  <polygon points="197,351 203,351 200,357" fill="#d9581a"/>
+
+  <!-- trayectoria de ejemplo -->
+  <path d="M203 352 C 224 440, 190 540, 200 598" fill="none" stroke="#17212c" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <text x="194" y="500" text-anchor="end" font-size="10" fill="#5a6775">trayectoria de ejemplo</text>
+
+  <!-- suelo y meta -->
+  <line x1="40" y1="600" x2="360" y2="600" stroke="#17212c" stroke-width="2"/>
+  <line x1="195.8" y1="600" x2="204.2" y2="600" stroke="#1d8f62" stroke-width="7"/>
+  <text x="210" y="590" font-size="11" font-weight="700" fill="#1d8f62">META · r = 10 m</text>
+  <text x="24" y="612" font-size="10" fill="#5a6775">suelo z = 0 · sin obstáculos</text>
+  <g font-size="10" fill="#5a6775" text-anchor="middle">
+    <text x="74" y="626">x = −300 m</text><text x="200" y="626">0</text><text x="326" y="626">+300 m</text>
+  </g>
+
+  <!-- ===== VISTA CENITAL (plano x–y) ===== -->
+  <text x="420" y="82" font-size="12" font-weight="700" letter-spacing=".06em" fill="#5a6775">VISTA CENITAL · PLANO x–y</text>
+  <circle cx="700" cy="360" r="126" fill="#f3f6f9" stroke="#5a6775" stroke-dasharray="6 4"/>
+  <g fill="none" stroke="#d2d9e0"><circle cx="700" cy="360" r="84"/><circle cx="700" cy="360" r="42"/></g>
+  <g stroke="#5a6775" marker-end="url(#m-muted)"><line x1="556" y1="360" x2="850" y2="360"/><line x1="700" y1="504" x2="700" y2="216"/></g>
+  <text x="854" y="364" fill="#5a6775">x</text><text x="706" y="222" fill="#5a6775">y</text>
+  <g font-size="10" fill="#5a6775"><text x="734" y="326">100 m</text><text x="763" y="297">200 m</text><text x="795" y="265">límite r = 300 m</text></g>
+  <rect x="679" y="339" width="42" height="42" fill="#17212c" opacity=".1" stroke="#17212c" stroke-dasharray="3 2"/>
+  <circle cx="700" cy="360" r="4.2" fill="#1d8f62"/>
+  <text x="726" y="392" font-size="10" fill="#5a6775">inicio: x, y ∈ [−50, 50] m</text>
+  <line x1="703" y1="364" x2="714" y2="410" stroke="#1d8f62"/>
+  <text x="718" y="416" font-size="11" font-weight="700" fill="#1d8f62">META · plataforma r = 10 m</text>
+  <text x="430" y="200" font-size="10" fill="#2c6fb8">viento: dirección y fuerza aleatorias</text>
+  <text x="430" y="212" font-size="10" fill="#2c6fb8">por época (0–10 m/s a 10 m de altura)</text>
+  <line x1="566" y1="240" x2="614" y2="276" stroke="#2c6fb8" stroke-width="2.5" marker-end="url(#m-wind)"/>
+
+  <!-- fuerzas sobre el cohete -->
+  <rect x="846" y="96" width="94" height="126" rx="4" fill="#f3f6f9" stroke="#d2d9e0"/>
+  <text x="852" y="110" font-size="9" font-weight="700" letter-spacing=".08em" fill="#5a6775">FUERZAS</text>
+  <text x="852" y="156" font-size="9" fill="#2c6fb8">viento</text>
+  <line x1="852" y1="162" x2="880" y2="162" stroke="#2c6fb8" stroke-width="1.5" marker-end="url(#m-wind)"/>
+  <g transform="translate(893 166) rotate(-14)">
+    <polygon points="0,-20 -4,-12 4,-12" fill="#17212c"/>
+    <rect x="-4" y="-12" width="8" height="24" fill="#17212c"/>
+    <polygon points="-3,12 3,12 0,18" fill="#d9581a"/>
+    <line x1="0" y1="-22" x2="0" y2="-48" stroke="#d9581a" stroke-width="1.5" marker-end="url(#m-thrust)"/>
+  </g>
+  <text x="906" y="122" font-size="9" fill="#d9581a">empuje</text>
+  <line x1="893" y1="166" x2="893" y2="206" stroke="#5a6775" stroke-width="1.5" marker-end="url(#m-muted)"/>
+  <text x="898" y="212" font-size="9" fill="#5a6775">peso</text>
+
+  <!-- dimensiones y reglas -->
+  <text x="420" y="520" font-size="11" font-weight="700" fill="#17212c">Dimensiones, límites y reglas</text>
+  <g font-size="10" fill="#17212c">
+    <text x="420" y="536">Meta: plataforma de radio 10 m en el origen. Suelo plano z = 0, sin obstáculos en v0.1.</text>
+    <text x="420" y="550">Zona de vuelo: cilindro de radio 300 m y techo 1200 m; salir de él es fracaso (−100 puntos).</text>
+    <text x="420" y="564">Inicio: z = 600 m; x, y ∈ [−50, 50] m; vz ∈ [−20, −15] m/s; vx, vy ∈ [−3, 3] m/s.</text>
+    <text x="420" y="578">Cohete: 1000 kg en seco + 500 kg de combustible; empuje máximo 27 kN (≈ 25 kN al nivel del mar).</text>
+    <text x="420" y="592">Paso: una decisión que se mantiene 20 m en vertical (o 2 s). Máximo 50 pasos por época.</text>
+    <text x="420" y="606">Aterrizaje seguro (+100): |vz| ≤ 3 m/s, v_h ≤ 2 m/s, inclinación ≤ 10° y a ≤ 10 m del centro.</text>
+    <text x="420" y="620">Suave fuera de la plataforma: −50. Choque, sin pasos o fuera de zona: −100.</text>
+    <text x="420" y="634">Viento a 10 m: 0–10 m/s, crece con la altura (ley 1/7) y lleva ráfagas; suelo a −10…40 °C y 98–104 kPa.</text>
+    <text x="420" y="648">Perturbación de robustez: viento fijo de 15 m/s. Escala del dibujo: 0,42 px/m.</text>
+  </g>
+  <text x="24" y="652" font-size="9" fill="#5a6775">Generado desde las constantes de rocket_env/ · detalle en docs/ambiente-v0.1.md</text>
+</svg>

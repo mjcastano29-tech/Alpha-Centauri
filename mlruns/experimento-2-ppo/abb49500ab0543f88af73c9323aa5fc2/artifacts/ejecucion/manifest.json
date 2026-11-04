@@ -1,0 +1,104 @@
+{
+  "run_id": "ppo-v0.1-s0",
+  "experimento": "experimento-2-ppo",
+  "fecha": "2026-10-28T17:26:41",
+  "formato": 1,
+  "git": {
+    "commit": "25f0295769b5",
+    "branch": "fase-3d",
+    "cambios_sin_commit": true
+  },
+  "ambiente": {
+    "id": "RocketLanding3D-v0",
+    "version": "0.1",
+    "step_altitude": 20.0,
+    "step_time_limit": 2.0,
+    "max_steps": 50,
+    "start_altitude": 600.0,
+    "pad_radius": 10.0,
+    "max_landing_vertical_speed": 3.0,
+    "max_landing_horizontal_speed": 2.0,
+    "max_landing_tilt": 10.0,
+    "rewards": {
+      "aterrizaje": 100.0,
+      "fuera de plataforma": -50.0,
+      "choque": -100.0,
+      "sin pasos": -100.0,
+      "fuera de zona": -100.0
+    }
+  },
+  "agente": {
+    "clase": "ppo",
+    "nombre": "PPO (red neuronal)",
+    "tipo": "PPO (Stable-Baselines3): red neuronal MLP sobre la acción continua del entorno",
+    "red": "[128, 128]",
+    "hiperparametros": {
+      "total_timesteps": 400000,
+      "n_envs": 8,
+      "n_steps": 256,
+      "batch_size": 256,
+      "n_epochs": 10,
+      "learning_rate": 0.0003,
+      "gamma": 0.99,
+      "gae_lambda": 0.95,
+      "clip_range": 0.2,
+      "ent_coef": 0.0,
+      "eval_every": 20000
+    }
+  },
+  "config": {
+    "total_timesteps": 400000,
+    "n_envs": 8,
+    "n_steps": 256,
+    "batch_size": 256,
+    "n_epochs": 10,
+    "learning_rate": 0.0003,
+    "gamma": 0.99,
+    "gae_lambda": 0.95,
+    "clip_range": 0.2,
+    "ent_coef": 0.0,
+    "net_arch": [
+      128,
+      128
+    ],
+    "eval_every": 20000,
+    "seed": 0
+  },
+  "software": {
+    "python": "3.10.12",
+    "gymnasium": "1.4.0",
+    "numpy": "2.2.6",
+    "torch": "2.14.1+cpu",
+    "stable_baselines3": "2.9.2",
+    "hilos_cpu": 6,
+    "maquina": "x86_64"
+  },
+  "resultado": {
+    "primer_aterrizaje": null,
+    "mejor_epoca": 14393,
+    "evaluacion": {
+      "episodes": 200,
+      "outcomes": {
+        "aterrizaje": 0,
+        "fuera de plataforma": 0,
+        "choque": 200,
+        "sin pasos": 0,
+        "fuera de zona": 0
+      },
+      "landing_rate": 0.0,
+      "contact_speed": 11.932136757851262,
+      "position_error": 8.117636984220098,
+      "fuel_used": 141.19046927966366
+    },
+    "epocas_grabadas": 20
+  },
+  "archivos": {
+    "modelo": [
+      "modelo.zip",
+      "modelo_normalizador.pkl"
+    ],
+    "entrenamiento": "entrenamiento.json",
+    "episodios": "episodios.csv",
+    "vuelos": "vuelos.json.gz"
+  }
+}

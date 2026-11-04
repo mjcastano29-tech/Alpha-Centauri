@@ -1,0 +1,23 @@
+artifact_path: file:///home/mjcas/code/alpha_centauri/mlruns/experimento-2-ppo/models/m-94743f914bd94a57bf094ae02bcbf757/artifacts
+flavors:
+  python_function:
+    artifacts:
+      modelo:
+        path: artifacts/modelo
+        uri: /tmp/tmpgiuq32a2/modelo
+    cloudpickle_version: 3.1.2
+    code: code
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pyfunc.model
+    python_model: python_model.pkl
+    python_version: 3.10.12
+    streamable: false
+mlflow_version: 3.17.2
+model_id: m-94743f914bd94a57bf094ae02bcbf757
+model_size_bytes: 495263
+model_uuid: m-94743f914bd94a57bf094ae02bcbf757
+prompts: null
+run_id: 0c465e9565574403a0957c4eb60aa1eb
+utc_time_created: '2026-10-28 23:04:26.404809'
