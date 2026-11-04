@@ -17,6 +17,12 @@ y se anota aquí. Los modelos entrenados con versiones distintas del ambiente no
 - Observación de 16 valores (incluye inclinación); acción continua de 5 valores.
 - Atmósfera ISA con suelo aleatorio por época; viento con ley 1/7 y ráfagas; perturbación `options={"viento": v}`.
 
+### 0.1.1 · 2026-11-03
+- "sin pasos" (agotar los 50 pasos sin tocar el suelo) se informa como `truncated=True` en vez de `terminated`,
+  como pide la guía para el límite externo de la época. La recompensa (−100) y todas las reglas son las mismas.
+- Tercer número de versión = señales que no cambian las reglas. `RocketLanding3DEnv.compatible(v)` compara solo
+  mayor.menor: los modelos entrenados con 0.1 siguen siendo válidos y comparables en 0.1.x.
+
 ## Agente Q-learning
 
 ### 0.1 · 2026-10-28
@@ -41,6 +47,11 @@ y se anota aquí. Los modelos entrenados con versiones distintas del ambiente no
 - Mismo día, ampliación compatible: `experimento`, `agente.clase/nombre` y `archivos.modelo` como lista en el
   manifest; `episodios.csv` (dataset) y `evaluacion.json` (evaluación detallada) en cada ejecución; registro
   en MLflow (`mlflow.db` + `mlruns/`).
+- 2026-11-03, ampliación compatible: `configs/<run_id>.json` (hipótesis, cambio frente al baseline, presupuesto,
+  estado seleccionado/rechazado/referencia y decisión; también como etiquetas `diseno.*` y `presupuesto.*` de la run
+  de MLflow), `manifests/<run_id>.json` con el formato de la sección 11 de la guía (`python manifiestos.py`: commit
+  completo, SHA-256 del modelo, `model_uri`, suite, nivel) y suites de evaluación con nombre en `configs/suites/`
+  (`suite-v1`; la reservada no lleva semilla en el repo). Los manifests nuevos guardan el SHA completo del commit.
 - 2026-10-30, ampliación compatible: `sha256` en el manifest (huella de la configuración resuelta y de cada archivo
   de `archivos`), comprobable con `python cli.py verificar`. Las cuatro ejecuciones anteriores recibieron sus
   huellas ese día, con una nota que lo indica; sus copias en `mlruns/` conservan el manifest sin huellas.

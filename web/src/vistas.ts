@@ -2,13 +2,20 @@
 import * as api from './api'
 import type { Catalogo, Detalle, Resumen, ResultadoEvaluacion, Vuelo } from './api'
 import { Reproductor } from './escena'
-import { barraResultados, corto, entero, esc, ICONO_RESULTADO, lineaSvg, num, pct, pillEstado, tabla } from './ui'
+import { barraResultados, corto, entero, esc, ICONO_RESULTADO, lineaSvg, num, pct, pillDiseno, pillEstado, tabla } from './ui'
 
 const COLORES = ['var(--series-1)', 'var(--series-2)', 'var(--series-3)', 'var(--series-4)']
 /** Última evaluación ejecutada en vivo, para poder reproducir sus vuelos. */
 let ultimaEvaluacion: ResultadoEvaluacion | null = null
 let catalogoCache: Catalogo | null = null
 const nombre = (r: Resumen) => `${r.run_id} · ${r.agente.nombre ?? r.agente.clase}`
+const ETIQUETA_PRESUPUESTO: Record<string, (v: string | number) => string> = {
+  epocas: (v) => `${entero(+v)} épocas`, pasos_agente: (v) => `${entero(+v)} pasos del agente`, tiempo_s: (v) => `${num(+v / 60, 1)} min`, maquina: (v) => String(v),
+}
+function presupuesto(p: Record<string, string | number> | null | undefined) {
+  if (!p) return '—'
+  return esc(Object.entries(p).map(([k, v]) => (ETIQUETA_PRESUPUESTO[k] ?? ((x: string | number) => `${k}: ${x}`))(v)).join(' · '))
+}
 
 async function cargarCatalogo() {
   catalogoCache ??= await api.catalogo()
@@ -20,7 +27,7 @@ export async function vistaCatalogo(el: HTMLElement) {
   const c = await cargarCatalogo()
   const filas = c.ejecuciones.map((r) => [
     `<a href="#/ejecucion/${esc(r.run_id)}"><b>${esc(r.run_id)}</b></a><br><span class="muted">${esc(r.experimento ?? '—')}</span>`,
-    pillEstado(r.estado),
+    `${pillEstado(r.estado)}<br>${pillDiseno(r.diseno?.estado)}`,
     `${esc(r.nivel)}<br><span class="muted">${esc(r.ambiente)}</span>`,
     `${esc(r.agente.nombre ?? r.agente.clase)}<br><span class="muted">${esc(r.agente.accion ?? '')}</span>`,
     `<b>${pct(r.evaluacion.aterrizajes)}</b> ${barraResultados(r.evaluacion.resultados, c.outcomes)}<br><span class="muted">${num(r.evaluacion.velocidad_contacto, 2)} m/s · ${num(r.evaluacion.error_posicion)} m</span>`,
@@ -35,11 +42,20 @@ export async function vistaCatalogo(el: HTMLElement) {
       <div><div class="num">${rec ? pct(rec.evaluacion.aterrizajes) : '—'}</div><div class="muted">aterrizajes seguros del modelo recomendado</div></div>
       <div class="sub">
         <p><b>Recomendado:</b> ${rec ? `<a href="#/ejecucion/${esc(rec.run_id)}">${esc(nombre(rec))}</a>` : '—'} · <b>anterior (rollback):</b> ${esc(c.catalogo.anterior ?? '—')} · catálogo v${c.catalogo.version} (${esc(c.catalogo.actualizado ?? '—')}).</p>
-        <p class="muted">${c.ejecuciones.length} ejecuciones, incluidas las que no mejoraron. Evaluación: 200 épocas nuevas (suite v1, semillas desde 10 000 000) y la misma suite con viento lateral de 15 m/s.</p>
+        <p class="muted">${c.ejecuciones.length} ejecuciones, incluidas las que no mejoraron. Evaluación: 200 épocas nuevas (suite v1, semillas desde 10 000 000) y la misma suite con viento lateral de 15 m/s. Cada configuración documenta su hipótesis, el cambio frente al baseline, el presupuesto y la decisión.</p>
       </div>
     </section>
     <h2>Ejecuciones</h2>
-    ${tabla(['ejecución', 'estado', 'nivel · ambiente', 'agente', 'aterrizajes (suite v1)', 'con viento', 'épocas', 'commit · MLflow', ''], filas)}
+    ${tabla(['ejecución', 'catálogo · decisión', 'nivel · ambiente', 'agente', 'aterrizajes (suite v1)', 'con viento', 'épocas', 'commit · MLflow', ''], filas)}
+    <h2>Hipótesis y decisiones</h2>
+    <p class="muted">La cadena de experimentos del nivel 1: cada fila es una configuración, qué cambió frente a la anterior y por qué se seleccionó o se rechazó.</p>
+    ${tabla(['ejecución', 'hipótesis', 'cambio frente al baseline', 'presupuesto', 'decisión'], c.ejecuciones.filter((r) => r.diseno).map((r) => [
+      `<a href="#/ejecucion/${esc(r.run_id)}"><b>${esc(r.run_id)}</b></a><br>${pillDiseno(r.diseno!.estado)}`,
+      esc(r.diseno!.hipotesis ?? '—'),
+      `${esc(r.diseno!.cambio ?? '—')}${r.diseno!.baseline ? `<br><span class="muted">baseline: ${esc(r.diseno!.baseline)}</span>` : ''}`,
+      presupuesto(r.diseno!.presupuesto),
+      `${esc(r.diseno!.decision ?? '—')}<br><span class="muted">${esc(r.diseno!.fecha_decision ?? '')}</span>`,
+    ]))}
     <p><button id="btn-comparar" class="btn primario" disabled>Comparar seleccionadas</button> <span class="muted">marca 2 o más</span></p>
     <h2>Historial del catálogo</h2>
     ${tabla(['v', 'fecha', 'acción', 'ejecución', 'motivo', 'commit base'], c.catalogo.historial.slice().reverse().map((h) => [h.version, esc(h.fecha), esc(h.accion), esc(h.run_id), esc(h.motivo), `<code>${corto(h.commit_base)}</code>`]))}
@@ -60,13 +76,26 @@ export async function vistaEjecucion(el: HTMLElement, id: string) {
     <p><a href="#/">← catálogo</a></p>
     <h1>${esc(d.run_id)} ${pillEstado(d.estado)}</h1>
     <p class="muted">${esc(d.experimento ?? '')} · nivel ${esc(d.nivel)} · ${esc(d.ambiente)} · ${esc(d.agente.nombre ?? '')} · entrenada el ${esc(d.fecha)}</p>
+    <section class="card">
+      <h2>Hipótesis y decisión ${pillDiseno(d.diseno?.estado)}</h2>
+      ${d.diseno ? `
+        <div class="hipotesis">
+          <p><b>Hipótesis.</b> ${esc(d.diseno.hipotesis ?? '—')}</p>
+          <p><b>Cambio frente al baseline${d.diseno.baseline ? ` (<a href="#/ejecucion/${esc(d.diseno.baseline)}">${esc(d.diseno.baseline)}</a>)` : ''}.</b> ${esc(d.diseno.cambio ?? '—')}</p>
+          <p><b>Presupuesto.</b> ${presupuesto(d.diseno.presupuesto)} · suite ${esc(d.diseno.suite ?? '—')}</p>
+          <p><b>Decisión (${esc(d.diseno.fecha_decision ?? 'sin fecha')}).</b> ${esc(d.diseno.decision ?? '—')}</p>
+        </div>
+        <p class="muted">Fuente: <code>configs/${esc(d.run_id)}.json</code>; las mismas etiquetas están en la run de MLflow${d.mlflow_ui ? ` (<a href="${esc(d.mlflow_ui)}" target="_blank" rel="noopener">abrir MLflow</a>)` : ''}.${d.diseno.comparacion_principal ? ` Comparación principal: <a href="#/comparar/${esc(d.run_id)},${esc(d.diseno.comparacion_principal)}">${esc(d.run_id)} frente a ${esc(d.diseno.comparacion_principal)}</a>.` : ''}</p>`
+      : '<p class="muted">Esta ejecución no tiene configs/&lt;run_id&gt;.json: no se documentó hipótesis ni decisión.</p>'}
+    </section>
     <div class="dos">
       <section class="card">
         <h2>Identidad</h2>
         <dl class="kv">
           <dt>commit de git</dt><dd><code>${esc(d.git.commit ?? '—')}</code> (${esc(d.git.branch ?? '—')}${d.git.cambios_sin_commit ? ', con cambios sin commit' : ''})</dd>
           <dt>ambiente</dt><dd>${esc(d.ambiente)} ${d.ambiente_version === c.ejecuciones[0]?.ambiente_version ? '' : ''}</dd>
-          <dt>modelo en MLflow</dt><dd>${d.mlflow ? `${esc(d.mlflow.modelo)} versión ${d.mlflow.version}` : '—'}</dd>
+          <dt>modelo en MLflow</dt><dd>${d.mlflow ? `${esc(d.mlflow.modelo)} versión ${d.mlflow.version}` : '—'}${d.mlflow_ui ? ` · <a href="${esc(d.mlflow_ui)}" target="_blank" rel="noopener">MLflow</a>` : ''}</dd>
+          <dt>manifiesto (sección 11)</dt><dd>${d.manifiesto ? `<a href="${esc(api.urlManifiesto(d.run_id))}" target="_blank" rel="noopener">manifests/${esc(d.run_id)}.json</a> · commit completo, SHA-256 del modelo, suite y nivel` : '—'}</dd>
           <dt>acción</dt><dd>${esc(d.agente.accion ?? '—')}</dd>
           <dt>red</dt><dd>${esc(d.agente.red ?? '—')}</dd>
           <dt>checkpoint</dt><dd>${d.checkpoint ? 'disponible' : '<b>sin checkpoint disponible</b>'}</dd>
@@ -96,11 +125,13 @@ export async function vistaEjecucion(el: HTMLElement, id: string) {
       <h2>Evaluar ahora este modelo</h2>
       <p class="muted">La API carga el modelo congelado y lo ejecuta en el ambiente ${esc(d.ambiente)} con las semillas que indiques. Es determinista: las mismas semillas dan el mismo resultado.</p>
       <form id="form-eval" class="fila">
+        <label>suite <select id="ev-suite"><option value="">manual</option><option value="suite-v1|normal">suite-v1 · normal</option><option value="suite-v1|viento-15">suite-v1 · viento 15 m/s</option></select></label>
         <label>épocas <input type="number" id="ev-episodios" value="20" min="1" max="50"></label>
         <label>semilla inicial <input type="number" id="ev-semilla" value="10000000" min="0"></label>
         <label>viento fijo (m/s) <input type="number" id="ev-viento" placeholder="aleatorio 0–10" min="0" max="30" step="1"></label>
         <button type="submit" class="btn primario" id="ev-boton">Evaluar</button>
       </form>
+      <p class="muted">Con una suite, la semilla y el viento los fija la suite (configs/suites/suite-v1.json); la API acepta hasta 50 épocas por petición.</p>
       <div id="ev-resultado"></div>
     </section>
   `
@@ -109,12 +140,13 @@ export async function vistaEjecucion(el: HTMLElement, id: string) {
     ev.preventDefault()
     const episodios = +(el.querySelector<HTMLInputElement>('#ev-episodios')!.value), semilla = +(el.querySelector<HTMLInputElement>('#ev-semilla')!.value)
     const vientoTxt = el.querySelector<HTMLInputElement>('#ev-viento')!.value, viento = vientoTxt === '' ? null : +vientoTxt
+    const [suite, condicion] = el.querySelector<HTMLSelectElement>('#ev-suite')!.value.split('|')
     boton.disabled = true; salida.innerHTML = `<p class="estado">Evaluando ${episodios} épocas en la API…</p>`
     try {
-      const r = await api.evaluar({ run_id: d.run_id, episodios, semilla_base: semilla, viento, grabar: 3 })
+      const r = await api.evaluar(suite ? { run_id: d.run_id, episodios, grabar: 3, suite, condicion } : { run_id: d.run_id, episodios, semilla_base: semilla, viento, grabar: 3 })
       ultimaEvaluacion = r
       salida.innerHTML = `
-        <p class="modo modo-eval">Modo: evaluación en vivo · modelo ${esc(r.modelo.run_id)} (${r.modelo.mlflow ? esc(r.modelo.mlflow.modelo) + ' v' + r.modelo.mlflow.version : 'sin MLflow'}) · ambiente ${esc(r.ambiente.id)} v${esc(r.ambiente.version)}${r.ambiente.compatible ? '' : ' · <b>ambiente no compatible</b>'} · servido por commit <code>${corto(r.servido_por.commit)}</code> · ${r.latencia.total_ms} ms (${r.latencia.por_paso_ms} ms por paso)</p>
+        <p class="modo modo-eval">Modo: evaluación en vivo${r.suite.id ? ` · ${esc(r.suite.id)} / ${esc(r.suite.condicion ?? '')}` : ''} · modelo ${esc(r.modelo.run_id)} (${r.modelo.mlflow ? esc(r.modelo.mlflow.modelo) + ' v' + r.modelo.mlflow.version : 'sin MLflow'}) · ambiente ${esc(r.ambiente.id)} v${esc(r.ambiente.version)}${r.ambiente.compatible ? '' : ' · <b>ambiente no compatible</b>'} · servido por commit <code>${corto(r.servido_por.commit)}</code> · ${r.latencia.total_ms} ms (${r.latencia.por_paso_ms} ms por paso)</p>
         <p><b>${pct(r.resumen.aterrizajes)}</b> aterrizajes en ${r.resumen.episodios} épocas ${barraResultados(r.resumen.resultados, c.outcomes)} · contacto ${num(r.resumen.velocidad_contacto, 2)} m/s · error ${num(r.resumen.error_posicion)} m · ${num(r.resumen.combustible, 0)} kg</p>
         <p><a class="btn" href="#/replay/${esc(d.run_id)}/evaluacion">Ver en 3D las ${r.vuelos.length} primeras épocas</a></p>
         ${tabla(['época', 'semilla', 'resultado', 'recompensa', 'pasos', 'vz contacto', 'vh', 'distancia', 'inclinación', 'combustible', 'viento'],
@@ -137,6 +169,9 @@ export async function vistaComparar(el: HTMLElement, ids: string[]) {
       ['agente', ...col((r) => esc(r.agente.nombre ?? r.agente.clase))],
       ['acción', ...col((r) => esc(r.agente.accion ?? '—'))],
       ['ambiente', ...col((r) => esc(r.ambiente))],
+      ['hipótesis', ...col((r) => esc(r.diseno?.hipotesis ?? '—'))],
+      ['cambio frente al baseline', ...col((r) => `${esc(r.diseno?.cambio ?? '—')}${r.diseno?.baseline ? `<br><span class="muted">baseline: ${esc(r.diseno.baseline)}</span>` : ''}`)],
+      ['presupuesto', ...col((r) => presupuesto(r.diseno?.presupuesto))],
       ['aterrizajes seguros', ...col((r) => `<b>${pct(r.evaluacion.aterrizajes)}</b>`)],
       ['cómo terminan', ...col((r) => barraResultados(r.evaluacion.resultados, c.outcomes))],
       ['velocidad de contacto', ...col((r) => `${num(r.evaluacion.velocidad_contacto, 2)} m/s`)],
@@ -147,6 +182,7 @@ export async function vistaComparar(el: HTMLElement, ids: string[]) {
       ['primer aterrizaje', ...col((r) => (r.primer_aterrizaje ? 'época ' + entero(r.primer_aterrizaje) : 'nunca'))],
       ['commit', ...col((r) => `<code>${corto(r.git.commit)}</code>`)],
       ['MLflow', ...col((r) => (r.mlflow ? `${esc(r.mlflow.modelo)} v${r.mlflow.version}` : '—'))],
+      ['decisión', ...col((r) => `${pillDiseno(r.diseno?.estado)}<br>${esc(r.diseno?.decision ?? '—')}`)],
     ])}`
 }
 

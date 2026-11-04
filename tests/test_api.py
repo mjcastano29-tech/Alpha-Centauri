@@ -52,3 +52,21 @@ def test_evaluar_reproduce_la_evaluacion_guardada():
 
 def test_evaluar_rechaza_mas_episodios_de_la_cuenta():
     assert cliente.post("/evaluar", json={"run_id": EJECUCIONES[0], "episodios": 10_000}).status_code == 422
+
+
+def test_suites_y_manifiestos_de_la_seccion_11():
+    s = cliente.get("/suites").json()["suites"]
+    assert s["suite-v1"]["semilla_base"] == 10_000_000 and {c["id"] for c in s["suite-v1"]["condiciones"]} == {"normal", "viento-15"}
+    for run_id in EJECUCIONES:
+        resumen = next(e for e in cliente.get("/catalogo").json()["ejecuciones"] if e["run_id"] == run_id)
+        assert resumen["diseno"]["estado"] in ("seleccionado", "rechazado", "referencia") and resumen["diseno"]["hipotesis"]
+        m = cliente.get(f"/ejecuciones/{run_id}/manifiesto").json()
+        assert m["run_id"] == run_id and len(m["git_commit"]) == 40 and len(m["model_sha256"]) == 64
+        assert m["evaluation_suite_id"] == "suite-v1" and m["level_id"] == "N1" and m["status"] == resumen["diseno"]["estado"]
+
+
+def test_evaluar_con_suite_fija_semilla_y_viento():
+    e = cliente.post("/evaluar", json={"run_id": EJECUCIONES[0], "suite": "suite-v1", "condicion": "viento-15", "episodios": 2}).json()
+    assert e["suite"]["semilla_base"] == 10_000_000 and e["suite"]["viento"] == 15.0 and e["resumen"]["episodios"] == 2
+    assert cliente.post("/evaluar", json={"run_id": EJECUCIONES[0], "suite": "no-existe"}).status_code == 404
+    assert cliente.post("/evaluar", json={"run_id": EJECUCIONES[0], "suite": "suite-v1", "condicion": "huracan"}).status_code == 422

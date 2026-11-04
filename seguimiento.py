@@ -52,6 +52,30 @@ def _aplanar(d, prefijo=""):
     return out
 
 
+def etiquetas_diseno(run_id):
+    """Hipótesis, cambio, presupuesto y estado de configs/<run_id>.json como etiquetas de MLflow."""
+    path = ROOT / "configs" / f"{run_id}.json"
+    if not path.exists():
+        return {}
+    cfg = json.loads(path.read_text(encoding="utf-8"))
+    tags = {f"diseno.{k}": str(cfg[k]) for k in ("hipotesis", "cambio", "baseline", "estado", "decision", "fecha_decision", "nivel", "suite") if cfg.get(k) is not None}
+    for k, v in cfg.get("presupuesto", {}).items():
+        tags[f"presupuesto.{k}"] = str(v)
+    return tags
+
+
+def etiquetar(run_id=None):
+    """Aplica las etiquetas de configs/ a las runs de MLflow ya registradas (por su etiqueta `ejecucion`)."""
+    ids = [run_id] if run_id else sorted(p.stem for p in (ROOT / "configs").glob("*.json"))
+    for rid in ids:
+        tags = etiquetas_diseno(rid)
+        runs = mlflow.search_runs(search_all_experiments=True, filter_string=f"tags.ejecucion = '{rid}'", output_format="list")
+        for run in runs:
+            with mlflow.start_run(run_id=run.info.run_id):
+                mlflow.set_tags(tags)
+        print(f"{rid}: {len(tags)} etiquetas en {len(runs)} run(s) de MLflow · estado {tags.get('diseno.estado', '—')}")
+
+
 def registrar_ejecucion(run_dir, experimento=None):
     """Registra una ejecución guardada. Si hay una run de MLflow activa, añade todo a ella."""
     run_dir = Path(run_dir).resolve()
@@ -65,6 +89,7 @@ def registrar_ejecucion(run_dir, experimento=None):
     contexto = nullcontext(activa) if activa else mlflow.start_run(run_name=manifest["run_id"])
     with contexto as run:
         git = manifest["git"]
+        mlflow.set_tags(etiquetas_diseno(manifest["run_id"]))
         mlflow.set_tags({
             "ejecucion": manifest["run_id"],
             "mlflow.source.git.commit": git["commit"] or "",
@@ -136,3 +161,11 @@ def registrar_ejecucion(run_dir, experimento=None):
             except Exception as e:  # el registro es un extra: no debe tumbar el entrenamiento
                 print(f"Aviso: no se pudo registrar el modelo en MLflow ({e})")
         return run.info.run_id
+
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) >= 2 and sys.argv[1] == "etiquetar":
+        etiquetar(sys.argv[2] if len(sys.argv) > 2 else None)
+    else:
+        print("uso: python seguimiento.py etiquetar [run_id]   # aplica configs/<run_id>.json como etiquetas de MLflow")

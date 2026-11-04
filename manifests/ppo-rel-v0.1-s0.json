@@ -1,0 +1,62 @@
+{
+  "run_id": "ppo-rel-v0.1-s0",
+  "level_id": "N1",
+  "environment_version": "RocketLanding3D-v0@0.1",
+  "git_commit": "5b55ff723ef5c0334ac5fa8a2e813d1e9cb3e76d",
+  "git_branch": "fase-3d",
+  "config_sha256": "caab5d4ed69375d850865f68ea8674ba7a8fcb0febfc8ceb6368b772c38011ec",
+  "model_uri": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/5b55ff723ef5c0334ac5fa8a2e813d1e9cb3e76d/resultados/runs/ppo-rel-v0.1-s0/modelo.zip",
+  "model_sha256": "d8a53b9d266cfcc6b7e9291dc749a180a7c036bf5af7b8f89f296c3886324903",
+  "normalization_uri": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/5b55ff723ef5c0334ac5fa8a2e813d1e9cb3e76d/resultados/runs/ppo-rel-v0.1-s0/modelo_normalizador.pkl",
+  "normalization_sha256": "d50264ebbd8b3aa59c2a71ca2d947f93f3e262dd02b59e1e5903cafe5ecedb2c",
+  "model_registry": null,
+  "runtime_ref": {
+    "python": "3.10.12",
+    "requirements": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/5b55ff723ef5c0334ac5fa8a2e813d1e9cb3e76d/requirements.txt",
+    "docker": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/5b55ff723ef5c0334ac5fa8a2e813d1e9cb3e76d/Dockerfile",
+    "paquetes": {
+      "gymnasium": "1.4.0",
+      "numpy": "2.2.6",
+      "torch": "2.14.1+cpu",
+      "stable_baselines3": "2.9.2"
+    }
+  },
+  "evaluation_suite_id": "suite-v1",
+  "seed": 0,
+  "parent_run_id": null,
+  "experiment_id": "experimento-2-ppo",
+  "agent": {
+    "class": "ppo",
+    "name": "PPO (red neuronal)",
+    "action": "relativa v1: empuje/peso en [0, 1.6] e inclinación ±0.3"
+  },
+  "hypothesis": "El fallo de ppo-v0.1-s0 es la parametrización de la acción: si la red decide el empuje respecto al peso (×1,0 = flotar), como hacía el Q-learning, PPO aprende a aterrizar.",
+  "change": "Acción relativa v1: empuje/peso en [0, 1,6] e inclinación de hasta ±0,3 por eje (23°). Presupuesto ampliado a 600 000 pasos; coeficiente de entropía 0,005.",
+  "baseline_run_id": "ppo-v0.1-s0",
+  "budget": {
+    "pasos_agente": 600000,
+    "epocas": 19831,
+    "tiempo_s": 546,
+    "maquina": "CPU de portátil (WSL2), 8 entornos en paralelo"
+  },
+  "status": "rechazado",
+  "decision": "Rechazado: 0/200. Frena bien (0,3 m/s al contacto) pero llega inclinado 17°, por encima del límite de 10°: el rango de la acción permitía violar la regla y la única señal correctora era el −100 final. La hipótesis se confirma a medias (el empuje relativo hace que frene) y da la siguiente.",
+  "evaluation": {
+    "suite": "suite-v1",
+    "episodes": 200,
+    "landing_rate": 0.0,
+    "contact_speed": 2.573809737447291,
+    "position_error": 5.931124915602038,
+    "fuel_used": 167.38545964405412,
+    "outcomes": {
+      "aterrizaje": 0,
+      "fuera de plataforma": 0,
+      "choque": 199,
+      "sin pasos": 1,
+      "fuera de zona": 0
+    },
+    "per_case": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/5b55ff723ef5c0334ac5fa8a2e813d1e9cb3e76d/resultados/runs/ppo-rel-v0.1-s0/evaluacion.json"
+  },
+  "trained_at": "2026-10-28T18:04:23",
+  "generated_at": "2026-11-03T20:54:08"
+}

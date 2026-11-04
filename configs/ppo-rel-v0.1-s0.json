@@ -1,0 +1,14 @@
+{
+  "run_id": "ppo-rel-v0.1-s0",
+  "experimento": "experimento-2-ppo",
+  "nivel": "N1",
+  "ambiente": "RocketLanding3D-v0@0.1",
+  "hipotesis": "El fallo de ppo-v0.1-s0 es la parametrización de la acción: si la red decide el empuje respecto al peso (×1,0 = flotar), como hacía el Q-learning, PPO aprende a aterrizar.",
+  "cambio": "Acción relativa v1: empuje/peso en [0, 1,6] e inclinación de hasta ±0,3 por eje (23°). Presupuesto ampliado a 600 000 pasos; coeficiente de entropía 0,005.",
+  "baseline": "ppo-v0.1-s0",
+  "presupuesto": {"pasos_agente": 600000, "epocas": 19831, "tiempo_s": 546, "maquina": "CPU de portátil (WSL2), 8 entornos en paralelo"},
+  "suite": "suite-v1",
+  "estado": "rechazado",
+  "decision": "Rechazado: 0/200. Frena bien (0,3 m/s al contacto) pero llega inclinado 17°, por encima del límite de 10°: el rango de la acción permitía violar la regla y la única señal correctora era el −100 final. La hipótesis se confirma a medias (el empuje relativo hace que frene) y da la siguiente.",
+  "fecha_decision": "2026-10-28"
+}

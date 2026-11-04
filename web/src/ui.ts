@@ -17,6 +17,12 @@ export function pillEstado(estado: string) {
   return `<span class="pill pill-${esc(estado)}">${esc(texto)}</span>`
 }
 
+/** Estado del diseño experimental: seleccionado / rechazado / referencia (configs/<run_id>.json). */
+export function pillDiseno(estado: string | null | undefined) {
+  if (!estado) return '<span class="pill pill-sin">sin hipótesis</span>'
+  return `<span class="pill pill-${esc(estado)}">${esc(estado)}</span>`
+}
+
 export function barraResultados(resultados: Record<string, number>, outcomes: string[]) {
   const total = Object.values(resultados).reduce((a, b) => a + b, 0) || 1
   const partes = outcomes

@@ -1,0 +1,60 @@
+{
+  "run_id": "base-v0.1-s0",
+  "level_id": "N1",
+  "environment_version": "RocketLanding3D-v0@0.1",
+  "git_commit": "f8f749a4e7cc8959dce7d5bed071019456bce9c4",
+  "git_branch": "fase-3d",
+  "config_sha256": "3376ea25366a2e76d46153f904c8a827b40051e963336686ec867aed4622a346",
+  "model_uri": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/f8f749a4e7cc8959dce7d5bed071019456bce9c4/resultados/runs/base-v0.1-s0/modelo.npz",
+  "model_sha256": "e1498f54808d1f0d1e44e37e46fc3319ab760887c1e7f05f5340468b5d337644",
+  "normalization_uri": null,
+  "normalization_sha256": null,
+  "model_registry": null,
+  "runtime_ref": {
+    "python": "3.10.12",
+    "requirements": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/f8f749a4e7cc8959dce7d5bed071019456bce9c4/requirements.txt",
+    "docker": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/f8f749a4e7cc8959dce7d5bed071019456bce9c4/Dockerfile",
+    "paquetes": {
+      "gymnasium": "1.4.0",
+      "numpy": "2.2.6"
+    }
+  },
+  "evaluation_suite_id": "suite-v1",
+  "seed": 0,
+  "parent_run_id": null,
+  "experiment_id": "experimento-1-qlearning",
+  "agent": {
+    "class": "qlearning",
+    "name": "Q-learning",
+    "action": null
+  },
+  "hypothesis": "Con el empuje expresado respecto al peso y un estado discreto pequeño (altitud, velocidad vertical y deriva prevista en cada eje), un Q-learning tabular aprende a aterrizar en menos de 5000 épocas.",
+  "change": "Primer modelo aprendido. Referencias no aprendidas: agente aleatorio (0/20) y controlador heurístico hecho a mano (20/20, experimento1.py).",
+  "baseline_run_id": null,
+  "budget": {
+    "epocas": 5000,
+    "tiempo_s": 116,
+    "maquina": "CPU de portátil (WSL2)",
+    "pasos_agente": 172280
+  },
+  "status": "referencia",
+  "decision": "Aceptado como baseline aprendido del nivel 1: 157/200 aterrizajes (78 %), 38 % con viento de 15 m/s, primer aterrizaje en la época 1785. Es el modelo 'anterior' del catálogo, al que se vuelve en un rollback.",
+  "evaluation": {
+    "suite": "suite-v1",
+    "episodes": 200,
+    "landing_rate": 0.785,
+    "contact_speed": 1.9505930632744906,
+    "position_error": 5.517376205096453,
+    "fuel_used": 272.2709643287528,
+    "outcomes": {
+      "aterrizaje": 157,
+      "fuera de plataforma": 10,
+      "choque": 33,
+      "sin pasos": 0,
+      "fuera de zona": 0
+    },
+    "per_case": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/f8f749a4e7cc8959dce7d5bed071019456bce9c4/resultados/runs/base-v0.1-s0/evaluacion.json"
+  },
+  "trained_at": "2026-10-28T15:35:57",
+  "generated_at": "2026-11-03T20:54:08"
+}

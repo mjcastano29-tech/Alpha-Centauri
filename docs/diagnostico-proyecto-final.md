@@ -4,6 +4,16 @@
 
 Contraste entre lo que pide el enunciado del proyecto final de MLOps (30 de octubre de 2026) y lo que hay en el repositorio hoy. Cada afirmación remite a un archivo o a un comando; lo que no se ha podido comprobar se dice.
 
+## Actualización · 3 de noviembre de 2026: hito 2, primera entrega
+
+- **Hipótesis y estado por configuración**: `configs/<run_id>.json` para las cuatro configuraciones del nivel 1 (hipótesis, cambio frente al baseline, presupuesto en épocas/pasos/tiempo/máquina, suite, estado `seleccionado`/`rechazado`/`referencia`, decisión y fecha). Las mismas etiquetas (`diseno.*`, `presupuesto.*`) están en las runs de MLflow (`python seguimiento.py etiquetar`). La API las expone como `diseno` en `/catalogo` y la web las muestra en el catálogo (tabla "Hipótesis y decisiones"), en la ficha de cada ejecución y en la comparación.
+- **Manifiestos con el formato de la sección 11**: `python manifiestos.py` genera `manifests/<run_id>.json` con `run_id`, `level_id`, `environment_version`, `git_commit` completo (40 caracteres), `config_sha256`, `model_uri` (URL al archivo en el commit exacto) y `model_sha256`, `normalization_uri`, `runtime_ref`, `evaluation_suite_id`, `seed`, `parent_run_id`, más hipótesis, presupuesto, estado y métricas. Servidos en `GET /ejecuciones/<id>/manifiesto` y enlazados desde la web. Los manifests de las ejecuciones nuevas guardan el SHA completo.
+- **Suite de evaluación con nombre**: `configs/suites/suite-v1.json` (200 épocas, semillas desde 10 000 000, condiciones `normal` y `viento-15`) y `suite-reservada` (misma estructura, semilla fuera del repo para el test final de los finalistas). `POST /evaluar` acepta `suite` y `condicion`; `GET /suites` las lista.
+- **`truncated`**: ambiente 0.1.1: agotar los pasos se informa como `truncated=True`; las reglas y la recompensa no cambian, `RocketLanding3DEnv.compatible()` compara mayor.menor y los modelos de 0.1 siguen siendo válidos (la API lo muestra como `entrenado_con` y `compatible`). La prueba que estaba marcada como fallo esperado pasa; 31 pruebas en total.
+- **Nivel 2**: propuesta en `docs/nivel-2-propuesta.md` con tres candidatos (A: rotación con torque, recomendado y alineado con la ficha del profesor; B: plataforma desplazada y combustible justo; C: obstáculos) y N3 = viento fuerte. Falta la decisión del equipo antes de entrenar.
+- **MLflow visible**: `render.yaml` declara un segundo servicio `alpha-centauri-mlflow` (interfaz de MLflow de solo lectura sobre el `mlflow.db` del repo) y la API publica su URL en `mlflow_ui`; la web enlaza a él desde cada ejecución. Queda pendiente comprobar que Render lo cree al sincronizar el blueprint.
+- Pendiente del hito 2 y siguientes: entrenar la familia N2 (tres semillas para los finalistas), pipeline con etapas (Prefect), incidente controlado e intervención, rollback desde la web, vista de monitoreo, release e informe.
+
 ## Actualización · 3 de noviembre de 2026: hito 1 cerrado
 
 - **Web**: https://alpha-centauri-five.vercel.app (Vercel, rama `main`, Root Directory `web`, variable pública `VITE_API_BASE_URL`).

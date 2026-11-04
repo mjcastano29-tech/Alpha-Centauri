@@ -1,0 +1,62 @@
+{
+  "run_id": "ppo-v2-v0.1-s0",
+  "level_id": "N1",
+  "environment_version": "RocketLanding3D-v0@0.1",
+  "git_commit": "6458e2b0fbb022ac625a7bdb45f85cb1da7294a5",
+  "git_branch": "fase-3d",
+  "config_sha256": "f425af3c50e93fadbe1830ba429a4a6873ca682c9633f419fe1800b0833d385a",
+  "model_uri": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/6458e2b0fbb022ac625a7bdb45f85cb1da7294a5/resultados/runs/ppo-v2-v0.1-s0/modelo.zip",
+  "model_sha256": "6f190ae32d2886b7755fb9911a282235dff7856984872242cf1afc5a064da496",
+  "normalization_uri": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/6458e2b0fbb022ac625a7bdb45f85cb1da7294a5/resultados/runs/ppo-v2-v0.1-s0/modelo_normalizador.pkl",
+  "normalization_sha256": "a5534a6f5af58e2ed478417323afa9178e39155ca0b326649ee6ef2415561675",
+  "model_registry": null,
+  "runtime_ref": {
+    "python": "3.10.12",
+    "requirements": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/6458e2b0fbb022ac625a7bdb45f85cb1da7294a5/requirements.txt",
+    "docker": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/6458e2b0fbb022ac625a7bdb45f85cb1da7294a5/Dockerfile",
+    "paquetes": {
+      "gymnasium": "1.4.0",
+      "numpy": "2.2.6",
+      "torch": "2.14.1+cpu",
+      "stable_baselines3": "2.9.2"
+    }
+  },
+  "evaluation_suite_id": "suite-v1",
+  "seed": 0,
+  "parent_run_id": null,
+  "experiment_id": "experimento-2-ppo",
+  "agent": {
+    "class": "ppo",
+    "name": "PPO (red neuronal)",
+    "action": "relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12"
+  },
+  "hypothesis": "Acotar la inclinación de la acción al límite del aterrizaje (≤ 9,6° combinados) y centrar el empuje en flotar (acción 0 = ×1,0 el peso) hace aprendible el problema con el mismo presupuesto que ppo-rel-v0.1-s0.",
+  "change": "Acción relativa v2: 3 valores en [−1, 1]; empuje = 1 + a₀ (máximo ×1,6), inclinación = a₁, a₂ × 0,12; desviación inicial de la política 0,6 (log_std_init −0,5). Todo lo demás igual que ppo-rel-v0.1-s0.",
+  "baseline_run_id": "ppo-rel-v0.1-s0",
+  "budget": {
+    "pasos_agente": 600000,
+    "epocas": 15942,
+    "tiempo_s": 683,
+    "maquina": "CPU de portátil (WSL2), 8 entornos en paralelo"
+  },
+  "status": "seleccionado",
+  "decision": "Seleccionado y promovido a modelo recomendado (catálogo v2): 194/200 aterrizajes (97 %) frente a 78 % del baseline; 63 % frente a 38 % con viento de 15 m/s; contacto a 1,20 m/s y 4,9 m del centro; primer aterrizaje en la época 1970.",
+  "evaluation": {
+    "suite": "suite-v1",
+    "episodes": 200,
+    "landing_rate": 0.97,
+    "contact_speed": 1.1975763256094811,
+    "position_error": 4.943637642366295,
+    "fuel_used": 229.92211867509542,
+    "outcomes": {
+      "aterrizaje": 194,
+      "fuera de plataforma": 2,
+      "choque": 3,
+      "sin pasos": 1,
+      "fuera de zona": 0
+    },
+    "per_case": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/6458e2b0fbb022ac625a7bdb45f85cb1da7294a5/resultados/runs/ppo-v2-v0.1-s0/evaluacion.json"
+  },
+  "trained_at": "2026-10-28T18:18:05",
+  "generated_at": "2026-11-03T20:54:08"
+}

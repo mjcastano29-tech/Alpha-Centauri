@@ -84,9 +84,29 @@ python visualizar_experimento1.py    # genera experimento1.html con esas épocas
 
 El ambiente es el mismo (versión 0.1) en los dos, para que los resultados sean comparables.
 
+### Diseño experimental: hipótesis, presupuesto y decisión
+
+Cada configuración entrenada tiene su `configs/<run_id>.json` con la **hipótesis**, el **cambio** frente al baseline,
+el **presupuesto** (épocas, pasos del agente, tiempo, máquina), la **suite** con la que se evaluó y el **estado**
+(`seleccionado`, `rechazado` o `referencia`) con la decisión y su fecha. Lo mismo va como etiquetas de la run de MLflow
+(`python seguimiento.py etiquetar`) y lo muestran la API (`diseno` en `/catalogo`) y la web.
+
+| Configuración | Hipótesis (resumen) | Cambio | Estado |
+|---|---|---|---|
+| `base-v0.1-s0` | Q-learning tabular aterriza en < 5000 épocas | primer modelo aprendido | referencia (78 %) |
+| `ppo-v0.1-s0` | PPO sobre la acción cruda supera al Q-learning | tabla → red MLP | rechazado (0 %) |
+| `ppo-rel-v0.1-s0` | el fallo era la acción: empuje relativo al peso | acción relativa v1 (±23°) | rechazado (0 %, llega inclinado) |
+| `ppo-v2-v0.1-s0` | acotar la inclinación al límite de aterrizaje lo hace aprendible | acción relativa v2 (±9,6°) | seleccionado (97 %) |
+
+Suites: [configs/suites/suite-v1.json](configs/suites/suite-v1.json) (200 épocas, semillas desde 10 000 000, condiciones
+`normal` y `viento-15`) y `suite-reservada` (misma estructura, semilla fuera del repo, solo para los finalistas).
+`POST /evaluar` acepta `suite` y `condicion`. Propuesta del nivel 2: [docs/nivel-2-propuesta.md](docs/nivel-2-propuesta.md).
+
 ## CLI y páginas
 
 ```bash
+python manifiestos.py                             # manifests/<id>.json (sección 11) para todas las ejecuciones
+python seguimiento.py etiquetar                   # aplica configs/<id>.json como etiquetas de las runs de MLflow
 python cli.py entrenar                            # exp. 1: Q-learning; dice cuántas épocas tarda en aterrizar
 python cli.py entrenar-ppo --run-id mi-ppo        # exp. 2: PPO; acepta las opciones de entrenar_ppo.py
 python cli.py runs                                # ejecuciones guardadas: experimento, commit y métricas
@@ -142,10 +162,11 @@ choque y los sonidos son solo visuales.
 
 Todo se versiona en git: código, fichas, modelos, datos de entrenamiento y el registro de MLflow.
 
-- **Ambiente**: `RocketLanding3DEnv.VERSION` (hoy `0.1`). Cualquier cambio de reglas o constantes sube la versión y se anota en [docs/CHANGELOG.md](docs/CHANGELOG.md).
+- **Ambiente**: `RocketLanding3DEnv.VERSION` (hoy `0.1.1`). Cualquier cambio de reglas o constantes sube mayor.menor y se anota en [docs/CHANGELOG.md](docs/CHANGELOG.md); el tercer número es para señales que no cambian las reglas y `compatible()` lo ignora.
+- **Manifiestos (sección 11 de la guía)**: `python manifiestos.py` genera `manifests/<run_id>.json` a partir de la ejecución y de `configs/<run_id>.json`: `run_id`, `level_id`, `environment_version`, `git_commit` completo, `config_sha256`, `model_uri` (URL al archivo en el commit exacto) y `model_sha256`, `normalization_uri`, `runtime_ref`, `evaluation_suite_id`, `seed`, hipótesis, presupuesto y estado. La API los sirve en `/ejecuciones/<id>/manifiesto`.
 - **Ejecuciones**: cada entrenamiento crea `resultados/runs/<id>/` con `manifest.json` (commit de git, versión del ambiente, configuración, software y métricas), el modelo, `entrenamiento.json` (todas las épocas), `episodios.csv` (dataset: una fila por época), `vuelos.json.gz` (épocas grabadas) y `evaluacion.json` (200 épocas normales + 200 con viento). `resultados/registro.json` es el índice.
 - **Huellas**: el manifest guarda en `sha256` la huella de la configuración resuelta y de cada archivo de la ejecución (modelo, normalizador, datos). `python cli.py verificar` las recalcula y avisa si algún artefacto cambió.
-- **MLflow** ([seguimiento.py](seguimiento.py)): `mlflow.db` (SQLite) y `mlruns/` dentro del repo. Cada ejecución es una *run* del experimento correspondiente con parámetros, métricas, el dataset `episodios.csv` como entrada y el modelo registrado (`rocket-landing-qlearning`, `rocket-landing-ppo`) como modelo *pyfunc* cargable con `mlflow.pyfunc.load_model("models:/rocket-landing-ppo/3")`. Interfaz: `mlflow ui --backend-store-uri sqlite:///mlflow.db`. Con `MLFLOW_TRACKING_URI` se apunta a un servidor compartido (DagsHub) sin tocar código.
+- **MLflow** ([seguimiento.py](seguimiento.py)): `mlflow.db` (SQLite) y `mlruns/` dentro del repo. Cada ejecución es una *run* del experimento correspondiente con parámetros, métricas, etiquetas `diseno.*` (hipótesis, estado, decisión) y `presupuesto.*`, el dataset `episodios.csv` como entrada y el modelo registrado (`rocket-landing-qlearning`, `rocket-landing-ppo`) como modelo *pyfunc* cargable con `mlflow.pyfunc.load_model("models:/rocket-landing-ppo/3")`. Interfaz: `mlflow ui --backend-store-uri sqlite:///mlflow.db`. Con `MLFLOW_TRACKING_URI` se apunta a un servidor compartido (DagsHub) sin tocar código.
 - **Hugging Face Hub** ([publicar_hf.py](publicar_hf.py)): `huggingface-cli login` y `python publicar_hf.py --repo usuario/alpha-centauri-rocket-landing --run ppo-v2-v0.1-s0` sube la ejecución con su tarjeta de modelo.
 - **Reproducibilidad**: los entrenamientos son deterministas. Con el mismo commit, la misma versión del ambiente, la misma configuración y las versiones de `requirements.txt` sale exactamente la misma ejecución.
 - **Páginas HTML**: se generan a partir de las ejecuciones y no se versionan.

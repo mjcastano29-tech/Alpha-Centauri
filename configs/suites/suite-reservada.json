@@ -1,0 +1,13 @@
+{
+  "id": "suite-reservada",
+  "version": 1,
+  "descripcion": "Test final reservado: misma estructura que suite-v1 (200 épocas, dos condiciones) pero con una base de semillas que no está en el repositorio ni se usa para ajustar nada. La guarda el equipo y se aplica solo a los finalistas antes de la sustentación.",
+  "ambiente": "RocketLanding3D-v0@0.1",
+  "episodios": 200,
+  "semilla_base": "${SUITE_RESERVADA_SEMILLA}",
+  "condiciones": [
+    {"id": "normal", "viento": null},
+    {"id": "viento-15", "viento": 15.0}
+  ],
+  "como_usarla": "SUITE_RESERVADA_SEMILLA=<secreto> python cli.py evaluar --run <id>  (o POST /evaluar con semilla_base). El resultado se guarda aparte y se publica solo en el informe final."
+}

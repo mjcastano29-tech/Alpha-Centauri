@@ -135,6 +135,9 @@ donde d_h = √(x² + y²) es la distancia horizontal a la plataforma y v_h = �
 | sin pasos | agota los 50 pasos sin tocar el suelo | **−100** |
 | fuera de zona | d_h > 300 m o z > 1200 m | **−100** |
 
+Desde 0.1.1, "sin pasos" se informa con `truncated=True` (límite externo de la época) y los otros cuatro con
+`terminated=True` (estado final del cohete). La recompensa es la misma; ver el CHANGELOG.
+
 Por qué estos valores: aterrizar y chocar son simétricos (±100) y dominan sobre la aproximación (+80) y el combustible (−50), así que la única forma de terminar con una recompensa alta es aterrizar. "Fuera de plataforma" vale la mitad del choque porque la parte difícil (posarse suave) está hecha, pero la misión no.
 
 Recompensa total típica por resultado, en las 5000 épocas de entrenamiento del agente de referencia:

@@ -1,0 +1,14 @@
+{
+  "run_id": "base-v0.1-s0",
+  "experimento": "experimento-1-qlearning",
+  "nivel": "N1",
+  "ambiente": "RocketLanding3D-v0@0.1",
+  "hipotesis": "Con el empuje expresado respecto al peso y un estado discreto pequeño (altitud, velocidad vertical y deriva prevista en cada eje), un Q-learning tabular aprende a aterrizar en menos de 5000 épocas.",
+  "cambio": "Primer modelo aprendido. Referencias no aprendidas: agente aleatorio (0/20) y controlador heurístico hecho a mano (20/20, experimento1.py).",
+  "baseline": null,
+  "presupuesto": {"epocas": 5000, "tiempo_s": 116, "maquina": "CPU de portátil (WSL2)"},
+  "suite": "suite-v1",
+  "estado": "referencia",
+  "decision": "Aceptado como baseline aprendido del nivel 1: 157/200 aterrizajes (78 %), 38 % con viento de 15 m/s, primer aterrizaje en la época 1785. Es el modelo 'anterior' del catálogo, al que se vuelve en un rollback.",
+  "fecha_decision": "2026-10-28"
+}

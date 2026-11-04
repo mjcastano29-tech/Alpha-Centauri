@@ -15,3 +15,17 @@ services:
         value: https://alpha-centauri-five.vercel.app,http://localhost:5173,http://localhost:4173
       - key: MAX_EPISODIOS
         value: "50"
+      - key: MLFLOW_UI_URL
+        value: https://alpha-centauri-mlflow.onrender.com
+  # Interfaz de MLflow de solo lectura sobre el mlflow.db versionado en el repo (experimentos, runs, etiquetas,
+  # métricas y registro de modelos). Los artefactos grandes viven en mlruns/ con rutas locales: se consultan en el repo.
+  - type: web
+    name: alpha-centauri-mlflow
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements-mlflow.txt
+    startCommand: mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --host 0.0.0.0 --port $PORT --workers 1
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.12

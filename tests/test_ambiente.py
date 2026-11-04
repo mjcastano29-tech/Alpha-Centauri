@@ -107,15 +107,15 @@ def agotar_pasos(env):
 def test_agotar_los_pasos_termina_la_epoca(env):
     _, reward, terminated, truncated, info = agotar_pasos(env)
     assert info["outcome"] == "sin pasos"
-    assert terminated or truncated
+    assert truncated and not terminated
     assert reward < Rocket.REWARDS["sin pasos"] / 2
 
 
-@pytest.mark.xfail(strict=True, reason="v0.1 marca 'sin pasos' como terminated; la guía pide truncated para el límite "
-                                       "externo del episodio. Cambiarlo es una versión nueva del ambiente (0.2).")
-def test_agotar_los_pasos_deberia_ser_truncated(env):
-    _, _, terminated, truncated, _ = agotar_pasos(env)
-    assert truncated and not terminated
+def test_version_del_ambiente_y_compatibilidad():
+    """0.1.1 solo cambia la señal truncated: los modelos de 0.1 siguen jugando con las mismas reglas."""
+    assert Rocket.VERSION == "0.1.1"
+    assert Rocket.compatible("0.1") and Rocket.compatible("0.1.1")
+    assert not Rocket.compatible("0.2") and not Rocket.compatible("1.0")
 
 
 def test_la_perturbacion_de_viento_fija_su_velocidad(env):

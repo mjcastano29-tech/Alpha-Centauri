@@ -1,0 +1,2 @@
+# Solo para el servicio alpha-centauri-mlflow de render.yaml (interfaz de MLflow sobre mlflow.db)
+mlflow==3.17.2

@@ -54,7 +54,14 @@ class RocketLanding3DEnv(gym.Env):
     """
 
     metadata = {"render_modes": ["ansi"], "render_fps": 10}
-    VERSION = "0.1"  # versión de las reglas; súbela si cambias constantes o reglas (ver docs/CHANGELOG.md)
+    VERSION = "0.1.1"  # versión de las reglas; súbela si cambias constantes o reglas (ver docs/CHANGELOG.md)
+    # mayor.menor = reglas (física, recompensas, observación, acción); el tercer número = señales que no cambian
+    # las reglas (0.1.1: "sin pasos" se informa como truncated). Los modelos de 0.1 siguen siendo válidos en 0.1.x.
+
+    @classmethod
+    def compatible(cls, version):
+        """¿Un modelo entrenado con `version` del ambiente juega con las mismas reglas que esta clase?"""
+        return str(version).split(".")[:2] == cls.VERSION.split(".")[:2]
 
     DT = 0.1  # paso de la simulación física (s)
     STEP_ALTITUDE = 20.0  # m de desplazamiento vertical por paso del agente
@@ -163,13 +170,15 @@ class RocketLanding3DEnv(gym.Env):
         shaping = self._shaping()
         reward = shaping - self.prev_shaping - 0.1 * fuel_used
         self.prev_shaping = shaping
-        terminated = self.outcome is not None
-        if terminated:
+        if self.outcome is not None:
             reward += self.REWARDS[self.outcome]
+        # "sin pasos" es el límite externo de la época (truncated), no un estado final del cohete (terminated)
+        truncated = self.outcome == "sin pasos"
+        terminated = self.outcome is not None and not truncated
 
         info = self._get_info()
         info["trajectory"] = trajectory
-        return self._get_obs(), float(reward), terminated, False, info
+        return self._get_obs(), float(reward), terminated, truncated, info
 
     def _simulate(self, engine_cmd, throttle, direction):
         """Avanza la física DT segundos. Devuelve el combustible gastado (kg)."""

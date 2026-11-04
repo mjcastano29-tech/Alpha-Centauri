@@ -27,8 +27,30 @@ export interface Resumen {
   perturbado: { viento: number; aterrizajes: number; velocidad_contacto: number | null; error_posicion: number; resultados: Resultados } | null
   sha256: { config: string; archivos: Record<string, string> } | null
   mlflow: { modelo: string; version: number } | null
+  mlflow_ui: string | null
+  diseno: Diseno | null
+  manifiesto: string | null
   checkpoint: boolean
   estado: 'recomendado' | 'anterior' | 'historico'
+}
+/** Diseño experimental de la configuración (configs/<run_id>.json): qué se probó y qué se decidió. */
+export interface Diseno {
+  hipotesis: string | null
+  cambio: string | null
+  baseline: string | null
+  comparacion_principal?: string | null
+  presupuesto: Record<string, string | number> | null
+  suite: string | null
+  estado: 'seleccionado' | 'rechazado' | 'referencia' | string | null
+  decision: string | null
+  fecha_decision: string | null
+}
+export interface Suite {
+  id: string
+  descripcion: string
+  episodios: number
+  semilla_base: number | string
+  condiciones: { id: string; viento: number | null; descripcion?: string }[]
 }
 export interface Catalogo {
   catalogo: {
@@ -65,6 +87,8 @@ export interface Version {
   commit: string | null
   arranque: string
   ambiente: { id: string; version: string }
+  mlflow_ui: string | null
+  suites: string[]
   catalogo: { version: number; actualizado: string | null; recomendado: string | null; anterior: string | null }
   modelos_cargados: string[]
   software: Record<string, string>
@@ -72,8 +96,8 @@ export interface Version {
 export interface ResultadoEvaluacion {
   modo: 'evaluacion'
   modelo: { run_id: string; agente: string | null; accion: string | null; commit: string | null; sha256: Record<string, string> | null; mlflow: { modelo: string; version: number } | null }
-  ambiente: { id: string; version: string; compatible: boolean }
-  suite: { episodios: number; semilla_base: number; viento: number | null; deterministico: boolean }
+  ambiente: { id: string; version: string; entrenado_con: string; compatible: boolean }
+  suite: { id: string | null; condicion: string | null; episodios: number; semilla_base: number; viento: number | null; deterministico: boolean }
   resumen: Evaluacion
   episodios: { epoca: number; semilla: number; resultado: string; recompensa: number; pasos: number; duracion_s: number; vz: number; vh: number; distancia: number; inclinacion: number; combustible: number; viento: number; toca_suelo: boolean }[]
   vuelos: Vuelo[]
@@ -104,5 +128,7 @@ export const catalogo = () => get<Catalogo>('/catalogo')
 export const ejecucion = (id: string) => get<Detalle>(`/ejecuciones/${encodeURIComponent(id)}`)
 export const vuelos = (id: string) => get<{ episodes: Vuelo[] }>(`/ejecuciones/${encodeURIComponent(id)}/vuelos`)
 export const comparar = (ids: string[]) => get<{ ejecuciones: Resumen[] }>(`/comparar?runs=${encodeURIComponent(ids.join(','))}`)
-export const evaluar = (peticion: { run_id: string; episodios: number; viento?: number | null; semilla_base?: number; grabar?: number }) =>
+export const suites = () => get<{ suites: Record<string, Suite>; maximo_por_peticion: number }>('/suites')
+export const urlManifiesto = (id: string) => `${API}/ejecuciones/${encodeURIComponent(id)}/manifiesto`
+export const evaluar = (peticion: { run_id: string; episodios: number; viento?: number | null; semilla_base?: number; grabar?: number; suite?: string | null; condicion?: string }) =>
   post<ResultadoEvaluacion>('/evaluar', peticion)

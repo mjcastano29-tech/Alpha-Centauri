@@ -1,0 +1,14 @@
+{
+  "run_id": "ppo-v0.1-s0",
+  "experimento": "experimento-2-ppo",
+  "nivel": "N1",
+  "ambiente": "RocketLanding3D-v0@0.1",
+  "hipotesis": "Una red neuronal entrenada con PPO (Stable-Baselines3) directamente sobre la acción cruda del entorno (acelerador, encendido y dirección del empuje) supera al Q-learning con 400 000 pasos.",
+  "cambio": "Modelo tabular → red MLP 128×128; mismo ambiente, misma recompensa y misma suite. Acción: los 5 valores crudos del entorno.",
+  "baseline": "base-v0.1-s0",
+  "presupuesto": {"pasos_agente": 400000, "epocas": 14443, "tiempo_s": 414, "maquina": "CPU de portátil (WSL2), 8 entornos en paralelo"},
+  "suite": "suite-v1",
+  "estado": "rechazado",
+  "decision": "Rechazado: 0/200 aterrizajes. La recompensa media sube de −115 a −49 (aprende a acercarse) pero nunca frena. Con la acción cruda el problema no es aprendible en este presupuesto. Se conserva como evidencia.",
+  "fecha_decision": "2026-10-28"
+}

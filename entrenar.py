@@ -61,7 +61,7 @@ def git_info():
             return subprocess.check_output(["git", *args], cwd=ROOT, text=True, stderr=subprocess.DEVNULL).strip()
         except (OSError, subprocess.CalledProcessError):
             return None
-    return {"commit": git("rev-parse", "--short=12", "HEAD"), "branch": git("rev-parse", "--abbrev-ref", "HEAD"),
+    return {"commit": git("rev-parse", "HEAD"), "branch": git("rev-parse", "--abbrev-ref", "HEAD"),
             # mlflow.db y mlruns/ cambian durante el propio entrenamiento (registro en directo): no cuentan
             "cambios_sin_commit": bool(git("status", "--porcelain", "--untracked-files=no", "--", ".", ":!mlflow.db", ":!mlruns"))}
 

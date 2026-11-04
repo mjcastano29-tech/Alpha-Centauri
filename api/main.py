@@ -34,7 +34,10 @@ from entrenamiento import CHECK_EPISODES, EVAL_SEED_BASE, OUTCOMES, episode_reco
 from entrenar import RUNS, load_agent, load_registry, run_dir  # noqa: E402
 from rocket_env.rocket_landing import RocketLanding3DEnv  # noqa: E402
 
-VERSION_API = "0.1.0"
+VERSION_API = "0.2.0"
+MLFLOW_UI_URL = os.environ.get("MLFLOW_UI_URL") or None
+CONFIGS = ROOT / "configs"
+MANIFESTS = ROOT / "manifests"
 MAX_EPISODIOS = int(os.environ.get("MAX_EPISODIOS", "50"))
 ARRANQUE = time.strftime("%Y-%m-%dT%H:%M:%S")
 
@@ -98,6 +101,20 @@ def versiones_mlflow():
 MLFLOW = versiones_mlflow()
 
 
+def diseno(run_id):
+    """Hipótesis, cambio, presupuesto y estado de la configuración (configs/<run_id>.json), si está documentada."""
+    path = CONFIGS / f"{run_id}.json"
+    if not path.exists():
+        return None
+    cfg = leer_json(path)
+    return {k: cfg.get(k) for k in ("hipotesis", "cambio", "baseline", "comparacion_principal", "presupuesto", "suite", "estado", "decision", "fecha_decision")}
+
+
+def suites():
+    """Suites de evaluación con nombre (configs/suites/*.json). La reservada no trae semilla: vive fuera del repo."""
+    return {s["id"]: s for s in (leer_json(p) for p in sorted((CONFIGS / "suites").glob("*.json")))}
+
+
 def resumen_ejecucion(run_id, cat):
     m = manifest(run_id)
     ev = m["resultado"]["evaluacion"]
@@ -126,6 +143,9 @@ def resumen_ejecucion(run_id, cat):
                         "resultados": detalle["perturbado"]["resumen"]["resultados"]} if detalle else None),
         "sha256": m.get("sha256"),
         "mlflow": MLFLOW.get(run_id),
+        "mlflow_ui": MLFLOW_UI_URL,
+        "diseno": diseno(run_id),
+        "manifiesto": f"/ejecuciones/{run_id}/manifiesto" if (MANIFESTS / f"{run_id}.json").exists() else None,
         "checkpoint": all((RUNS / run_id / a).exists() for a in archivos),
         "estado": "recomendado" if cat["recomendado"] == run_id else "anterior" if cat["anterior"] == run_id else "historico",
     }
@@ -160,7 +180,7 @@ def agente(run_id):
 @app.get("/", summary="Qué sirve esta API")
 def raiz():
     cat = catalogo_git.leer()
-    return {"nombre": app.title, "version_api": VERSION_API, "commit": COMMIT,
+    return {"nombre": app.title, "version_api": VERSION_API, "commit": COMMIT, "mlflow_ui": MLFLOW_UI_URL,
             "ambiente": {"id": "RocketLanding3D-v0", "version": RocketLanding3DEnv.VERSION},
             "recomendado": cat["recomendado"], "documentacion": "/docs",
             "rutas": ["/salud", "/version", "/catalogo", "/ejecuciones/{run_id}", "/ejecuciones/{run_id}/vuelos",
@@ -181,7 +201,7 @@ def version():
         software.update({"torch": torch.__version__, "stable_baselines3": stable_baselines3.__version__})
     except ImportError:
         pass
-    return {"api": VERSION_API, "commit": COMMIT, "arranque": ARRANQUE,
+    return {"api": VERSION_API, "commit": COMMIT, "arranque": ARRANQUE, "mlflow_ui": MLFLOW_UI_URL, "suites": list(suites()),
             "ambiente": {"id": "RocketLanding3D-v0", "version": RocketLanding3DEnv.VERSION},
             "catalogo": {"version": cat["version"], "actualizado": cat["actualizado"], "recomendado": cat["recomendado"],
                          "anterior": cat["anterior"]},
@@ -220,6 +240,19 @@ def ejecucion_manifest(run_id: str):
     return manifest(run_id)
 
 
+@app.get("/suites", summary="Suites de evaluación con nombre (episodios, semillas y condiciones)")
+def listar_suites():
+    return {"suites": suites(), "maximo_por_peticion": MAX_EPISODIOS}
+
+
+@app.get("/ejecuciones/{run_id}/manifiesto", summary="Manifiesto inmutable de la ejecución en el formato de la guía (sección 11)")
+def ejecucion_manifiesto(run_id: str):
+    path = MANIFESTS / f"{run_id}.json"
+    if not path.exists():
+        raise HTTPException(404, f"No hay manifests/{run_id}.json (genera: python manifiestos.py --run {run_id})")
+    return leer_json(path)
+
+
 @app.get("/ejecuciones/{run_id}/evaluacion", summary="Evaluación guardada época a época (normal y con viento)")
 def ejecucion_evaluacion(run_id: str):
     manifest(run_id)
@@ -244,6 +277,8 @@ class PeticionEvaluacion(BaseModel):
     semilla_base: int = Field(EVAL_SEED_BASE, description="semilla de la primera época; la suite v1 usa 10 000 000")
     viento: float | None = Field(None, ge=0, le=30, description="viento fijo a 10 m (m/s); None = aleatorio 0–10")
     grabar: int = Field(1, ge=0, le=5, description="cuántas épocas devolver con su trayectoria completa")
+    suite: str | None = Field(None, description="id de una suite de configs/suites (p. ej. suite-v1): fija semilla_base y viento")
+    condicion: str = Field("normal", description="condición de la suite (normal, viento-15)")
 
 
 @app.post("/evaluar", summary="Ejecuta el modelo congelado de una ejecución en el ambiente (modo evaluación)")
@@ -251,6 +286,17 @@ def evaluar(p: PeticionEvaluacion):
     m = manifest(p.run_id)
     ag = agente(p.run_id)
     env = gym.make("RocketLanding3D-v0")
+    if p.suite:
+        s = suites().get(p.suite)
+        if s is None:
+            raise HTTPException(404, f"Suite desconocida: {p.suite}")
+        cond = next((c for c in s["condiciones"] if c["id"] == p.condicion), None)
+        if cond is None:
+            raise HTTPException(422, f"La suite {p.suite} no tiene la condición {p.condicion}")
+        if not isinstance(s["semilla_base"], int):
+            raise HTTPException(422, f"La suite {p.suite} no tiene semilla en el repositorio: pásala en semilla_base sin suite")
+        p = p.model_copy(update={"semilla_base": s["semilla_base"], "viento": cond["viento"],
+                                 "episodios": p.episodios if "episodios" in p.model_fields_set else min(s["episodios"], MAX_EPISODIOS)})
     options = {"viento": p.viento} if p.viento is not None else None
     t0 = time.perf_counter()
     filas, vuelos, pasos = [], [], 0
@@ -280,9 +326,10 @@ def evaluar(p: PeticionEvaluacion):
         "modo": "evaluacion",
         "modelo": {"run_id": p.run_id, "agente": m["agente"].get("nombre"), "accion": m["agente"].get("accion"),
                    "commit": m["git"]["commit"], "sha256": (m.get("sha256") or {}).get("archivos"), "mlflow": MLFLOW.get(p.run_id)},
-        "ambiente": {"id": "RocketLanding3D-v0", "version": RocketLanding3DEnv.VERSION,
-                     "compatible": m["ambiente"]["version"] == RocketLanding3DEnv.VERSION},
-        "suite": {"episodios": p.episodios, "semilla_base": p.semilla_base, "viento": p.viento, "deterministico": True},
+        "ambiente": {"id": "RocketLanding3D-v0", "version": RocketLanding3DEnv.VERSION, "entrenado_con": m["ambiente"]["version"],
+                     "compatible": RocketLanding3DEnv.compatible(m["ambiente"]["version"])},
+        "suite": {"id": p.suite, "condicion": p.condicion if p.suite else None, "episodios": p.episodios, "semilla_base": p.semilla_base,
+                  "viento": p.viento, "deterministico": True},
         "resumen": resumen,
         "episodios": filas,
         "vuelos": vuelos,

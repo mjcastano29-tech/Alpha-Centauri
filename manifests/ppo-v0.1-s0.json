@@ -1,0 +1,62 @@
+{
+  "run_id": "ppo-v0.1-s0",
+  "level_id": "N1",
+  "environment_version": "RocketLanding3D-v0@0.1",
+  "git_commit": "25f0295769b5de65ebe39d7f42da6f0ce4e56ca8",
+  "git_branch": "fase-3d",
+  "config_sha256": "ae22fa4140b9b22487221ac9dfc191bf67d1adb4ad54c7f9555436fa5e847fdd",
+  "model_uri": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/25f0295769b5de65ebe39d7f42da6f0ce4e56ca8/resultados/runs/ppo-v0.1-s0/modelo.zip",
+  "model_sha256": "dd5d2f87be2bbb430c59a56c385678392599c68b48d81b668567948f13c3d616",
+  "normalization_uri": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/25f0295769b5de65ebe39d7f42da6f0ce4e56ca8/resultados/runs/ppo-v0.1-s0/modelo_normalizador.pkl",
+  "normalization_sha256": "92c3285a0c53237138f527868c80a57b504f420c33562e65449f8b955c32aec8",
+  "model_registry": null,
+  "runtime_ref": {
+    "python": "3.10.12",
+    "requirements": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/25f0295769b5de65ebe39d7f42da6f0ce4e56ca8/requirements.txt",
+    "docker": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/25f0295769b5de65ebe39d7f42da6f0ce4e56ca8/Dockerfile",
+    "paquetes": {
+      "gymnasium": "1.4.0",
+      "numpy": "2.2.6",
+      "torch": "2.14.1+cpu",
+      "stable_baselines3": "2.9.2"
+    }
+  },
+  "evaluation_suite_id": "suite-v1",
+  "seed": 0,
+  "parent_run_id": null,
+  "experiment_id": "experimento-2-ppo",
+  "agent": {
+    "class": "ppo",
+    "name": "PPO (red neuronal)",
+    "action": "cruda: los 5 valores del entorno"
+  },
+  "hypothesis": "Una red neuronal entrenada con PPO (Stable-Baselines3) directamente sobre la acción cruda del entorno (acelerador, encendido y dirección del empuje) supera al Q-learning con 400 000 pasos.",
+  "change": "Modelo tabular → red MLP 128×128; mismo ambiente, misma recompensa y misma suite. Acción: los 5 valores crudos del entorno.",
+  "baseline_run_id": "base-v0.1-s0",
+  "budget": {
+    "pasos_agente": 400000,
+    "epocas": 14443,
+    "tiempo_s": 414,
+    "maquina": "CPU de portátil (WSL2), 8 entornos en paralelo"
+  },
+  "status": "rechazado",
+  "decision": "Rechazado: 0/200 aterrizajes. La recompensa media sube de −115 a −49 (aprende a acercarse) pero nunca frena. Con la acción cruda el problema no es aprendible en este presupuesto. Se conserva como evidencia.",
+  "evaluation": {
+    "suite": "suite-v1",
+    "episodes": 200,
+    "landing_rate": 0.0,
+    "contact_speed": 11.932136757851262,
+    "position_error": 8.117636984220098,
+    "fuel_used": 141.19046927966366,
+    "outcomes": {
+      "aterrizaje": 0,
+      "fuera de plataforma": 0,
+      "choque": 200,
+      "sin pasos": 0,
+      "fuera de zona": 0
+    },
+    "per_case": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/25f0295769b5de65ebe39d7f42da6f0ce4e56ca8/resultados/runs/ppo-v0.1-s0/evaluacion.json"
+  },
+  "trained_at": "2026-10-28T17:26:41",
+  "generated_at": "2026-11-03T20:54:08"
+}

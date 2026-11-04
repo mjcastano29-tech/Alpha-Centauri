@@ -42,6 +42,16 @@
 <h1>Diagnóstico frente al enunciado del proyecto final</h1>
 <p><strong>Equipo Alpha Centauri · Rocket Landing · 2 de noviembre de 2026 · rama <code>fase-3d</code> (commit <code>c0058c4</code>) + rama <code>isaias/arreglos-rapidos</code> sin fusionar</strong></p>
 <p>Contraste entre lo que pide el enunciado del proyecto final de MLOps (30 de octubre de 2026) y lo que hay en el repositorio hoy. Cada afirmación remite a un archivo o a un comando; lo que no se ha podido comprobar se dice.</p>
+<h2>Actualización · 3 de noviembre de 2026: hito 2, primera entrega</h2>
+<ul>
+<li><strong>Hipótesis y estado por configuración</strong>: <code>configs/&lt;run_id&gt;.json</code> para las cuatro configuraciones del nivel 1 (hipótesis, cambio frente al baseline, presupuesto en épocas/pasos/tiempo/máquina, suite, estado <code>seleccionado</code>/<code>rechazado</code>/<code>referencia</code>, decisión y fecha). Las mismas etiquetas (<code>diseno.*</code>, <code>presupuesto.*</code>) están en las runs de MLflow (<code>python seguimiento.py etiquetar</code>). La API las expone como <code>diseno</code> en <code>/catalogo</code> y la web las muestra en el catálogo (tabla "Hipótesis y decisiones"), en la ficha de cada ejecución y en la comparación.</li>
+<li><strong>Manifiestos con el formato de la sección 11</strong>: <code>python manifiestos.py</code> genera <code>manifests/&lt;run_id&gt;.json</code> con <code>run_id</code>, <code>level_id</code>, <code>environment_version</code>, <code>git_commit</code> completo (40 caracteres), <code>config_sha256</code>, <code>model_uri</code> (URL al archivo en el commit exacto) y <code>model_sha256</code>, <code>normalization_uri</code>, <code>runtime_ref</code>, <code>evaluation_suite_id</code>, <code>seed</code>, <code>parent_run_id</code>, más hipótesis, presupuesto, estado y métricas. Servidos en <code>GET /ejecuciones/&lt;id&gt;/manifiesto</code> y enlazados desde la web. Los manifests de las ejecuciones nuevas guardan el SHA completo.</li>
+<li><strong>Suite de evaluación con nombre</strong>: <code>configs/suites/suite-v1.json</code> (200 épocas, semillas desde 10 000 000, condiciones <code>normal</code> y <code>viento-15</code>) y <code>suite-reservada</code> (misma estructura, semilla fuera del repo para el test final de los finalistas). <code>POST /evaluar</code> acepta <code>suite</code> y <code>condicion</code>; <code>GET /suites</code> las lista.</li>
+<li><strong><code>truncated</code></strong>: ambiente 0.1.1: agotar los pasos se informa como <code>truncated=True</code>; las reglas y la recompensa no cambian, <code>RocketLanding3DEnv.compatible()</code> compara mayor.menor y los modelos de 0.1 siguen siendo válidos (la API lo muestra como <code>entrenado_con</code> y <code>compatible</code>). La prueba que estaba marcada como fallo esperado pasa; 31 pruebas en total.</li>
+<li><strong>Nivel 2</strong>: propuesta en <code>docs/nivel-2-propuesta.md</code> con tres candidatos (A: rotación con torque, recomendado y alineado con la ficha del profesor; B: plataforma desplazada y combustible justo; C: obstáculos) y N3 = viento fuerte. Falta la decisión del equipo antes de entrenar.</li>
+<li><strong>MLflow visible</strong>: <code>render.yaml</code> declara un segundo servicio <code>alpha-centauri-mlflow</code> (interfaz de MLflow de solo lectura sobre el <code>mlflow.db</code> del repo) y la API publica su URL en <code>mlflow_ui</code>; la web enlaza a él desde cada ejecución. Queda pendiente comprobar que Render lo cree al sincronizar el blueprint.</li>
+<li>Pendiente del hito 2 y siguientes: entrenar la familia N2 (tres semillas para los finalistas), pipeline con etapas (Prefect), incidente controlado e intervención, rollback desde la web, vista de monitoreo, release e informe.</li>
+</ul>
 <h2>Actualización · 3 de noviembre de 2026: hito 1 cerrado</h2>
 <ul>
 <li><strong>Web</strong>: https://alpha-centauri-five.vercel.app (Vercel, rama <code>main</code>, Root Directory <code>web</code>, variable pública <code>VITE_API_BASE_URL</code>).</li>
@@ -52,7 +62,7 @@
 <li>Lo que sigue es el hito 2 (hipótesis y estado por configuración, manifiestos con el formato de la sección 11, suite de evaluación con nombre y <code>truncated</code>, niveles N2/N3).</li>
 </ul>
 <h2>1. Resumen</h2>
-<div class="tbl"><table>
+<table>
 <thead>
 <tr>
 <th>Hito del enunciado</th>
@@ -82,10 +92,10 @@
 <td><strong>No empezado</strong>.</td>
 </tr>
 </tbody>
-</table></div>
+</table>
 <p>Cobertura estimada por criterio de la rúbrica (peso entre paréntesis): versionamiento y recuperación (30 %) ≈ 60 %; diseño experimental y análisis (25 %) ≈ 55 %; pipeline, despliegue, monitoreo y rollback (20 %) ≈ 10 %; contrato y funcionamiento del ambiente/agente (10 %) ≈ 85 %; defensa (15 %) por preparar. <strong>El bloque que más pesa y menos tenemos es el de operación: web en Vercel + API + pipeline + rollback.</strong></p>
 <h2>2. Lo que ya cumple, con su evidencia</h2>
-<div class="tbl"><table>
+<table>
 <thead>
 <tr>
 <th>Exigencia del enunciado</th>
@@ -150,9 +160,9 @@
 <td>comprobado dos veces para <code>base-v0.1-s0</code> (157/200, primer aterrizaje 1785).</td>
 </tr>
 </tbody>
-</table></div>
+</table>
 <h2>3. Brechas, ordenadas por peso en la rúbrica</h2>
-<div class="tbl"><table>
+<table>
 <thead>
 <tr>
 <th>#</th>
@@ -293,7 +303,7 @@
 <td>Medio</td>
 </tr>
 </tbody>
-</table></div>
+</table>
 <h2>4. Plan propuesto</h2>
 <p><strong>Esta semana (cerrar hito 1 y preparar el 2)</strong>
 1. Fusionar <code>isaias/arreglos-rapidos</code> en <code>fase-3d</code> mediante PR (tests, huellas, <code>verificar</code>, dependencias) y fusionar <code>fase-3d</code> en <code>main</code>; <code>git tag -a v0.2.0</code>.

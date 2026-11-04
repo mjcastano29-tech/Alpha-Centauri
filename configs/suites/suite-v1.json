@@ -1,0 +1,15 @@
+{
+  "id": "suite-v1",
+  "version": 1,
+  "descripcion": "Suite fija de evaluación del nivel 1: 200 épocas con meteorología y punto de salida que no aparecen en el entrenamiento (semillas desde 10 000 000), jugadas por el modelo congelado y sin exploración. Dos condiciones: normal y perturbación de viento lateral fuerte.",
+  "ambiente": "RocketLanding3D-v0@0.1",
+  "episodios": 200,
+  "semilla_base": 10000000,
+  "condiciones": [
+    {"id": "normal", "viento": null, "descripcion": "viento aleatorio de 0 a 10 m/s a 10 m, como en el entrenamiento"},
+    {"id": "viento-15", "viento": 15.0, "descripcion": "viento lateral fijo de 15 m/s a 10 m (incidente controlado)"}
+  ],
+  "metricas": ["aterrizajes", "velocidad_contacto", "error_posicion", "combustible", "resultados"],
+  "resultado_por_caso": "resultados/runs/<run_id>/evaluacion.json",
+  "nota": "Las semillas de entrenamiento (seed × 1 000 000 + época) y las de la evaluación periódica (20 000 000 + k) no se solapan con las de esta suite."
+}
