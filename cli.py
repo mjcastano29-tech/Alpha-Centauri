@@ -9,9 +9,11 @@ Ejemplos:
     python cli.py ver --agente aleatorio
     python cli.py evaluar --viento 15           # métricas con y sin viento lateral fuerte
     python cli.py transiciones                  # las primeras transiciones en detalle
+    python cli.py verificar                     # comprueba con SHA-256 que modelos y datos guardados no cambiaron
     mlflow ui --backend-store-uri sqlite:///mlflow.db   # interfaz de MLflow con todos los experimentos
 """
 import argparse
+import json
 import sys
 import time
 
@@ -21,7 +23,8 @@ import numpy as np
 import rocket_env  # noqa: F401  (registra RocketLanding3D-v0)
 from agente_qlearning import DIRECTION_ACTIONS, ENGINE_ACTIONS, action_label, to_env_action
 from entrenamiento import CHECK_EPISODES, EVAL_SEED_BASE, OUTCOMES, epochs_to_rate, evaluate, train
-from entrenar import FINAL_EPISODES, add_train_args, config_from_args, load_agent, load_registry, save_run, write_pages
+from entrenar import (FINAL_EPISODES, add_train_args, config_from_args, config_sha256, load_agent, load_registry, run_dir,
+                      save_run, sha256_file, write_pages)
 from rocket_env.rocket_landing import RocketLanding3DEnv
 
 # ---------- colores (solo si la salida es una terminal) ----------
@@ -255,6 +258,27 @@ def cmd_runs(args):
     print(paint("\ncommit con * = había cambios sin commit al entrenar · detalle y comparación: mlflow ui --backend-store-uri sqlite:///mlflow.db", "2"))
 
 
+def cmd_verificar(args):
+    """Recalcula las huellas SHA-256 de cada ejecución y las compara con las de su manifest."""
+    ids = [args.run] if args.run else [r["run_id"] for r in load_registry()["ejecuciones"]]
+    fallos = 0
+    for run_id in ids:
+        path = run_dir(run_id)
+        manifest = json.loads((path / "manifest.json").read_text(encoding="utf-8"))
+        huellas = manifest.get("sha256")
+        if not huellas:
+            print(f"{run_id:24s} {paint('sin huellas en el manifest', '33')}")
+            continue
+        distintos = [name for name, h in huellas["archivos"].items() if not (path / name).exists() or sha256_file(path / name) != h]
+        if config_sha256(manifest["config"]) != huellas["config"]:
+            distintos.append("config")
+        fallos += bool(distintos)
+        estado = paint("OK", "32") if not distintos else paint("DISTINTO: " + ", ".join(distintos), "31")
+        print(f"{run_id:24s} {len(huellas['archivos'])} archivos + config  {estado}")
+    if fallos:
+        raise SystemExit(f"\n{fallos} ejecución(es) con artefactos que no coinciden con su manifest")
+
+
 def main():
     if len(sys.argv) > 1 and sys.argv[1] == "entrenar-ppo":  # sus opciones las interpreta entrenar_ppo.py
         from entrenar_ppo import main as ppo_main  # import tardío: carga PyTorch
@@ -294,6 +318,10 @@ def main():
 
     p = sub.add_parser("runs", help="lista las ejecuciones guardadas en resultados/runs")
     p.set_defaults(func=cmd_runs)
+
+    p = sub.add_parser("verificar", help="comprueba con SHA-256 que los modelos y datos guardados no cambiaron")
+    p.add_argument("--run", help="id de la ejecución (por defecto todas)")
+    p.set_defaults(func=cmd_verificar)
 
     args = parser.parse_args()
     args.func(args)

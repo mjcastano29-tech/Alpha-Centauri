@@ -2,7 +2,7 @@
 
 Cada entrenamiento es una "ejecución" guardada en resultados/runs/<id>/ con todo lo necesario para
 reproducirla y compararla:
-  manifest.json       commit de git, versión del ambiente, configuración, software, métricas
+  manifest.json       commit de git, versión del ambiente, configuración, software, métricas y huellas SHA-256
   modelo.npz          las tablas Q de la mejor versión
   entrenamiento.json  recompensa, pasos, resultado, combustible y ε de cada época; evaluaciones periódicas
   vuelos.json.gz      las épocas grabadas (trayectoria completa), para las páginas HTML
@@ -14,6 +14,7 @@ import argparse
 import collections
 import csv
 import gzip
+import hashlib
 import json
 import platform
 import subprocess
@@ -63,6 +64,30 @@ def git_info():
     return {"commit": git("rev-parse", "--short=12", "HEAD"), "branch": git("rev-parse", "--abbrev-ref", "HEAD"),
             # mlflow.db y mlruns/ cambian durante el propio entrenamiento (registro en directo): no cuentan
             "cambios_sin_commit": bool(git("status", "--porcelain", "--untracked-files=no", "--", ".", ":!mlflow.db", ":!mlruns"))}
+
+
+def sha256_file(path):
+    """Huella SHA-256 de un archivo: identifica el artefacto exacto aunque se copie o se renombre."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def config_sha256(config):
+    """Huella de la configuración resuelta, sobre su JSON canónico (claves ordenadas, sin espacios)."""
+    canonical = json.dumps(config, sort_keys=True, separators=(",", ":"), ensure_ascii=False, default=float)
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def run_hashes(path, archivos, config):
+    """Huellas de la configuración y de los archivos que lista manifest["archivos"] (el modelo puede ser una lista)."""
+    names = []
+    for value in archivos.values():
+        names.extend(value if isinstance(value, list) else [value])
+    return {"algoritmo": "sha256", "config": config_sha256(config),
+            "archivos": {name: sha256_file(path / name) for name in names}}
 
 
 def load_registry():
@@ -139,6 +164,8 @@ def save_run(result, evaluation, run_id=None, experimento="experimento-1-qlearni
         json.dump({"episodes": result["replays"] + final_runs}, f, default=float)
 
     rocket = RocketLanding3DEnv
+    archivos = {"modelo": model_files, "entrenamiento": "entrenamiento.json", "episodios": "episodios.csv",
+                "vuelos": "vuelos.json.gz"}
     manifest = {
         "run_id": run_id,
         "experimento": experimento,
@@ -161,8 +188,8 @@ def save_run(result, evaluation, run_id=None, experimento="experimento-1-qlearni
             "primer_aterrizaje": result["first_landing"], "mejor_epoca": result["best_epoch"],
             "evaluacion": evaluation, "epocas_grabadas": len(result["replays"]),
         },
-        "archivos": {"modelo": model_files, "entrenamiento": "entrenamiento.json", "episodios": "episodios.csv",
-                     "vuelos": "vuelos.json.gz"},
+        "archivos": archivos,
+        "sha256": run_hashes(path, archivos, config),
     }
     (path / "manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False, default=float), encoding="utf-8")
 

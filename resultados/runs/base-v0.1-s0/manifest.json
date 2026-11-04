@@ -108,5 +108,16 @@
     "vuelos": "vuelos.json.gz",
     "episodios": "episodios.csv"
   },
-  "experimento": "experimento-1-qlearning"
+  "experimento": "experimento-1-qlearning",
+  "sha256": {
+    "algoritmo": "sha256",
+    "config": "3376ea25366a2e76d46153f904c8a827b40051e963336686ec867aed4622a346",
+    "archivos": {
+      "modelo.npz": "e1498f54808d1f0d1e44e37e46fc3319ab760887c1e7f05f5340468b5d337644",
+      "entrenamiento.json": "baf675cedb9e50bd9169c3f09312a66b8426f11274692f7eb71b75f037d959af",
+      "vuelos.json.gz": "90670e19297afb850a04009df771881a877e36f3c807214c4cadda14efc3cc91",
+      "episodios.csv": "e47eed86e9e1a2f0a7b76ac8faa669da7defa8bdb2fa62eb9b2a462ba021a044"
+    },
+    "nota": "calculadas el 2026-10-30, después del entrenamiento: esta ejecución es anterior a las huellas en el manifest"
+  }
 }
