@@ -31,7 +31,8 @@ async function enrutar() {
     else app.innerHTML = `<p class="error">Ruta desconocida: ${esc(ruta)}</p><p><a href="#/">Ir al catálogo</a></p>`
   } catch (e) {
     const err = e as api.ErrorApi
-    app.innerHTML = `<p class="error">${err.status === 404 ? 'No existe.' : 'Error de la API.'} ${esc(err.message)}</p><p><a href="#/">Volver al catálogo</a></p>`
+    const quien = !ruta ? 'No se pudo cargar el catálogo desde la API (revisa VITE_API_BASE_URL).' : err.status === 404 ? 'No existe.' : 'Error de la API.'
+    app.innerHTML = `<p class="error">${quien} ${esc(err.message)}</p><p><a href="#/">Volver al catálogo</a></p>`
   }
   window.scrollTo(0, 0)
 }

@@ -110,6 +110,9 @@ choque y los sonidos son solo visuales.
 
 ## Web y API (entrega del proyecto final)
 
+- **Web publicada**: https://alpha-centauri-five.vercel.app (Vercel, rama `main`, Root Directory `web`).
+- **API**: Render, servicio `alpha-centauri-api` definido en [render.yaml](render.yaml) (URL `https://alpha-centauri-api.onrender.com` salvo que Render asigne otro sufijo; `GET /version` identifica el commit servido).
+
 ```
 ┌────────────────────────────┐   HTTPS + CORS   ┌──────────────────────────────────┐
 │ web/  Vite + TypeScript +  │ ───────────────► │ api/  FastAPI + Uvicorn (Python   │

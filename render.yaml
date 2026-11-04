@@ -12,6 +12,6 @@ services:
       - key: PYTHON_VERSION
         value: 3.10.12
       - key: CORS_ORIGENES
-        value: https://alpha-centauri.vercel.app,http://localhost:5173
+        value: https://alpha-centauri-five.vercel.app,http://localhost:5173,http://localhost:4173
       - key: MAX_EPISODIOS
         value: "50"
