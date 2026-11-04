@@ -89,11 +89,15 @@ def versiones_mlflow():
         return {}
     try:
         con = sqlite3.connect(f"file:{db}?mode=ro", uri=True)
-        filas = con.execute("""select t.value, mv.name, mv.version from model_versions mv
+        filas = con.execute("""select t.value, mv.name, mv.version, r.run_uuid, r.experiment_id from model_versions mv
                                join tags t on t.run_uuid = mv.run_id and t.key = 'ejecucion'
+                               join runs r on r.run_uuid = mv.run_id
                                order by mv.version""").fetchall()
         con.close()
-        return {ejecucion: {"modelo": nombre, "version": int(version)} for ejecucion, nombre, version in filas}
+        return {ejecucion: {"modelo": nombre, "version": int(version), "run_uuid": run_uuid, "experimento_id": str(exp_id),
+                            # página de la run en la interfaz de MLflow (etiquetas diseno.*, métricas, artefactos)
+                            "url": f"{MLFLOW_UI_URL}/#/experiments/{exp_id}/runs/{run_uuid}" if MLFLOW_UI_URL else None}
+                for ejecucion, nombre, version, run_uuid, exp_id in filas}
     except sqlite3.Error:  # el registro es informativo: no impide servir
         return {}
 

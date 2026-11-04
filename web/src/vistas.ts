@@ -33,7 +33,7 @@ export async function vistaCatalogo(el: HTMLElement) {
     `<b>${pct(r.evaluacion.aterrizajes)}</b> ${barraResultados(r.evaluacion.resultados, c.outcomes)}<br><span class="muted">${num(r.evaluacion.velocidad_contacto, 2)} m/s · ${num(r.evaluacion.error_posicion)} m</span>`,
     r.perturbado ? `${pct(r.perturbado.aterrizajes)}<br><span class="muted">viento ${r.perturbado.viento} m/s</span>` : '—',
     `${entero(r.epocas)}<br><span class="muted">1.º aterrizaje: ${r.primer_aterrizaje ? entero(r.primer_aterrizaje) : 'nunca'}</span>`,
-    `<code>${corto(r.git.commit)}</code>${r.git.cambios_sin_commit ? '*' : ''}<br><span class="muted">${r.mlflow ? `${esc(r.mlflow.modelo)} v${r.mlflow.version}` : 'sin registro MLflow'}</span>`,
+    `<code>${corto(r.git.commit)}</code>${r.git.cambios_sin_commit ? '*' : ''}<br><span class="muted">${r.mlflow ? (r.mlflow.url ? `<a href="${esc(r.mlflow.url)}" target="_blank" rel="noopener">${esc(r.mlflow.modelo)} v${r.mlflow.version}</a>` : `${esc(r.mlflow.modelo)} v${r.mlflow.version}`) : 'sin registro MLflow'}</span>`,
     `<label class="check"><input type="checkbox" class="cmp" value="${esc(r.run_id)}"> comparar</label><br><a class="btn" href="#/replay/${esc(r.run_id)}">replay</a>`,
   ])
   const rec = c.ejecuciones.find((r) => r.estado === 'recomendado')
@@ -85,7 +85,7 @@ export async function vistaEjecucion(el: HTMLElement, id: string) {
           <p><b>Presupuesto.</b> ${presupuesto(d.diseno.presupuesto)} · suite ${esc(d.diseno.suite ?? '—')}</p>
           <p><b>Decisión (${esc(d.diseno.fecha_decision ?? 'sin fecha')}).</b> ${esc(d.diseno.decision ?? '—')}</p>
         </div>
-        <p class="muted">Fuente: <code>configs/${esc(d.run_id)}.json</code>; las mismas etiquetas están en la run de MLflow${d.mlflow_ui ? ` (<a href="${esc(d.mlflow_ui)}" target="_blank" rel="noopener">abrir MLflow</a>)` : ''}.${d.diseno.comparacion_principal ? ` Comparación principal: <a href="#/comparar/${esc(d.run_id)},${esc(d.diseno.comparacion_principal)}">${esc(d.run_id)} frente a ${esc(d.diseno.comparacion_principal)}</a>.` : ''}</p>`
+        <p class="muted">Fuente: <code>configs/${esc(d.run_id)}.json</code>; las mismas etiquetas están en la run de MLflow${d.mlflow?.url ? ` (<a href="${esc(d.mlflow.url)}" target="_blank" rel="noopener">verlas en MLflow</a>)` : d.mlflow_ui ? ` (<a href="${esc(d.mlflow_ui)}" target="_blank" rel="noopener">abrir MLflow</a>)` : ''}.${d.diseno.comparacion_principal ? ` Comparación principal: <a href="#/comparar/${esc(d.run_id)},${esc(d.diseno.comparacion_principal)}">${esc(d.run_id)} frente a ${esc(d.diseno.comparacion_principal)}</a>.` : ''}</p>`
       : '<p class="muted">Esta ejecución no tiene configs/&lt;run_id&gt;.json: no se documentó hipótesis ni decisión.</p>'}
     </section>
     <div class="dos">
@@ -94,7 +94,7 @@ export async function vistaEjecucion(el: HTMLElement, id: string) {
         <dl class="kv">
           <dt>commit de git</dt><dd><code>${esc(d.git.commit ?? '—')}</code> (${esc(d.git.branch ?? '—')}${d.git.cambios_sin_commit ? ', con cambios sin commit' : ''})</dd>
           <dt>ambiente</dt><dd>${esc(d.ambiente)} ${d.ambiente_version === c.ejecuciones[0]?.ambiente_version ? '' : ''}</dd>
-          <dt>modelo en MLflow</dt><dd>${d.mlflow ? `${esc(d.mlflow.modelo)} versión ${d.mlflow.version}` : '—'}${d.mlflow_ui ? ` · <a href="${esc(d.mlflow_ui)}" target="_blank" rel="noopener">MLflow</a>` : ''}</dd>
+          <dt>modelo en MLflow</dt><dd>${d.mlflow ? `${esc(d.mlflow.modelo)} versión ${d.mlflow.version}` : '—'}${d.mlflow?.url ? ` · <a href="${esc(d.mlflow.url)}" target="_blank" rel="noopener">abrir la run en MLflow</a>` : d.mlflow_ui ? ` · <a href="${esc(d.mlflow_ui)}" target="_blank" rel="noopener">MLflow</a>` : ''}</dd>
           <dt>manifiesto (sección 11)</dt><dd>${d.manifiesto ? `<a href="${esc(api.urlManifiesto(d.run_id))}" target="_blank" rel="noopener">manifests/${esc(d.run_id)}.json</a> · commit completo, SHA-256 del modelo, suite y nivel` : '—'}</dd>
           <dt>acción</dt><dd>${esc(d.agente.accion ?? '—')}</dd>
           <dt>red</dt><dd>${esc(d.agente.red ?? '—')}</dd>

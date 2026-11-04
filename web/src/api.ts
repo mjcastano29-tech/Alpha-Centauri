@@ -26,7 +26,7 @@ export interface Resumen {
   evaluacion: Evaluacion
   perturbado: { viento: number; aterrizajes: number; velocidad_contacto: number | null; error_posicion: number; resultados: Resultados } | null
   sha256: { config: string; archivos: Record<string, string> } | null
-  mlflow: { modelo: string; version: number } | null
+  mlflow: { modelo: string; version: number; run_uuid?: string; experimento_id?: string; url?: string | null } | null
   mlflow_ui: string | null
   diseno: Diseno | null
   manifiesto: string | null
