@@ -1,0 +1,89 @@
+{
+  "flujo": {
+    "prefect_flow_run_id": "9e265d26-169b-44f0-8cbb-087922bc3c5f",
+    "nombre": "beautiful-guillemot",
+    "inicio": "2026-11-05T16:39:09",
+    "duracion_s": 20,
+    "estado": "completado"
+  },
+  "parametros": {
+    "ambiente": "RocketLanding3D-N2-v0",
+    "seed": 0,
+    "run_id": null,
+    "run_existente": "ppo-n2-transfer-1m5-v0.2-s0",
+    "desde": null,
+    "total_timesteps": null,
+    "hipotesis": "",
+    "cambio": "",
+    "baseline": null,
+    "push": false,
+    "sin_commit": true,
+    "api": "https://alpha-centauri-api.onrender.com",
+    "espera_api": 900
+  },
+  "etapas": {
+    "1 validar": {
+      "id": "RocketLanding3D-N2-v0",
+      "version": "0.2",
+      "nivel": "N2",
+      "observacion": 25,
+      "accion": 5,
+      "obstaculos": 3,
+      "suite": "suite-v1",
+      "git_limpio": false
+    },
+    "2 probar": "18 passed in 0.31s",
+    "3 entrenar": {
+      "run_id": "ppo-n2-transfer-1m5-v0.2-s0",
+      "reutilizada": true
+    },
+    "4 evaluar": {
+      "episodios": 200,
+      "viento": 15.0,
+      "aterrizajes": 0.86,
+      "colisiones": 27,
+      "velocidad_contacto": 1.3116763005780345,
+      "error_posicion": 6.9925,
+      "resultados": {
+        "aterrizaje": 172,
+        "fuera de plataforma": 0,
+        "choque": 1,
+        "sin pasos": 0,
+        "fuera de zona": 0,
+        "colisión": 27
+      },
+      "aterrizajes_viento": 0.555,
+      "colisiones_viento": 42
+    },
+    "5 registrar": {
+      "config": "configs/ppo-n2-transfer-1m5-v0.2-s0.json",
+      "manifest": "manifests/ppo-n2-transfer-1m5-v0.2-s0.json",
+      "sha256": "OK"
+    },
+    "6 decidir": {
+      "aceptado": false,
+      "estado": "seleccionado",
+      "decision": "Sin cambio: ya es el recomendado del nivel N2. 86.0% de aterrizajes en la suite v1 (27 colisiones), 55.5% con viento de 15 m/s.",
+      "comparacion": {
+        "recomendado": "ppo-n2-transfer-1m5-v0.2-s0",
+        "nota": "ya es el recomendado del nivel"
+      },
+      "criterio": {
+        "margen_mejora": 0.02,
+        "tolerancia_viento": 0.05
+      }
+    },
+    "7 publicar": {
+      "commit": null,
+      "nota": "sin commit (--sin-commit)"
+    },
+    "8 comprobar": {
+      "commit": "771f169bfe19386141e555c150a3835a9ef7c4c3",
+      "catalogo": 4,
+      "recomendado": "ppo-n2-transfer-1m5-v0.2-s0",
+      "evaluacion": 0.6666666666666666,
+      "compatible": true,
+      "modo": "local (sin push)"
+    }
+  }
+}

@@ -146,6 +146,14 @@ motor y la calidad (la ligera quita sombras y posproceso para equipos lentos). E
 entre las muestras grabadas cada 0,1 s y nada de la escena cambia los datos; el giro suave del cohete, el vuelco tras un
 choque y los sonidos son solo visuales.
 
+## Pipeline orquestado (Prefect)
+
+[pipelines/entrenar_publicar.py](pipelines/entrenar_publicar.py) encadena las ocho etapas que pide la guía: validar el ambiente,
+probar el contrato, entrenar, evaluar en la suite v1, registrar (configs, manifiesto de la sección 11, MLflow, huellas), decidir
+con un criterio de aceptación frente al recomendado del nivel, publicar el catálogo (commit y push) y comprobar la versión servida
+por la API. La evidencia de cada ejecución queda en `pipelines/ejecuciones/`. Detalles y uso en [pipelines/README.md](pipelines/README.md).
+El orquestador tiene su propio entorno (`requirements-pipeline.txt`, carpeta `.venv-prefect`).
+
 ## Web y API (entrega del proyecto final)
 
 - **Web publicada**: https://alpha-centauri-five.vercel.app (Vercel, rama `main`, Root Directory `web`).

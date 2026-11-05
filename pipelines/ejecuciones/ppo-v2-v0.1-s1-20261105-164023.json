@@ -1,0 +1,36 @@
+{
+  "flujo": {
+    "prefect_flow_run_id": "1c22c1a6-f82b-4240-9ed5-5261046358a1",
+    "nombre": "light-lorikeet",
+    "inicio": "2026-11-05T16:40:23",
+    "duracion_s": 2
+  },
+  "parametros": {
+    "ambiente": "RocketLanding3D-v0",
+    "seed": 1,
+    "run_id": "ppo-v2-v0.1-s1",
+    "run_existente": null,
+    "desde": null,
+    "total_timesteps": null,
+    "hipotesis": "Con otra semilla (1), la configuración v2 del nivel 1 queda a menos de 5 puntos del 97 % de la semilla 0: el resultado no depende de la semilla (primera de las tres semillas del finalista).",
+    "cambio": "Solo la semilla: 1 en vez de 0. Mismos hiperparámetros, ambiente y presupuesto (600 000 pasos) que ppo-v2-v0.1-s0.",
+    "baseline": "ppo-v2-v0.1-s0",
+    "push": true,
+    "sin_commit": false,
+    "api": "https://alpha-centauri-api.onrender.com",
+    "espera_api": 900
+  },
+  "etapas": {
+    "1 validar": {
+      "id": "RocketLanding3D-v0",
+      "version": "0.1.1",
+      "nivel": "N1",
+      "observacion": 16,
+      "accion": 5,
+      "obstaculos": 0,
+      "suite": "suite-v1",
+      "git_limpio": false
+    },
+    "2 probar": "18 passed in 0.31s"
+  }
+}
