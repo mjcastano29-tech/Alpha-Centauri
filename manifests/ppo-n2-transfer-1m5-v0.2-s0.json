@@ -1,0 +1,63 @@
+{
+  "run_id": "ppo-n2-transfer-1m5-v0.2-s0",
+  "level_id": "N2",
+  "environment_version": "RocketLanding3D-N2-v0@0.2",
+  "git_commit": "e106cda449db0da672de7f6a855a94380beb84d9",
+  "git_branch": "main",
+  "config_sha256": "17ad6b78daadfa3bad4a4fbf615ca098c48f6a6743b19c154890aa5a47d3dabe",
+  "model_uri": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/e106cda449db0da672de7f6a855a94380beb84d9/resultados/runs/ppo-n2-transfer-1m5-v0.2-s0/modelo.zip",
+  "model_sha256": "a1d482aaa151eb8819258f8512174d846231ef1c60a9ab008e5cd136805fd1db",
+  "normalization_uri": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/e106cda449db0da672de7f6a855a94380beb84d9/resultados/runs/ppo-n2-transfer-1m5-v0.2-s0/modelo_normalizador.pkl",
+  "normalization_sha256": "0f47cb0d9ea76b116d53e6e106c96cdafed65beefd1fd5eb543564f1848b38c3",
+  "model_registry": null,
+  "runtime_ref": {
+    "python": "3.10.12",
+    "requirements": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/e106cda449db0da672de7f6a855a94380beb84d9/requirements.txt",
+    "docker": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/e106cda449db0da672de7f6a855a94380beb84d9/Dockerfile",
+    "paquetes": {
+      "gymnasium": "1.4.0",
+      "numpy": "2.2.6",
+      "torch": "2.14.1+cpu",
+      "stable_baselines3": "2.9.2"
+    }
+  },
+  "evaluation_suite_id": "suite-v1",
+  "seed": 0,
+  "parent_run_id": "ppo-v2-v0.1-s0",
+  "experiment_id": "experimento-3-nivel2",
+  "agent": {
+    "class": "ppo",
+    "name": "PPO (red neuronal)",
+    "action": "relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12"
+  },
+  "hypothesis": "Esquivar las torres exige anticipar la ruta desde la salida y 600 000 pasos no bastan: con 1,5 M de pasos y la misma transferencia desde el nivel 1, las colisiones bajan claramente (menos de 30 en 200) y la tasa supera el 80 %.",
+  "change": "Solo el presupuesto: 1 500 000 pasos en vez de 600 000. Misma transferencia desde ppo-v2-v0.1-s0, mismos hiperparámetros y ambiente que ppo-n2-transfer-v0.2-s0.",
+  "baseline_run_id": "ppo-n2-transfer-v0.2-s0",
+  "budget": {
+    "pasos_agente": 1500000,
+    "epocas": 49460,
+    "tiempo_s": 2564,
+    "maquina": "CPU de portátil (WSL2), 8 entornos en paralelo"
+  },
+  "status": "seleccionado",
+  "decision": "Seleccionado y promovido a recomendado del nivel 2 (catálogo v4): 172/200 aterrizajes (86 %) frente a 77 % con 600 000 pasos y 72 % del modelo del nivel 1 a ciegas; colisiones 27 frente a 42 y 53; contacto a 1.31 m/s y 7.0 m del centro. Confirma la hipótesis: el presupuesto era el cuello de botella. Cuesta 2,5 veces más tiempo (43 min). Queda pendiente repetirlo con tres semillas.",
+  "evaluation": {
+    "suite": "suite-v1",
+    "episodes": 200,
+    "landing_rate": 0.86,
+    "contact_speed": 1.3117274983648284,
+    "position_error": 6.9951987427453854,
+    "fuel_used": 177.26311449647815,
+    "outcomes": {
+      "aterrizaje": 172,
+      "fuera de plataforma": 0,
+      "choque": 1,
+      "sin pasos": 0,
+      "fuera de zona": 0,
+      "colisión": 27
+    },
+    "per_case": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/e106cda449db0da672de7f6a855a94380beb84d9/resultados/runs/ppo-n2-transfer-1m5-v0.2-s0/evaluacion.json"
+  },
+  "trained_at": "2026-11-05T16:22:12",
+  "generated_at": "2026-11-05T16:23:53"
+}

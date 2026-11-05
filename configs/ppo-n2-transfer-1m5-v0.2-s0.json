@@ -1,0 +1,20 @@
+{
+  "run_id": "ppo-n2-transfer-1m5-v0.2-s0",
+  "experimento": "experimento-3-nivel2",
+  "nivel": "N2",
+  "ambiente": "RocketLanding3D-N2-v0@0.2",
+  "hipotesis": "Esquivar las torres exige anticipar la ruta desde la salida y 600 000 pasos no bastan: con 1,5 M de pasos y la misma transferencia desde el nivel 1, las colisiones bajan claramente (menos de 30 en 200) y la tasa supera el 80 %.",
+  "cambio": "Solo el presupuesto: 1 500 000 pasos en vez de 600 000. Misma transferencia desde ppo-v2-v0.1-s0, mismos hiperparámetros y ambiente que ppo-n2-transfer-v0.2-s0.",
+  "baseline": "ppo-n2-transfer-v0.2-s0",
+  "comparacion_principal": "ppo-n2-transfer-v0.2-s0",
+  "presupuesto": {
+    "pasos_agente": 1500000,
+    "epocas": 49460,
+    "tiempo_s": 2564,
+    "maquina": "CPU de portátil (WSL2), 8 entornos en paralelo"
+  },
+  "suite": "suite-v1",
+  "estado": "seleccionado",
+  "decision": "Seleccionado y promovido a recomendado del nivel 2 (catálogo v4): 172/200 aterrizajes (86 %) frente a 77 % con 600 000 pasos y 72 % del modelo del nivel 1 a ciegas; colisiones 27 frente a 42 y 53; contacto a 1.31 m/s y 7.0 m del centro. Confirma la hipótesis: el presupuesto era el cuello de botella. Cuesta 2,5 veces más tiempo (43 min). Queda pendiente repetirlo con tres semillas.",
+  "fecha_decision": "2026-11-05"
+}

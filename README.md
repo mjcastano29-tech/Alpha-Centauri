@@ -92,8 +92,8 @@ python visualizar_experimento1.py    # genera experimento1.html con esas épocas
 |---|---|---|---|
 | Modelo | Q-learning con dos tablas ([agente_qlearning.py](agente_qlearning.py)) | PPO, red neuronal con Stable-Baselines3 ([agente_ppo.py](agente_ppo.py)) | PPO con transferencia desde el modelo del nivel 1 (`--desde`) |
 | Ambiente | N1 · `RocketLanding3D-v0` 0.1 | N1 · `RocketLanding3D-v0` 0.1 | N2 · `RocketLanding3D-N2-v0` 0.2 (tres torres) |
-| Entrenar | `python cli.py entrenar` (~2 min) | `python cli.py entrenar-ppo` (~11 min en CPU) | `python cli.py entrenar-ppo --ambiente RocketLanding3D-N2-v0 --desde ppo-v2-v0.1-s0` (~14 min) |
-| Aterrizajes en 200 épocas de evaluación | 157 (78 %) | 194 (97 %) | 153 (77 %); desde cero, 16 (8 %) |
+| Entrenar | `python cli.py entrenar` (~2 min) | `python cli.py entrenar-ppo` (~11 min en CPU) | `python cli.py entrenar-ppo --ambiente RocketLanding3D-N2-v0 --desde ppo-v2-v0.1-s0 --total-timesteps 1500000` (~43 min) |
+| Aterrizajes en 200 épocas de evaluación | 157 (78 %) | 194 (97 %) | 172 (86 %) con 1,5 M de pasos; 153 (77 %) con 600 000; desde cero, 16 (8 %) |
 | Documento | [docs/ambiente-v0.1.md](docs/ambiente-v0.1.md) | [docs/experimento-2.md](docs/experimento-2.md) | [docs/ambiente-v0.2.md](docs/ambiente-v0.2.md) |
 
 Los experimentos 1 y 2 comparten ambiente (0.1) y son comparables entre sí; el 3 es otra familia de modelos (observación de 25 valores)
@@ -113,7 +113,8 @@ el **presupuesto** (épocas, pasos del agente, tiempo, máquina), la **suite** c
 | `ppo-rel-v0.1-s0` | el fallo era la acción: empuje relativo al peso | acción relativa v1 (±23°) | rechazado (0 %, llega inclinado) |
 | `ppo-v2-v0.1-s0` | acotar la inclinación al límite de aterrizaje lo hace aprendible | acción relativa v2 (±9,6°) | seleccionado (97 %) |
 | `ppo-n2-v0.2-s0` | la receta del nivel 1 aprende el nivel 2 desde cero | ambiente N2 (torres) | rechazado (8 %: frena, pero fuera de la plataforma y choca con las torres) |
-| `ppo-n2-transfer-v0.2-s0` | partir de la política del nivel 1 y aprender solo a esquivar | transferencia de pesos y normalización | seleccionado N2 (77 %; las colisiones bajan poco: 42 frente a 53) |
+| `ppo-n2-transfer-v0.2-s0` | partir de la política del nivel 1 y aprender solo a esquivar | transferencia de pesos y normalización | referencia (77 %; las colisiones bajan poco: 42 frente a 53); anterior del nivel 2 |
+| `ppo-n2-transfer-1m5-v0.2-s0` | el presupuesto era el cuello de botella | 1,5 M de pasos en vez de 600 000 | seleccionado N2 (86 %, 27 colisiones) |
 
 Suites: [configs/suites/suite-v1.json](configs/suites/suite-v1.json) (200 épocas, semillas desde 10 000 000, condiciones
 `normal` y `viento-15`) y `suite-reservada` (misma estructura, semilla fuera del repo, solo para los finalistas).

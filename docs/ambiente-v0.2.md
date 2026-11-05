@@ -107,12 +107,14 @@ Lectura: en los cinco primeros pasos el agente deja caer el cohete (la recompens
 
 Se documentan en `configs/<run_id>.json` (hipótesis, cambio, presupuesto, estado y decisión); resumen (suite v1, 200 épocas, viento 0–10 m/s):
 
-| Ejecución | Hipótesis (resumen) | Presupuesto | Aterrizajes | Colisiones | Estado |
-|---|---|---|---|---|---|
-| referencia: `ppo-v2-v0.1-s0` a ciegas | modelo del nivel 1 con `AdaptadorN1` | — | 143 (72 %) | 53 | referencia de dificultad |
-| `ppo-n2-v0.2-s0` | la receta del nivel 1 aprende el nivel 2 desde cero | 600 000 pasos · 21 376 épocas · 12,7 min | 16 (8 %) | 54 | rechazado: frena (97 contactos suaves) pero fuera de la plataforma; trata la plataforma rodeada de torres como zona peligrosa |
-| `ppo-n2-transfer-v0.2-s0` | partir de la política del nivel 1 y aprender solo a esquivar | 600 000 pasos · 19 940 épocas · 13,9 min | 153 (77 %) | 42 | **seleccionado** (recomendado del nivel 2, catálogo v3); aterriza en su 4.ª época; esquivar mejora poco |
-| `ppo-n2-transfer-1m5-v0.2-s0` | con 1,5 M de pasos la transferencia aprende a esquivar | 1 500 000 pasos | en curso | | pendiente |
+| Ejecución | Hipótesis (resumen) | Presupuesto | Aterrizajes | Colisiones | Con viento de 15 m/s | Estado |
+|---|---|---|---|---|---|---|
+| referencia: `ppo-v2-v0.1-s0` a ciegas | modelo del nivel 1 con `AdaptadorN1` | — | 143 (72 %) | 53 | — | referencia de dificultad |
+| `ppo-n2-v0.2-s0` | la receta del nivel 1 aprende el nivel 2 desde cero | 600 000 pasos · 21 376 épocas · 12,7 min | 16 (8 %) | 54 | 2 % | rechazado: frena (97 contactos suaves) pero fuera de la plataforma; trata la plataforma rodeada de torres como zona peligrosa |
+| `ppo-n2-transfer-v0.2-s0` | partir de la política del nivel 1 y aprender solo a esquivar | 600 000 pasos · 19 940 épocas · 13,9 min | 153 (77 %) | 42 | 42 % (58 colisiones) | referencia: fue el recomendado del nivel 2 (catálogo v3) y es el "anterior" para rollback; aterriza en su 4.ª época, esquivar mejora poco |
+| `ppo-n2-transfer-1m5-v0.2-s0` | el presupuesto era el cuello de botella: con 1,5 M de pasos la transferencia aprende a esquivar | 1 500 000 pasos · 49 460 épocas · 42,7 min | **172 (86 %)** | **27** | 56 % (42 colisiones) | **seleccionado**: recomendado del nivel 2 (catálogo v4); contacto 1,31 m/s, error 7,0 m, 177 kg |
+
+Con viento de 15 m/s (fuera del rango de entrenamiento) el viento empuja al cohete hacia las torres: las colisiones del recomendado suben de 27 a 42 y la tasa cae a 56 %. Es el incidente del nivel 2 y la perturbación candidata para el nivel 3.
 
 Cómo evolucionó el modelo desde cero (resultado de cada cuarto de las 21 376 épocas de entrenamiento, con exploración): choque 73 → 76 → 69 → 56 %, colisión 24 → 21 → 23 → 26 %, fuera de plataforma 1 → 3 → 7 → 15 %, aterrizaje 0 → 0 → 1 → 2 %. Aprende a frenar antes que a entrar entre las torres.
 

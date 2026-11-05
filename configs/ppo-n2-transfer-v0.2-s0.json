@@ -7,9 +7,14 @@
   "cambio": "Transferencia: se copian los pesos de ppo-v2-v0.1-s0 y la normalización de las 16 observaciones comunes; las columnas de la primera capa para las 9 entradas nuevas (torres) empiezan en cero. Mismos hiperparámetros y ambiente que ppo-n2-v0.2-s0.",
   "baseline": "ppo-n2-v0.2-s0",
   "comparacion_principal": "ppo-v2-v0.1-s0",
-  "presupuesto": {"pasos_agente": 600000, "epocas": 19940, "tiempo_s": 832, "maquina": "CPU de portátil (WSL2), 8 entornos en paralelo"},
+  "presupuesto": {
+    "pasos_agente": 600000,
+    "epocas": 19940,
+    "tiempo_s": 832,
+    "maquina": "CPU de portátil (WSL2), 8 entornos en paralelo"
+  },
   "suite": "suite-v1",
-  "estado": "seleccionado",
-  "decision": "Seleccionado como recomendado del nivel 2 (catálogo v3): 153/200 aterrizajes (77 %) frente a 8 % desde cero y 72 % del modelo del nivel 1 a ciegas; aterriza en su cuarta época y la evaluación sin ruido llega a 45/50. La hipótesis se confirma solo en parte: la destreza de aterrizar se conserva, pero las colisiones bajan poco (42 frente a 53): esquivar las torres exige anticipar la ruta desde los 600 m y 600 000 pasos no bastan. Siguiente hipótesis: más presupuesto (1,5 M de pasos) con la misma transferencia.",
+  "estado": "referencia",
+  "decision": "Seleccionado como recomendado del nivel 2 (catálogo v3): 153/200 aterrizajes (77 %) frente a 8 % desde cero y 72 % del modelo del nivel 1 a ciegas; aterriza en su cuarta época y la evaluación sin ruido llega a 45/50. La hipótesis se confirma solo en parte: la destreza de aterrizar se conserva, pero las colisiones bajan poco (42 frente a 53): esquivar las torres exige anticipar la ruta desde los 600 m y 600 000 pasos no bastan. Siguiente hipótesis: más presupuesto (1,5 M de pasos) con la misma transferencia. Actualización (mismo día): superado por ppo-n2-transfer-1m5-v0.2-s0 (86 %, 27 colisiones); pasa a 'anterior' del nivel 2 en el catálogo (destino del rollback).",
   "fecha_decision": "2026-11-05"
 }
