@@ -1,0 +1,81 @@
+{
+  "flujo": {
+    "prefect_flow_run_id": "a89a83ea-bf35-429f-95ed-b28f68b2f172",
+    "nombre": "humble-rooster",
+    "inicio": "2026-11-05T18:12:34",
+    "duracion_s": 391
+  },
+  "parametros": {
+    "ambiente": "RocketLanding3D-N3-v0",
+    "seed": 0,
+    "run_id": "ppo-n3-transfer-v0.3-s0",
+    "run_existente": null,
+    "desde": "ppo-n2-transfer-1m5-v0.2-s0",
+    "total_timesteps": 600000,
+    "hipotesis": "Intervención ante el incidente de viento: reentrenar el recomendado del nivel 2 en las condiciones del nivel 3 (viento 0–15 m/s, ráfagas ×2) recupera al menos 2 puntos de aterrizajes frente a ese mismo modelo jugando en N3 (72,0 %) sin más colisiones",
+    "cambio": "Ambiente N3 (viento hasta 15 m/s, ráfagas 3 m/s) y transferencia de pesos y normalización desde ppo-n2-transfer-1m5-v0.2-s0; 600 000 pasos",
+    "baseline": "ppo-n2-transfer-1m5-v0.2-s0",
+    "push": false,
+    "sin_commit": false,
+    "api": "https://alpha-centauri-api.onrender.com",
+    "espera_api": 900
+  },
+  "etapas": {
+    "1 validar": {
+      "id": "RocketLanding3D-N3-v0",
+      "version": "0.3",
+      "nivel": "N3",
+      "observacion": 25,
+      "accion": 5,
+      "obstaculos": 3,
+      "suite": "suite-v1",
+      "git_limpio": true
+    },
+    "2 probar": "using dumb terminal settings.",
+    "3 entrenar": {
+      "run_id": "ppo-n3-transfer-v0.3-s0",
+      "reutilizada": false
+    },
+    "4 evaluar": {
+      "episodios": 200,
+      "viento": 15.0,
+      "aterrizajes": 0.815,
+      "colisiones": 37,
+      "velocidad_contacto": 1.5246625766871165,
+      "error_posicion": 9.83,
+      "resultados": {
+        "aterrizaje": 163,
+        "fuera de plataforma": 0,
+        "choque": 0,
+        "sin pasos": 0,
+        "fuera de zona": 0,
+        "colisión": 37
+      },
+      "aterrizajes_viento": 0.745,
+      "colisiones_viento": 31
+    },
+    "5 registrar": {
+      "config": "configs/ppo-n3-transfer-v0.3-s0.json",
+      "manifest": "manifests/ppo-n3-transfer-v0.3-s0.json",
+      "sha256": "OK"
+    },
+    "6 decidir": {
+      "aceptado": false,
+      "estado": "rechazado",
+      "decision": "Rechazado por el pipeline: 81.5% de aterrizajes en la suite v1 (37 colisiones), 74.5% con viento de 15 m/s. más colisiones que ppo-n2-transfer-1m5-v0.2-s0 (37 frente a 35).",
+      "comparacion": {
+        "recomendado": null,
+        "aterrizajes": 0.72,
+        "aterrizajes_viento": 0.465,
+        "colisiones": 35,
+        "referencia": "ppo-n2-transfer-1m5-v0.2-s0",
+        "jugando_en": "RocketLanding3D-N3-v0",
+        "nota": "primer candidato del nivel: se compara con ppo-n2-transfer-1m5-v0.2-s0 jugando en RocketLanding3D-N3-v0 (incidente.py)"
+      },
+      "criterio": {
+        "margen_mejora": 0.02,
+        "tolerancia_viento": 0.05
+      }
+    }
+  }
+}
