@@ -1,0 +1,23 @@
+artifact_path: file:///home/jorge/Alpha-Centauri/mlruns/experimento-4-nivel3/models/m-97fb2cc136f3473ca83e834476562e60/artifacts
+flavors:
+  python_function:
+    artifacts:
+      modelo:
+        path: artifacts/modelo
+        uri: /tmp/tmpmob1hmco/modelo
+    cloudpickle_version: 3.1.2
+    code: code
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pyfunc.model
+    python_model: python_model.pkl
+    python_version: 3.10.12
+    streamable: false
+mlflow_version: 3.17.2
+model_id: m-97fb2cc136f3473ca83e834476562e60
+model_size_bytes: 524599
+model_uuid: m-97fb2cc136f3473ca83e834476562e60
+prompts: null
+run_id: 58b9c5e22bb3459c9c99c145c680ee4d
+utc_time_created: '2026-11-05 23:35:44.485714'
