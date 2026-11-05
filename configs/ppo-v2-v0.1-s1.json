@@ -1,0 +1,20 @@
+{
+  "run_id": "ppo-v2-v0.1-s1",
+  "experimento": "experimento-2-ppo",
+  "nivel": "N1",
+  "ambiente": "RocketLanding3D-v0@0.1.1",
+  "hipotesis": "Con otra semilla (1), la configuración v2 del nivel 1 queda a menos de 5 puntos del 97 % de la semilla 0: el resultado no depende de la semilla (primera de las tres semillas del finalista).",
+  "cambio": "Solo la semilla: 1 en vez de 0. Mismos hiperparámetros, ambiente y presupuesto (600 000 pasos) que ppo-v2-v0.1-s0.",
+  "baseline": "ppo-v2-v0.1-s0",
+  "comparacion_principal": "ppo-v2-v0.1-s0",
+  "presupuesto": {
+    "pasos_agente": 600000,
+    "epocas": 16423,
+    "maquina": "pipeline Prefect en CPU de portátil (WSL2)"
+  },
+  "suite": "suite-v1",
+  "estado": "seleccionado",
+  "decision": "Seleccionado por el pipeline: 99.0% de aterrizajes en la suite v1 (0 colisiones), 72.0% con viento de 15 m/s; supera al recomendado ppo-v2-v0.1-s0 con el criterio de aceptación (+2% de tasa, viento −5% como mucho).",
+  "fecha_decision": "2026-11-05",
+  "pipeline": true
+}

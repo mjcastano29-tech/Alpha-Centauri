@@ -1,0 +1,125 @@
+{
+  "run_id": "ppo-v2-v0.1-s1",
+  "experimento": "experimento-2-ppo",
+  "nivel": "N1",
+  "fecha": "2026-11-05T17:03:38",
+  "formato": 1,
+  "git": {
+    "commit": "3f69d344e63dc1f526e718abdb1d98231f0c1611",
+    "branch": "main",
+    "cambios_sin_commit": true
+  },
+  "ambiente": {
+    "id": "RocketLanding3D-v0",
+    "version": "0.1.1",
+    "nivel": "N1",
+    "obstaculos": [],
+    "step_altitude": 20.0,
+    "step_time_limit": 2.0,
+    "max_steps": 50,
+    "start_altitude": 600.0,
+    "pad_radius": 10.0,
+    "max_landing_vertical_speed": 3.0,
+    "max_landing_horizontal_speed": 2.0,
+    "max_landing_tilt": 10.0,
+    "rewards": {
+      "aterrizaje": 100.0,
+      "fuera de plataforma": -50.0,
+      "choque": -100.0,
+      "sin pasos": -100.0,
+      "fuera de zona": -100.0
+    }
+  },
+  "agente": {
+    "clase": "ppo",
+    "nombre": "PPO (red neuronal)",
+    "tipo": "PPO (Stable-Baselines3): red neuronal MLP sobre la acción continua del entorno",
+    "red": "[128, 128]",
+    "accion": "relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12",
+    "hiperparametros": {
+      "total_timesteps": 600000,
+      "n_envs": 8,
+      "n_steps": 256,
+      "batch_size": 256,
+      "n_epochs": 10,
+      "learning_rate": 0.0003,
+      "gamma": 0.99,
+      "gae_lambda": 0.95,
+      "clip_range": 0.2,
+      "ent_coef": 0.005,
+      "log_std_init": -0.5,
+      "eval_every": 20000
+    }
+  },
+  "config": {
+    "total_timesteps": 600000,
+    "n_envs": 8,
+    "n_steps": 256,
+    "batch_size": 256,
+    "n_epochs": 10,
+    "learning_rate": 0.0003,
+    "gamma": 0.99,
+    "gae_lambda": 0.95,
+    "clip_range": 0.2,
+    "ent_coef": 0.005,
+    "net_arch": [
+      128,
+      128
+    ],
+    "log_std_init": -0.5,
+    "eval_every": 20000,
+    "seed": 1,
+    "accion": "relativa",
+    "ambiente": "RocketLanding3D-v0",
+    "desde": null
+  },
+  "software": {
+    "python": "3.10.12",
+    "gymnasium": "1.4.0",
+    "numpy": "2.2.6",
+    "torch": "2.14.1+cpu",
+    "stable_baselines3": "2.9.2",
+    "hilos_cpu": 6,
+    "maquina": "x86_64"
+  },
+  "resultado": {
+    "primer_aterrizaje": 1470,
+    "mejor_epoca": 16422,
+    "evaluacion": {
+      "episodes": 200,
+      "outcomes": {
+        "aterrizaje": 198,
+        "fuera de plataforma": 0,
+        "choque": 0,
+        "sin pasos": 2,
+        "fuera de zona": 0,
+        "colisión": 0
+      },
+      "landing_rate": 0.99,
+      "contact_speed": 1.2496149397210743,
+      "position_error": 3.1458073482533937,
+      "fuel_used": 328.96103212418615
+    },
+    "epocas_grabadas": 30
+  },
+  "archivos": {
+    "modelo": [
+      "modelo.zip",
+      "modelo_normalizador.pkl"
+    ],
+    "entrenamiento": "entrenamiento.json",
+    "episodios": "episodios.csv",
+    "vuelos": "vuelos.json.gz"
+  },
+  "sha256": {
+    "algoritmo": "sha256",
+    "config": "965fb0b0e6c7a7e8f58f43093e73f7f9f7c472805a728ae1ebf84f6e55cbf9c3",
+    "archivos": {
+      "modelo.zip": "b180a033bcf1c8111fd3361e4a3c065e4622666196f2ef5ba08bf14151cac97d",
+      "modelo_normalizador.pkl": "cbb62d0aa06fd956d0e584af5638f0edb183efbfb07cfe168068d19363e549d2",
+      "entrenamiento.json": "104c4f7452a8eb37aadb71a496666a4cf4e6737408d38b3e1d9884ebc951edb5",
+      "episodios.csv": "66d8a6201ee0baf5719330022ead8636e560b8054742041189a0a96d1e071773",
+      "vuelos.json.gz": "3c7b5d72d6dd8365d402046bb868ae272a864bbc07cc900d517d42d4ea693975"
+    }
+  }
+}
