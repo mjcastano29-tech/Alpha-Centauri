@@ -4,6 +4,12 @@
 
 Contraste entre lo que pide el enunciado del proyecto final de MLOps (30 de octubre de 2026) y lo que hay en el repositorio hoy. Cada afirmación remite a un archivo o a un comando; lo que no se ha podido comprobar se dice.
 
+## Actualización · 5 de noviembre de 2026 (noche): pipeline orquestado con Prefect
+
+- **Pipeline de ocho etapas** en [pipelines/entrenar_publicar.py](../pipelines/entrenar_publicar.py) (Prefect 3): validar el ambiente, probar el contrato, entrenar, evaluar en la suite v1 (normal y con viento), registrar (configs, manifiesto de la sección 11, MLflow, huellas), decidir con criterio de aceptación frente al recomendado del nivel (+2 puntos de tasa, no perder más de 5 con viento, sin más colisiones en el nivel 2), publicar el catálogo con commit y push, y comprobar que la API pública sirve el commit y el catálogo esperados con una evaluación corta. Evidencia versionada en `pipelines/ejecuciones/`. Prefect vive en su propio entorno (`requirements-pipeline.txt`) porque no convive con la versión de FastAPI de la API.
+- **Primera ejecución real**: `ppo-v2-v0.1-s1` (la configuración ganadora del nivel 1 con la semilla 1, primera de las tres semillas del finalista). Resultado 99 % en la suite v1 y 72 % con viento de 15 m/s, frente a 97 % y 63 % de la semilla 0: el criterio la aceptó, el pipeline la promovió a recomendado del nivel 1 (catálogo v5, la semilla 0 queda como anterior), hizo push (commit `a527ff9`) y comprobó la API pública 169 s después (28 min en total, 1674 s). La diferencia entre semillas (2 puntos) es la variabilidad de la configuración y justifica las tres semillas que pide la guía.
+- Pendiente: las semillas restantes de los dos finalistas (s2 del nivel 1; s1 y s2 del nivel 2, 43 min cada una), intervención ante el incidente de viento, rollback desde la web, monitoreo, release e informe.
+
 ## Actualización · 5 de noviembre de 2026: nivel 2 en marcha y web 3D completa
 
 - **Web 3D**: el replay y la evaluación en vivo de la web usan ahora la escena cinematográfica completa de la fase 3D (cielo, terreno, cohete de acero, penacho, polvo, choques, tres cámaras, fantasmas, posproceso) portada a `web/src/escena.ts`; el 4 de noviembre se detectó que la web servía una escena simplificada.

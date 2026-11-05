@@ -39,8 +39,8 @@
     "tiempo_s": 683,
     "maquina": "CPU de portátil (WSL2), 8 entornos en paralelo"
   },
-  "status": "seleccionado",
-  "decision": "Seleccionado y promovido a modelo recomendado (catálogo v2): 194/200 aterrizajes (97 %) frente a 78 % del baseline; 63 % frente a 38 % con viento de 15 m/s; contacto a 1,20 m/s y 4,9 m del centro; primer aterrizaje en la época 1970.",
+  "status": "referencia",
+  "decision": "Seleccionado y promovido a modelo recomendado (catálogo v2): 194/200 aterrizajes (97 %) frente a 78 % del baseline; 63 % frente a 38 % con viento de 15 m/s; contacto a 1,20 m/s y 4,9 m del centro; primer aterrizaje en la época 1970. Actualización (2026-11-05): el pipeline promovió a ppo-v2-v0.1-s1 (misma configuración con semilla 1: 99 %, 72 % con viento) como recomendado del nivel 1 (catálogo v5); esta ejecución pasa a 'anterior' (destino del rollback). La diferencia entre semillas (97 % frente a 99 %) mide la variabilidad de la configuración.",
   "evaluation": {
     "suite": "suite-v1",
     "episodes": 200,
@@ -58,5 +58,5 @@
     "per_case": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/6458e2b0fbb022ac625a7bdb45f85cb1da7294a5/resultados/runs/ppo-v2-v0.1-s0/evaluacion.json"
   },
   "trained_at": "2026-10-28T18:18:05",
-  "generated_at": "2026-11-05T16:23:53"
+  "generated_at": "2026-11-05T17:09:03"
 }

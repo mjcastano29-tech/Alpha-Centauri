@@ -7,9 +7,14 @@
   "cambio": "Acción relativa v2: 3 valores en [−1, 1]; empuje = 1 + a₀ (máximo ×1,6), inclinación = a₁, a₂ × 0,12; desviación inicial de la política 0,6 (log_std_init −0,5). Todo lo demás igual que ppo-rel-v0.1-s0.",
   "baseline": "ppo-rel-v0.1-s0",
   "comparacion_principal": "base-v0.1-s0",
-  "presupuesto": {"pasos_agente": 600000, "epocas": 15942, "tiempo_s": 683, "maquina": "CPU de portátil (WSL2), 8 entornos en paralelo"},
+  "presupuesto": {
+    "pasos_agente": 600000,
+    "epocas": 15942,
+    "tiempo_s": 683,
+    "maquina": "CPU de portátil (WSL2), 8 entornos en paralelo"
+  },
   "suite": "suite-v1",
-  "estado": "seleccionado",
-  "decision": "Seleccionado y promovido a modelo recomendado (catálogo v2): 194/200 aterrizajes (97 %) frente a 78 % del baseline; 63 % frente a 38 % con viento de 15 m/s; contacto a 1,20 m/s y 4,9 m del centro; primer aterrizaje en la época 1970.",
+  "estado": "referencia",
+  "decision": "Seleccionado y promovido a modelo recomendado (catálogo v2): 194/200 aterrizajes (97 %) frente a 78 % del baseline; 63 % frente a 38 % con viento de 15 m/s; contacto a 1,20 m/s y 4,9 m del centro; primer aterrizaje en la época 1970. Actualización (2026-11-05): el pipeline promovió a ppo-v2-v0.1-s1 (misma configuración con semilla 1: 99 %, 72 % con viento) como recomendado del nivel 1 (catálogo v5); esta ejecución pasa a 'anterior' (destino del rollback). La diferencia entre semillas (97 % frente a 99 %) mide la variabilidad de la configuración.",
   "fecha_decision": "2026-11-02"
 }
