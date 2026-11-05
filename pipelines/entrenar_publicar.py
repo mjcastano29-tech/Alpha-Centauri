@@ -5,7 +5,8 @@
     3 entrenar     entrenamiento PPO (o se reutiliza una ejecución existente con --run-existente)
     4 evaluar      suite v1: 200 épocas normales + 200 con viento de 15 m/s (evaluacion.json)
     5 registrar    configs/<id>.json (hipótesis, cambio, presupuesto), manifests/<id>.json (sección 11), etiquetas en MLflow, huellas SHA-256
-    6 decidir      criterio de aceptación frente al recomendado actual del nivel; estado seleccionado/rechazado en configs/
+    6 decidir      criterio de aceptación frente al recomendado actual del nivel (en un nivel sin recomendado, frente a
+                   --baseline jugando en este ambiente: incidente.py); estado seleccionado/rechazado en configs/
     7 publicar     catálogo (recomendar si se aceptó), commit con todos los artefactos y, con --push, push (dispara el despliegue)
     8 comprobar    la versión servida (GET /version, catálogo y una evaluación corta) coincide con el commit publicado
 
@@ -85,7 +86,7 @@ def validar(ambiente):
 
 @task(name="2 probar contrato")
 def probar():
-    salida = correr([PYTHON, "-m", "pytest", "-q", "tests/test_ambiente.py", "tests/test_ambiente_n2.py"], timeout=900)
+    salida = correr([PYTHON, "-m", "pytest", "-q", "tests/test_ambiente.py", "tests/test_ambiente_n2.py", "tests/test_ambiente_n3.py"], timeout=900)
     return salida.splitlines()[-1]
 
 
@@ -135,28 +136,41 @@ def registrar(run_id, args, ambiente_info, evaluacion):
 
 
 @task(name="6 decidir")
-def decidir(run_id, ambiente_info, evaluacion):
+def decidir(run_id, ambiente_info, evaluacion, baseline=None):
     nivel = ambiente_info["nivel"]
     cat = leer(ROOT / "catalogo.json")
     actual = (cat.get("niveles", {}).get(nivel) or {}).get("recomendado") or (cat.get("recomendado") if nivel == "N1" else None)
     motivos = []
+    referencia = None
     if actual and actual != run_id:
         ev_actual = leer(ROOT / "resultados" / "runs" / actual / "evaluacion.json")
-        ra, rv = ev_actual["normal"]["resumen"]["aterrizajes"], ev_actual["perturbado"]["resumen"]["aterrizajes"]
-        ca = ev_actual["normal"]["resumen"]["resultados"].get("colisión", 0)
+        referencia = (ev_actual["normal"]["resumen"], ev_actual["perturbado"]["resumen"])
+    elif not actual and baseline and baseline != run_id:
+        # nivel nuevo: la referencia es el baseline (p. ej. el recomendado del nivel anterior) jugando en este ambiente
+        correr([PYTHON, "incidente.py", "--run", baseline, "--ambiente", ambiente_info["id"]], timeout=3600)
+        inc = leer(ROOT / "resultados" / "incidentes" / f"{baseline}@{ambiente_info['id']}.json")
+        referencia = (inc["despues"]["normal"]["resumen"], inc["despues"]["perturbado"]["resumen"])
+        actual = baseline
+    if referencia:
+        ra, rv = referencia[0]["aterrizajes"], referencia[1]["aterrizajes"]
+        ca = referencia[0]["resultados"].get("colisión", 0)
         mejora = evaluacion["aterrizajes"] - ra
         if mejora < MARGEN_MEJORA:
-            motivos.append(f"no mejora al recomendado {actual} en al menos {MARGEN_MEJORA:.0%} ({evaluacion['aterrizajes']:.1%} frente a {ra:.1%})")
+            motivos.append(f"no mejora a {actual} en al menos {MARGEN_MEJORA:.0%} ({evaluacion['aterrizajes']:.1%} frente a {ra:.1%})")
         if evaluacion["aterrizajes_viento"] < rv - TOLERANCIA_VIENTO:
             motivos.append(f"con viento de 15 m/s pierde más de {TOLERANCIA_VIENTO:.0%} ({evaluacion['aterrizajes_viento']:.1%} frente a {rv:.1%})")
         if nivel != "N1" and evaluacion["colisiones"] > ca:
-            motivos.append(f"más colisiones que el recomendado ({evaluacion['colisiones']} frente a {ca})")
+            motivos.append(f"más colisiones que {actual} ({evaluacion['colisiones']} frente a {ca})")
         comparacion = {"recomendado": actual, "aterrizajes": ra, "aterrizajes_viento": rv, "colisiones": ca}
+        if actual == baseline and not (cat.get("niveles", {}).get(nivel) or {}).get("recomendado"):
+            comparacion.update({"recomendado": None, "referencia": baseline, "jugando_en": ambiente_info["id"],
+                                "nota": f"primer candidato del nivel: se compara con {baseline} jugando en {ambiente_info['id']} (incidente.py)"})
     elif actual == run_id:
         comparacion = {"recomendado": actual, "nota": "ya es el recomendado del nivel"}
     else:
         comparacion = {"recomendado": None, "nota": "primer candidato del nivel"}
     aceptado = not motivos and actual != run_id
+    actual = comparacion.get("recomendado")
     cfg_path = ROOT / "configs" / f"{run_id}.json"
     cfg = leer(cfg_path)
     resumen = (f"{evaluacion['aterrizajes']:.1%} de aterrizajes en la suite v1 ({evaluacion['colisiones']} colisiones), "
@@ -165,7 +179,7 @@ def decidir(run_id, ambiente_info, evaluacion):
         decision = f"Sin cambio: ya es el recomendado del nivel {nivel}. {resumen}."
         estado = cfg.get("estado", "seleccionado")
     elif aceptado:
-        estado, decision = "seleccionado", f"Seleccionado por el pipeline: {resumen}; supera al recomendado {actual or '—'} con el criterio de aceptación (+{MARGEN_MEJORA:.0%} de tasa, viento −{TOLERANCIA_VIENTO:.0%} como mucho{', no más colisiones' if nivel != 'N1' else ''})."
+        estado, decision = "seleccionado", f"Seleccionado por el pipeline: {resumen}; supera {('al recomendado ' + actual) if actual else ('a ' + comparacion['referencia'] + ' en este ambiente') if comparacion.get('referencia') else 'sin referencia'} con el criterio de aceptación (+{MARGEN_MEJORA:.0%} de tasa, viento −{TOLERANCIA_VIENTO:.0%} como mucho{', no más colisiones' if nivel != 'N1' else ''})."
     else:
         estado, decision = "rechazado", f"Rechazado por el pipeline: {resumen}. " + "; ".join(motivos) + "."
     if cfg.get("estado") in (None, "candidato") or cfg.get("pipeline"):
@@ -183,6 +197,8 @@ def publicar(run_id, decision, args, evidencia_path):
     if args.sin_commit:
         return {"commit": None, "nota": "sin commit (--sin-commit)"}
     rutas = ["catalogo.json", "configs", "manifests", "mlflow.db", "mlruns", "resultados/registro.json", f"resultados/runs/{run_id}", str(evidencia_path.relative_to(ROOT))]
+    if (ROOT / "resultados" / "incidentes").exists():
+        rutas.append("resultados/incidentes")
     subprocess.run(["git", "add", "-A", "--", *rutas], cwd=ROOT, check=True)
     mensaje = (f"pipeline: {run_id} {'seleccionado y recomendado' if decision['aceptado'] else decision['estado']} "
                f"({decision['comparacion'].get('recomendado') or 'sin recomendado previo'})\n\n{decision['decision']}\n\n"
@@ -263,7 +279,7 @@ def entrenar_y_publicar(args):
         run_id = entrenar(args, ambiente_info); guardar("3 entrenar", {"run_id": run_id, "reutilizada": bool(args.run_existente)})
         evaluacion = evaluar(run_id); guardar("4 evaluar", evaluacion)
         guardar("5 registrar", registrar(run_id, args, ambiente_info, evaluacion))
-        decision = decidir(run_id, ambiente_info, evaluacion); guardar("6 decidir", decision)
+        decision = decidir(run_id, ambiente_info, evaluacion, args.baseline); guardar("6 decidir", decision)
         publicacion = publicar(run_id, decision, args, evidencia_path); guardar("7 publicar", publicacion)
         guardar("8 comprobar", comprobar(run_id, decision, publicacion, args, ambiente_info))
         evidencia["flujo"]["estado"] = "completado"

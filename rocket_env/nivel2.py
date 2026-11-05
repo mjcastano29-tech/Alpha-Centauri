@@ -5,7 +5,7 @@ torres altas alrededor de la plataforma. Chocar con una torre termina la época 
 El agente las ve en la observación (posición relativa y altura que le queda por encima) y tiene que
 decidir la ruta de aproximación: por qué hueco entre torres baja y cuándo alinearse con él.
 
-Es una familia nueva de modelos: la observación pasa de 16 a 22 valores, así que una política del
+Es una familia nueva de modelos: la observación pasa de 16 a 25 valores, así que una política del
 nivel 1 no puede jugar aquí tal cual. `AdaptadorN1` recorta la observación a los 16 valores del nivel 1
 para medir cuánto se degrada un modelo del nivel 1 que ignora las torres (mide la dificultad del nivel).
 """

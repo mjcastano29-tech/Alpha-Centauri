@@ -103,7 +103,7 @@ export interface Version {
 export interface ResultadoEvaluacion {
   modo: 'evaluacion'
   modelo: { run_id: string; agente: string | null; accion: string | null; commit: string | null; sha256: Record<string, string> | null; mlflow: { modelo: string; version: number } | null }
-  ambiente: Ambiente & { entrenado_en: string; entrenado_con: string; compatible: boolean; adaptador: boolean }
+  ambiente: Ambiente & { entrenado_en: string; entrenado_con: string; nivel_entrenado?: string; compatible: boolean; adaptador: boolean; misma_familia?: boolean }
   suite: { id: string | null; condicion: string | null; episodios: number; semilla_base: number; viento: number | null; deterministico: boolean }
   resumen: Evaluacion
   episodios: { epoca: number; semilla: number; resultado: string; recompensa: number; pasos: number; duracion_s: number; vz: number; vh: number; distancia: number; inclinacion: number; combustible: number; viento: number; toca_suelo: boolean }[]

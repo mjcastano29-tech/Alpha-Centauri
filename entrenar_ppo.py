@@ -31,6 +31,7 @@ from entrenar import FINAL_EPISODES, save_run, write_pages
 from rocket_env.rocket_landing import RocketLanding3DEnv
 
 EXPERIMENTO = "experimento-2-ppo"
+EXPERIMENTO_POR_NIVEL = {"N1": EXPERIMENTO, "N2": "experimento-3-nivel2", "N3": "experimento-4-nivel3"}
 DEFAULTS = {
     "total_timesteps": 600_000,
     "n_envs": 8,
@@ -47,7 +48,7 @@ DEFAULTS = {
     "eval_every": 20_000,  # pasos entre evaluaciones sin ruido
     "seed": 0,
     "accion": "relativa",  # relativa (empuje/peso e inclinación) o cruda (los 5 valores del entorno)
-    "ambiente": RocketLanding3DEnv.ID,  # nivel en el que se entrena (RocketLanding3D-v0 = N1, RocketLanding3D-N2-v0 = N2)
+    "ambiente": RocketLanding3DEnv.ID,  # nivel en el que se entrena (RocketLanding3D-v0 = N1, -N2-v0 = N2, -N3-v0 = N3)
     "desde": None,  # run_id de un modelo PPO del que partir (transferencia: pesos y normalización; ver transferir_desde)
 }
 
@@ -165,9 +166,9 @@ def main(argv=None):
         else:
             parser.add_argument("--" + key.replace("_", "-"), type=type(value), default=value)
     parser.add_argument("--run-id", help="nombre de la ejecución (por defecto fecha-hora-semilla)")
-    parser.add_argument("--experimento", default=None, help="experimento de MLflow (por defecto experimento-2-ppo; el nivel 2 usa experimento-3-nivel2)")
+    parser.add_argument("--experimento", default=None, help="experimento de MLflow (por defecto el del nivel: experimento-2-ppo, -3-nivel2, -4-nivel3)")
     args = parser.parse_args(argv)
-    experimento = args.experimento or (EXPERIMENTO if args.ambiente == RocketLanding3DEnv.ID else "experimento-3-nivel2")
+    experimento = args.experimento or EXPERIMENTO_POR_NIVEL[rocket_env.clase_ambiente(args.ambiente).NIVEL]
     config = {k: getattr(args, k) for k in DEFAULTS}
 
     torch.manual_seed(config["seed"])

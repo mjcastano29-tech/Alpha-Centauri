@@ -219,10 +219,12 @@ def cmd_evaluar(args):
     manifest = manifest_de(args.run)
     env = hacer_entorno(manifest, args.ambiente)
     rocket = env.unwrapped
-    nota = " · modelo del nivel 1 jugando con AdaptadorN1 (no ve las torres)" if args.ambiente and args.ambiente != manifest["ambiente"].get("id", RocketLanding3DEnv.ID) else ""
+    propio = rocket_env.clase_ambiente(manifest["ambiente"].get("id", RocketLanding3DEnv.ID))
+    nota = (" · modelo del nivel 1 jugando con AdaptadorN1 (no ve las torres)" if isinstance(env, rocket_env.AdaptadorN1) else
+            f" · modelo del nivel {propio.NIVEL[1:]} jugando en las condiciones de {rocket.NIVEL}" if propio.ID != rocket.ID else "")
     print(bold(f"Ejecución {path.name} · {agent.info().get('nombre', '')} · ambiente {rocket.ID} v{rocket.VERSION} ({rocket.NIVEL}){nota}") + "\n")
     normal = evaluate(env, agent, args.episodios)
-    print_metrics(f"Condiciones normales (viento 0–10 m/s) · {args.episodios} épocas", normal)
+    print_metrics(f"Condiciones normales (viento 0–{rocket.VIENTO_MAX:.0f} m/s) · {args.episodios} épocas", normal)
     if args.viento is not None:
         print()
         perturbed = evaluate(env, agent, args.episodios, options={"viento": args.viento})
@@ -325,7 +327,7 @@ def main():
     p.add_argument("--run", help="id de la ejecución (por defecto la última)")
     p.add_argument("--episodios", type=int, default=FINAL_EPISODES)
     p.add_argument("--viento", type=float, help="velocidad del viento para la perturbación (m/s)")
-    p.add_argument("--ambiente", choices=list(rocket_env.AMBIENTES), help="otro ambiente (nivel): un modelo de N1 juega en N2 con AdaptadorN1")
+    p.add_argument("--ambiente", choices=list(rocket_env.AMBIENTES), help="otro ambiente (nivel): un modelo de N2 juega en N3 tal cual; uno de N1, en N2 o N3 con AdaptadorN1")
     p.set_defaults(func=cmd_evaluar)
 
     p = sub.add_parser("transiciones", help="muestra las primeras transiciones en detalle")
