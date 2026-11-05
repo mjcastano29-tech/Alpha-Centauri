@@ -7,6 +7,17 @@ hizo, así siempre se sabe con qué reglas se entrenó un modelo.
 Regla del equipo: un cambio en las reglas o en las constantes del ambiente sube su versión (0.1 → 0.2)
 y se anota aquí. Los modelos entrenados con versiones distintas del ambiente no se comparan entre sí.
 
+## Ambiente RocketLanding3D-N3-v0 (nivel 3)
+
+### 0.3 · 2026-11-05
+- Nivel 3 = nivel 2 con condiciones de operación exigentes: viento a 10 m sorteado entre 0 y 15 m/s (antes 0–10)
+  y ráfagas de 3 m/s (antes 1,5). Ficha: [ambiente-v0.3.md](ambiente-v0.3.md). Clase `RocketLandingN3Env` en
+  `rocket_env/nivel3.py`, hereda del nivel 2.
+- Misma observación (25 valores) y acción que el nivel 2: misma familia de modelos. Un modelo de N2 juega en N3 sin
+  adaptador (`hacer_entorno`, `POST /evaluar` con `ambiente`), lo que mide la degradación (`python incidente.py`).
+- `VIENTO_MAX` y `RAFAGAS` pasan a ser constantes de clase de `RocketLanding3DEnv` (10 y 1,5): los niveles 1 y 2 no
+  cambian (mismas semillas, mismos sorteos, mismas evaluaciones guardadas).
+
 ## Ambiente RocketLanding3D-N2-v0 (nivel 2)
 
 ### 0.2 · 2026-11-05

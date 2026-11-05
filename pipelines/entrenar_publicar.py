@@ -220,16 +220,17 @@ def comprobar(run_id, decision, publicacion, args, ambiente_info):
     esperado = (cat.get("niveles", {}).get(nivel) or {}).get("recomendado")
     if not (publicacion.get("push") and publicacion.get("commit")):
         # sin push: la API se comprueba en local con el mismo código que se desplegaría
+        # (un nivel nuevo cuyo primer candidato se rechazó no tiene recomendado: se comprueba que la API tampoco lo sirva)
         script = (
             "import json; from fastapi.testclient import TestClient; from api.main import app\n"
             "c = TestClient(app); v = c.get('/version').json(); cat = c.get('/catalogo').json()['catalogo']\n"
-            f"e = c.post('/evaluar', json={{'run_id': {esperado!r}, 'suite': 'suite-v1', 'episodios': 3}}).json()\n"
+            f"e = c.post('/evaluar', json={{'run_id': {esperado!r}, 'suite': 'suite-v1', 'episodios': 3}}).json() if {esperado!r} else None\n"
             f"print(json.dumps({{'commit': v['commit'], 'catalogo': cat['version'], 'recomendado': cat['niveles'].get({nivel!r}, {{}}).get('recomendado'), "
-            "'evaluacion': e['resumen']['aterrizajes'], 'compatible': e['ambiente']['compatible']}))"
+            "'evaluacion': e['resumen']['aterrizajes'] if e else None, 'compatible': e['ambiente']['compatible'] if e else None}))"
         )
         info = json.loads(correr([PYTHON, "-c", script], timeout=600).splitlines()[-1])
         info["modo"] = "local (sin push)"
-        assert info["recomendado"] == esperado and info["compatible"], "la API local no sirve el catálogo esperado"
+        assert info["recomendado"] == esperado and (info["compatible"] or esperado is None), "la API local no sirve el catálogo esperado"
         return info
     api, commit, inicio = args.api.rstrip("/"), publicacion["commit"], time.time()
     while True:
@@ -249,6 +250,9 @@ def comprobar(run_id, decision, publicacion, args, ambiente_info):
         cat_servido = json.load(r)["catalogo"]
     servido = cat_servido["niveles"].get(nivel, {}).get("recomendado")
     assert servido == esperado, f"la API sirve {servido} como recomendado de {nivel}; se esperaba {esperado}"
+    if esperado is None:
+        return {"modo": "público", "api": api, "commit": commit, "catalogo": cat_servido["version"], "recomendado": None,
+                "nota": f"el nivel {nivel} sigue sin recomendado", "espera_s": round(time.time() - inicio)}
     req = urllib.request.Request(f"{api}/evaluar", data=json.dumps({"run_id": esperado, "suite": "suite-v1", "episodios": 3}).encode(),
                                  headers={"content-type": "application/json"})
     with urllib.request.urlopen(req, timeout=300) as r:

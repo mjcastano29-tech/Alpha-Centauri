@@ -3,7 +3,8 @@
     "prefect_flow_run_id": "a89a83ea-bf35-429f-95ed-b28f68b2f172",
     "nombre": "humble-rooster",
     "inicio": "2026-11-05T18:12:34",
-    "duracion_s": 391
+    "duracion_s": 391,
+    "estado": "fallido: /home/jorge/Alpha-Centauri/.venv/bin/python -c import json; from fastapi.testclient import TestClient; from api.main import app\nc = TestClient(app); v = c.get('/version').json(); cat = c.get('/catalogo').json()['catalogo']\ne = c.post('/evaluar', json={'run_id': None, 'suite': 'suite-v1', 'episodios': 3}).json()\nprint(json.dumps({'commit': v['commit'], 'catalogo': cat['version'], 'recomendado': cat['niveles'].get('N3', {}).get('recomendado'), 'evaluacion': e['resumen']['aterrizajes'], 'compatible': e['ambiente']['compatible']})) terminó con código 1"
   },
   "parametros": {
     "ambiente": "RocketLanding3D-N3-v0",
@@ -76,6 +77,10 @@
         "margen_mejora": 0.02,
         "tolerancia_viento": 0.05
       }
+    },
+    "7 publicar": {
+      "commit": "87474a5529665e200898e597e36ae5f3df84df03",
+      "push": false
     }
   }
 }
