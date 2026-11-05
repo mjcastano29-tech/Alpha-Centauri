@@ -1,10 +1,10 @@
-artifact_path: file:///home/jorge/Alpha-Centauri/mlruns/experimento-4-nivel3/models/m-97fb2cc136f3473ca83e834476562e60/artifacts
+artifact_path: file:///home/jorge/Alpha-Centauri/mlruns/experimento-4-nivel3/models/m-abf8ceaa83514ced9be8151a15163901/artifacts
 flavors:
   python_function:
     artifacts:
       modelo:
         path: artifacts/modelo
-        uri: /tmp/tmpmob1hmco/modelo
+        uri: /tmp/tmpmeoh2_0a/modelo
     cloudpickle_version: 3.1.2
     code: code
     env:
@@ -15,9 +15,9 @@ flavors:
     python_version: 3.10.12
     streamable: false
 mlflow_version: 3.17.2
-model_id: m-97fb2cc136f3473ca83e834476562e60
+model_id: m-abf8ceaa83514ced9be8151a15163901
 model_size_bytes: 524599
-model_uuid: m-97fb2cc136f3473ca83e834476562e60
+model_uuid: m-abf8ceaa83514ced9be8151a15163901
 prompts: null
-run_id: 58b9c5e22bb3459c9c99c145c680ee4d
-utc_time_created: '2026-11-05 23:35:44.485714'
+run_id: 44b0296d7d6a4443b72aae36456157c6
+utc_time_created: '2026-11-05 23:44:16.940096'

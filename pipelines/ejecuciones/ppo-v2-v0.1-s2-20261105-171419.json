@@ -3,7 +3,8 @@
     "prefect_flow_run_id": "41fefe09-9b01-4191-88ee-619a98d5b102",
     "nombre": "glaring-chowchow",
     "inicio": "2026-11-05T17:14:19",
-    "duracion_s": 1242
+    "duracion_s": 2187,
+    "estado": "completado"
   },
   "parametros": {
     "ambiente": "RocketLanding3D-v0",
@@ -73,6 +74,20 @@
         "margen_mejora": 0.02,
         "tolerancia_viento": 0.05
       }
+    },
+    "7 publicar": {
+      "commit": "6a82c95260dad60bdc36e96a6695c80cdd35a454",
+      "push": true
+    },
+    "8 comprobar": {
+      "modo": "público",
+      "api": "https://alpha-centauri-api.onrender.com",
+      "commit": "6a82c95260dad60bdc36e96a6695c80cdd35a454",
+      "catalogo": 5,
+      "recomendado": "ppo-v2-v0.1-s1",
+      "evaluacion": 1.0,
+      "latencia_ms": 1000,
+      "espera_s": 938
     }
   }
 }
