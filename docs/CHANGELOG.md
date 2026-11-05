@@ -7,6 +7,21 @@ hizo, así siempre se sabe con qué reglas se entrenó un modelo.
 Regla del equipo: un cambio en las reglas o en las constantes del ambiente sube su versión (0.1 → 0.2)
 y se anota aquí. Los modelos entrenados con versiones distintas del ambiente no se comparan entre sí.
 
+## Ambiente RocketLanding3D-N2-v0 (nivel 2)
+
+### 0.2 · 2026-11-05
+- Nivel 2 = nivel 1 + tres torres alrededor de la plataforma (a 28 m del centro, 120° entre sí, radio 7 m,
+  alturas 420/360/300 m). Chocar con una torre es el resultado nuevo "colisión" (−100). Ficha:
+  [ambiente-v0.2.md](ambiente-v0.2.md). Clase `RocketLandingN2Env` en `rocket_env/nivel2.py`, hereda la física.
+- Observación de 16 + 3 × 3 = 25 valores (por torre: posición relativa x, y y altura que queda por encima);
+  acción igual. Es una familia nueva de modelos: los del nivel 1 no juegan aquí salvo con `AdaptadorN1`
+  (recorta la observación a los 16 valores del nivel 1), que sirve para medir la dificultad del nivel.
+- Potencial de la recompensa = el del nivel 1 − 8 × (1 − d/15 m) por cada torre a menos de 15 m de la
+  superficie y por debajo de su cima + 20 m. Lo demás (pasos, aterrizaje, viento, combustible) no cambia.
+- Cada ejecución guarda en su manifest `ambiente.id`, `nivel` y `obstaculos`; la API y la CLI crean el
+  ambiente que dice el manifest. Los manifests anteriores al nivel 2 no traen `ambiente.id`: se interpretan
+  como `RocketLanding3D-v0`.
+
 ## Ambiente RocketLanding3D-v0
 
 ### 0.1 · 2026-10-28
@@ -47,6 +62,10 @@ y se anota aquí. Los modelos entrenados con versiones distintas del ambiente no
 - Mismo día, ampliación compatible: `experimento`, `agente.clase/nombre` y `archivos.modelo` como lista en el
   manifest; `episodios.csv` (dataset) y `evaluacion.json` (evaluación detallada) en cada ejecución; registro
   en MLflow (`mlflow.db` + `mlruns/`).
+- 2026-11-05, ampliación compatible: el catálogo lleva un recomendado y un anterior por nivel (`niveles.N1`,
+  `niveles.N2`); `recomendado`/`anterior` de primer nivel siguen siendo los del nivel 1. `registro.json` y el
+  manifest guardan `nivel`; `ambiente.id` y `ambiente.obstaculos` en el manifest. `OUTCOMES` global = los del
+  nivel 2 (los cinco del nivel 1 conservan su índice en `entrenamiento.json`).
 - 2026-11-03, ampliación compatible: `configs/<run_id>.json` (hipótesis, cambio frente al baseline, presupuesto,
   estado seleccionado/rechazado/referencia y decisión; también como etiquetas `diseno.*` y `presupuesto.*` de la run
   de MLflow), `manifests/<run_id>.json` con el formato de la sección 11 de la guía (`python manifiestos.py`: commit

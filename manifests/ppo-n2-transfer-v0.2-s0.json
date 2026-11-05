@@ -1,0 +1,63 @@
+{
+  "run_id": "ppo-n2-transfer-v0.2-s0",
+  "level_id": "N2",
+  "environment_version": "RocketLanding3D-N2-v0@0.2",
+  "git_commit": "5b99fd685a66c4ae1c88dd64041fc212398e441e",
+  "git_branch": "main",
+  "config_sha256": "b743fc72e8e30eb8284025f088e45100ad4876aa31ad602a04cd7dfc9f63865a",
+  "model_uri": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/5b99fd685a66c4ae1c88dd64041fc212398e441e/resultados/runs/ppo-n2-transfer-v0.2-s0/modelo.zip",
+  "model_sha256": "a7cd4150e5b70798848442664c5c112d4baa95b16f0fa54a90b963425e46f49d",
+  "normalization_uri": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/5b99fd685a66c4ae1c88dd64041fc212398e441e/resultados/runs/ppo-n2-transfer-v0.2-s0/modelo_normalizador.pkl",
+  "normalization_sha256": "7a0c6bcad898c4e1af9432aeb2184f840f1bf95ed52ff81f105a4fc85bf84a75",
+  "model_registry": null,
+  "runtime_ref": {
+    "python": "3.10.12",
+    "requirements": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/5b99fd685a66c4ae1c88dd64041fc212398e441e/requirements.txt",
+    "docker": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/5b99fd685a66c4ae1c88dd64041fc212398e441e/Dockerfile",
+    "paquetes": {
+      "gymnasium": "1.4.0",
+      "numpy": "2.2.6",
+      "torch": "2.14.1+cpu",
+      "stable_baselines3": "2.9.2"
+    }
+  },
+  "evaluation_suite_id": "suite-v1",
+  "seed": 0,
+  "parent_run_id": "ppo-v2-v0.1-s0",
+  "experiment_id": "experimento-3-nivel2",
+  "agent": {
+    "class": "ppo",
+    "name": "PPO (red neuronal)",
+    "action": "relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12"
+  },
+  "hypothesis": "Partir de la política del nivel 1 (ppo-v2-v0.1-s0: 72 % en el nivel 2 sin ver las torres) y aprender solo a esquivar las torres es más barato y mejor que aprender desde cero: con el mismo presupuesto de 600 000 pasos se superan el 72 % y las 53 colisiones del modelo a ciegas.",
+  "change": "Transferencia: se copian los pesos de ppo-v2-v0.1-s0 y la normalización de las 16 observaciones comunes; las columnas de la primera capa para las 9 entradas nuevas (torres) empiezan en cero. Mismos hiperparámetros y ambiente que ppo-n2-v0.2-s0.",
+  "baseline_run_id": "ppo-n2-v0.2-s0",
+  "budget": {
+    "pasos_agente": 600000,
+    "epocas": 19940,
+    "tiempo_s": 832,
+    "maquina": "CPU de portátil (WSL2), 8 entornos en paralelo"
+  },
+  "status": "seleccionado",
+  "decision": "Seleccionado como recomendado del nivel 2 (catálogo v3): 153/200 aterrizajes (77 %) frente a 8 % desde cero y 72 % del modelo del nivel 1 a ciegas; aterriza en su cuarta época y la evaluación sin ruido llega a 45/50. La hipótesis se confirma solo en parte: la destreza de aterrizar se conserva, pero las colisiones bajan poco (42 frente a 53): esquivar las torres exige anticipar la ruta desde los 600 m y 600 000 pasos no bastan. Siguiente hipótesis: más presupuesto (1,5 M de pasos) con la misma transferencia.",
+  "evaluation": {
+    "suite": "suite-v1",
+    "episodes": 200,
+    "landing_rate": 0.765,
+    "contact_speed": 1.4358745676830036,
+    "position_error": 9.422642825767019,
+    "fuel_used": 152.94864867405946,
+    "outcomes": {
+      "aterrizaje": 153,
+      "fuera de plataforma": 1,
+      "choque": 4,
+      "sin pasos": 0,
+      "fuera de zona": 0,
+      "colisión": 42
+    },
+    "per_case": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/5b99fd685a66c4ae1c88dd64041fc212398e441e/resultados/runs/ppo-n2-transfer-v0.2-s0/evaluacion.json"
+  },
+  "trained_at": "2026-11-05T15:38:26",
+  "generated_at": "2026-11-05T15:40:09"
+}

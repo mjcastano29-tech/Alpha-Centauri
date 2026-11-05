@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 470" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13">
+  <title>Mapa del ambiente v0.2 (nivel 2): plataforma con tres torres alrededor</title>
+  <defs>
+    <marker id="f" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1d2126"/></marker>
+  </defs>
+  <rect width="980" height="470" fill="#fdfdfb"/>
+
+  <!-- vista cenital, escala 3 px = 1 m, centro (235, 235) -->
+  <g transform="translate(235,235)">
+    <text x="-215" y="-205" font-weight="600" font-size="15" fill="#1d2126">Vista cenital (escala 3 px = 1 m)</text>
+    <rect x="-150" y="-150" width="300" height="300" fill="none" stroke="#9aa3ad" stroke-dasharray="6 4"/>
+    <text x="-146" y="-156" fill="#5d6572">cuadrado de salida: x, y ∈ [−50, 50] m, z = 600 m</text>
+    <circle r="30" fill="#e4efeb" stroke="#1f6f5c" stroke-width="2"/>
+    <text x="0" y="4" text-anchor="middle" fill="#1f6f5c" font-weight="600" font-size="11">plataforma r = 10 m</text>
+    <circle r="84" fill="none" stroke="#c9b26a" stroke-dasharray="4 4"/>
+    <text x="60" y="-88" fill="#8a7a3a" font-size="11">torres a 28 m del centro</text>
+    <!-- torre A: azimut 15°, (27.05, 7.25), r 7, 420 m; el eje y del ambiente apunta hacia arriba en el mapa -->
+    <g transform="translate(81.15,-21.75)"><circle r="21" fill="#b8714a" stroke="#4e2a1f" stroke-width="2"/><text x="26" y="4" fill="#1d2126" font-weight="600">torre A · 420 m</text></g>
+    <!-- torre B: 135°, (-19.8, 19.8), 360 m -->
+    <g transform="translate(-59.4,-59.4)"><circle r="21" fill="#b8714a" stroke="#4e2a1f" stroke-width="2"/><text x="-130" y="-26" fill="#1d2126" font-weight="600">torre B · 360 m</text></g>
+    <!-- torre C: 255°, (-7.25, -27.05), 300 m -->
+    <g transform="translate(-21.75,81.15)"><circle r="21" fill="#b8714a" stroke="#4e2a1f" stroke-width="2"/><text x="-60" y="44" fill="#1d2126" font-weight="600">torre C · 300 m</text></g>
+    <!-- hueco libre entre A y B -->
+    <line x1="60" y1="-36" x2="-40" y2="-45" stroke="#1d2126" stroke-width="1.2" marker-end="url(#f)" marker-start="url(#f)"/>
+    <text x="10" y="-52" text-anchor="middle" fill="#1d2126" font-size="11">34,5 m libres entre torres</text>
+    <!-- ejes -->
+    <line x1="-150" y1="170" x2="-110" y2="170" stroke="#1d2126" marker-end="url(#f)"/><text x="-105" y="174" fill="#1d2126">x</text>
+    <line x1="-150" y1="170" x2="-150" y2="130" stroke="#1d2126" marker-end="url(#f)"/><text x="-158" y="126" fill="#1d2126">y</text>
+    <!-- radio de colisión -->
+    <text x="-215" y="200" fill="#5d6572" font-size="11">colisión: el eje del cohete a menos de 7 m + 3 m (radio del fuselaje) del eje de una torre, por debajo de su cima</text>
+  </g>
+
+  <!-- vista lateral, escala 0,5 px = 1 m: 600 m = 300 px; suelo en y = 400 -->
+  <g transform="translate(520,0)">
+    <text x="0" y="30" font-weight="600" font-size="15" fill="#1d2126">Vista lateral (escala 1 px = 2 m)</text>
+    <line x1="0" y1="400" x2="440" y2="400" stroke="#4e2a1f" stroke-width="2"/>
+    <text x="4" y="416" fill="#5d6572" font-size="11">suelo z = 0</text>
+    <line x1="60" y1="100" x2="380" y2="100" stroke="#9aa3ad" stroke-dasharray="6 4"/>
+    <text x="64" y="94" fill="#5d6572">salida: z = 600 m, vz ∈ [−20, −15] m/s</text>
+    <rect x="205" y="396" width="30" height="4" fill="#1f6f5c"/>
+    <text x="220" y="432" text-anchor="middle" fill="#1f6f5c" font-size="11">plataforma</text>
+    <!-- torres: alturas 420, 360, 300 m -> 210, 180, 150 px; separación lateral orientativa -->
+    <rect x="258" y="190" width="7" height="210" fill="#b8714a" stroke="#4e2a1f"/><text x="268" y="196" fill="#1d2126" font-size="11">A · 420 m</text>
+    <rect x="170" y="220" width="7" height="180" fill="#b8714a" stroke="#4e2a1f"/><text x="118" y="226" fill="#1d2126" font-size="11">B · 360 m</text>
+    <rect x="212" y="250" width="7" height="150" fill="#b8714a" stroke="#4e2a1f"/><text x="186" y="246" fill="#1d2126" font-size="11">C · 300 m</text>
+    <!-- ruta -->
+    <path d="M 330 100 C 330 180, 300 230, 262 300 C 240 345, 222 380, 220 398" fill="none" stroke="#1f6f5c" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#f)"/>
+    <text x="300" y="260" fill="#1f6f5c" font-size="11">decisión nueva: alinearse con un</text>
+    <text x="300" y="274" fill="#1f6f5c" font-size="11">hueco antes de bajar de las cimas</text>
+    <!-- castigo de proximidad -->
+    <rect x="243" y="190" width="15" height="210" fill="#ffb347" opacity="0.25"/><rect x="265" y="190" width="15" height="210" fill="#ffb347" opacity="0.25"/>
+    <text x="4" y="452" fill="#5d6572" font-size="11">franja naranja: a menos de 15 m de una torre (y por debajo de su cima + 20 m) el potencial de la recompensa baja hasta 8 puntos</text>
+  </g>
+</svg>

@@ -10,7 +10,7 @@ import pytest
 
 import rocket_env  # noqa: F401  (registra RocketLanding3D-v0)
 from entrenamiento import EVAL_SEED_BASE, run_epoch
-from entrenar import RUNS, config_sha256, load_agent, load_registry, run_hashes, sha256_file
+from entrenar import RUNS, config_sha256, hacer_entorno, load_agent, load_registry, run_hashes, sha256_file
 
 EJECUCIONES = [r["run_id"] for r in load_registry()["ejecuciones"]]
 CASOS = 20  # primeras épocas de la evaluación guardada (evaluacion.json) que se vuelven a jugar
@@ -52,7 +52,7 @@ def test_el_modelo_reproduce_su_evaluacion(run_id):
         pytest.importorskip("stable_baselines3")
     agent, path = load_agent(run_id)
     registradas = json.loads((path / "evaluacion.json").read_text(encoding="utf-8"))["normal"]["filas"][:CASOS]
-    env = gym.make("RocketLanding3D-v0")
+    env = hacer_entorno(manifest(run_id))
     resultados, recompensas = [], []
     for k in range(CASOS):
         meta, _, _ = run_epoch(env, agent, seed=EVAL_SEED_BASE + k, learn=False, greedy=True)

@@ -23,13 +23,13 @@ import numpy as np
 import rocket_env  # noqa: F401  (registra RocketLanding3D-v0)
 from agente_qlearning import DIRECTION_ACTIONS, ENGINE_ACTIONS, action_label, to_env_action
 from entrenamiento import CHECK_EPISODES, EVAL_SEED_BASE, OUTCOMES, epochs_to_rate, evaluate, train
-from entrenar import (FINAL_EPISODES, add_train_args, config_from_args, config_sha256, load_agent, load_registry, run_dir,
-                      save_run, sha256_file, write_pages)
+from entrenar import (FINAL_EPISODES, add_train_args, config_from_args, config_sha256, hacer_entorno, load_agent, load_registry,
+                      run_dir, save_run, sha256_file, write_pages)
 from rocket_env.rocket_landing import RocketLanding3DEnv
 
 # ---------- colores (solo si la salida es una terminal) ----------
 IS_TTY = sys.stdout.isatty()
-COLORS = {"aterrizaje": "32", "fuera de plataforma": "33", "choque": "31", "sin pasos": "90", "fuera de zona": "35"}
+COLORS = {"aterrizaje": "32", "fuera de plataforma": "33", "choque": "31", "sin pasos": "90", "fuera de zona": "35", "colisión": "31"}
 
 
 def paint(text, code):
@@ -47,6 +47,18 @@ def bold(text):
 def announce(text):
     """Imprime un aviso en su propia línea, borrando antes la barra de progreso si la hay."""
     print(f"\r{' ' * 110}\r{text}" if IS_TTY else text)
+
+
+def manifest_de(run_id=None):
+    return json.loads((run_dir(run_id) / "manifest.json").read_text(encoding="utf-8"))
+
+
+def entorno_cmd(args):
+    """Entorno para `ver`/`transiciones`: el de la ejecución si el agente es un modelo, o el de --ambiente."""
+    ambiente = getattr(args, "ambiente", None)
+    if args.agente in ("modelo", "qlearning", "ppo"):
+        return hacer_entorno(manifest_de(args.run), ambiente)
+    return gym.make(ambiente or RocketLanding3DEnv.ID)
 
 
 # ---------- políticas para `ver` y `transiciones` ----------
@@ -166,14 +178,14 @@ def print_metrics(title, ev):
 
 
 def cmd_ver(args):
-    env = gym.make("RocketLanding3D-v0")
+    env = entorno_cmd(args)
     rocket = env.unwrapped
     policy, descripcion = make_policy(args.agente, args.run)
     options = {"viento": args.viento} if args.viento is not None else None
     obs, info = env.reset(seed=args.semilla, options=options)
     atm = rocket.atmosphere
     wind = np.hypot(*atm.ground_wind[:2])
-    print(bold(f"Época con {descripcion} · semilla {args.semilla}"))
+    print(bold(f"Época con {descripcion} · semilla {args.semilla} · ambiente {rocket.ID} v{rocket.VERSION} ({rocket.NIVEL})"))
     print(f"Meteorología: suelo {atm.t0 - 273.15:.1f} °C, {atm.p0 / 1000:.1f} kPa, viento a 10 m {wind:.1f} m/s")
     print(f"Salida: altitud {obs[2]:.0f} m, a {np.hypot(obs[0], obs[1]):.1f} m de la plataforma, "
           f"bajando a {-obs[5]:.1f} m/s\n")
@@ -193,7 +205,7 @@ def cmd_ver(args):
         if terminated or truncated:
             break
     outcome = info["outcome"]
-    print(f"\nResultado: {outcome_text(outcome)} ({RocketLanding3DEnv.REWARDS[outcome]:+.0f} puntos) tras "
+    print(f"\nResultado: {outcome_text(outcome)} ({rocket.REWARDS[outcome]:+.0f} puntos) tras "
           f"{info['step']} pasos · recompensa total {total:.1f}")
     if obs[2] <= 0.0:
         print(f"Contacto: {-obs[5]:.2f} m/s vertical (máx. {rocket.MAX_LANDING_VERTICAL_SPEED}), "
@@ -204,8 +216,11 @@ def cmd_ver(args):
 
 def cmd_evaluar(args):
     agent, path = load_agent(args.run)
-    env = gym.make("RocketLanding3D-v0")
-    print(bold(f"Ejecución {path.name} · {agent.info().get('nombre', '')}") + "\n")
+    manifest = manifest_de(args.run)
+    env = hacer_entorno(manifest, args.ambiente)
+    rocket = env.unwrapped
+    nota = " · modelo del nivel 1 jugando con AdaptadorN1 (no ve las torres)" if args.ambiente and args.ambiente != manifest["ambiente"].get("id", RocketLanding3DEnv.ID) else ""
+    print(bold(f"Ejecución {path.name} · {agent.info().get('nombre', '')} · ambiente {rocket.ID} v{rocket.VERSION} ({rocket.NIVEL}){nota}") + "\n")
     normal = evaluate(env, agent, args.episodios)
     print_metrics(f"Condiciones normales (viento 0–10 m/s) · {args.episodios} épocas", normal)
     if args.viento is not None:
@@ -217,15 +232,17 @@ def cmd_evaluar(args):
 
 
 def cmd_transiciones(args):
-    env = gym.make("RocketLanding3D-v0")
+    env = entorno_cmd(args)
     policy, descripcion = make_policy(args.agente, args.run)
     obs, _ = env.reset(seed=args.semilla)
     print(bold(descripcion) + "\n")
 
     def describe(o):
-        return (f"pos=({o[0]:.1f}, {o[1]:.1f}, {o[2]:.1f}) m  vel=({o[3]:.1f}, {o[4]:.1f}, {o[5]:.1f}) m/s  "
-                f"viento=({o[6]:.1f}, {o[7]:.1f}) m/s  aire={o[9] - 273.15:.1f} °C {o[10]:.1f} kPa  "
-                f"motor={o[11]:.0f} K  comb={o[12]:.2f}  incl={o[15]:.1f}°  pasos rest.={o[14]:.2f}")
+        texto = (f"pos=({o[0]:.1f}, {o[1]:.1f}, {o[2]:.1f}) m  vel=({o[3]:.1f}, {o[4]:.1f}, {o[5]:.1f}) m/s  "
+                 f"viento=({o[6]:.1f}, {o[7]:.1f}) m/s  aire={o[9] - 273.15:.1f} °C {o[10]:.1f} kPa  "
+                 f"motor={o[11]:.0f} K  comb={o[12]:.2f}  incl={o[15]:.1f}°  pasos rest.={o[14]:.2f}")
+        torres = [f"({o[k]:.0f}, {o[k + 1]:.0f}, {o[k + 2]:+.0f})" for k in range(16, len(o), 3)]  # nivel 2: dx, dy, altura restante por torre
+        return texto + (f"  torres={' '.join(torres)} m" if torres else "")
 
     for k in range(1, args.n + 1):
         action, label = policy(env, obs)
@@ -301,12 +318,14 @@ def main():
     p.add_argument("--semilla", type=int, default=EVAL_SEED_BASE, help="semilla de la meteorología y la salida")
     p.add_argument("--viento", type=float, help="fija la velocidad del viento (m/s)")
     p.add_argument("--lento", type=float, default=0.0, help="segundos de pausa entre pasos")
+    p.add_argument("--ambiente", choices=list(rocket_env.AMBIENTES), help="otro ambiente (nivel); por defecto el de la ejecución")
     p.set_defaults(func=cmd_ver)
 
     p = sub.add_parser("evaluar", help="métricas del modelo, opcionalmente con viento lateral fuerte")
     p.add_argument("--run", help="id de la ejecución (por defecto la última)")
     p.add_argument("--episodios", type=int, default=FINAL_EPISODES)
     p.add_argument("--viento", type=float, help="velocidad del viento para la perturbación (m/s)")
+    p.add_argument("--ambiente", choices=list(rocket_env.AMBIENTES), help="otro ambiente (nivel): un modelo de N1 juega en N2 con AdaptadorN1")
     p.set_defaults(func=cmd_evaluar)
 
     p = sub.add_parser("transiciones", help="muestra las primeras transiciones en detalle")
@@ -314,6 +333,7 @@ def main():
     p.add_argument("--run", help="id de la ejecución (por defecto la última)")
     p.add_argument("--semilla", type=int, default=EVAL_SEED_BASE)
     p.add_argument("--n", type=int, default=5)
+    p.add_argument("--ambiente", choices=list(rocket_env.AMBIENTES), help="otro ambiente (nivel); por defecto el de la ejecución")
     p.set_defaults(func=cmd_transiciones)
 
     p = sub.add_parser("runs", help="lista las ejecuciones guardadas en resultados/runs")

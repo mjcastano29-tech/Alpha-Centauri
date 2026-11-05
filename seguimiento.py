@@ -96,6 +96,8 @@ def registrar_ejecucion(run_dir, experimento=None):
             "git.rama": git["branch"] or "",
             "git.cambios_sin_commit": str(git["cambios_sin_commit"]),
             "ambiente.version": manifest["ambiente"]["version"],
+            "ambiente.id": manifest["ambiente"].get("id", "RocketLanding3D-v0"),
+            "nivel": manifest.get("nivel", "N1"),
             "agente": manifest["agente"].get("nombre", manifest["agente"].get("tipo", "")),
             "formato": str(manifest["formato"]),
         })

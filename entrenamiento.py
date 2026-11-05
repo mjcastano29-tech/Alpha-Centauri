@@ -10,7 +10,7 @@ from agente_qlearning import QLearningAgent
 from rocket_env.rocket_landing import RocketLanding3DEnv
 from visualizacion.datos import summary, trajectory_columns, weather
 
-OUTCOMES = RocketLanding3DEnv.OUTCOMES
+OUTCOMES = rocket_env.OUTCOMES  # resultados de todos los niveles; los del nivel 1 conservan su índice
 CHECK_EPISODES = 50  # épocas de cada evaluación periódica
 EVAL_SEED_BASE = 10_000_000  # semillas de evaluación: meteorología que no aparece al entrenar
 
@@ -24,6 +24,7 @@ class TrainConfig:
     epsilon_end: float = 0.02  # exploración mínima
     epsilon_decay: float = 0.6  # fracción de épocas en la que la exploración baja de 1 al mínimo
     seed: int = 0
+    ambiente: str = RocketLanding3DEnv.ID  # id del ambiente (nivel) en el que se entrena
 
 
 def run_epoch(env, agent, seed, learn=True, greedy=False, options=None, on_step=None):
@@ -84,7 +85,7 @@ def train(config, record_epochs=(), on_epoch=None, on_check=None):
     on_epoch(época, meta, agente) se llama al terminar cada época de entrenamiento.
     on_check(época, aterrizajes, mejora) se llama tras cada evaluación periódica.
     """
-    env = gym.make("RocketLanding3D-v0")
+    env = gym.make(config.ambiente)
     agent = QLearningAgent(alpha=config.alpha, gamma=config.gamma, seed=config.seed)
     n = config.epochs
     check_every = max(1, n // 20)

@@ -1,5 +1,9 @@
 # Propuesta de nivel 2 (ambiente 0.2) · para acordar en equipo
 
+> **Decisión (5 de noviembre de 2026): candidato C, obstáculos junto a la plataforma.** Implementado como
+> `RocketLanding3D-N2-v0` (ambiente 0.2): tres torres de 300–420 m alrededor de la plataforma. Ficha:
+> [ambiente-v0.2.md](ambiente-v0.2.md). El resto de este documento se conserva como registro de las opciones.
+
 **3 de noviembre de 2026.** La guía pide tres niveles: N1 misión base (lo que tenemos), N2 "más decisiones" (rutas,
 obstáculos, recursos o una variable relevante) y N3 operación exigente (perturbación). Cada modelo conserva el
 ambiente donde se entrenó; si cambian las dimensiones o el significado de observaciones o acciones, nace una

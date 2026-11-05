@@ -127,10 +127,11 @@ class PPOAgent:
         return [Path(path).name + ".zip", Path(path).name + "_normalizador.pkl"]
 
     @classmethod
-    def load(cls, path):
+    def load(cls, path, ambiente=Rocket.ID):
+        """Carga el modelo; `ambiente` es el id del entorno en el que se entrenó (define el tamaño de la observación)."""
         path = str(path)
         model = PPO.load(path + ".zip", device="cpu")
-        normalizer = VecNormalize.load(path + "_normalizador.pkl", DummyVecEnv([lambda: gym.make("RocketLanding3D-v0")]))
+        normalizer = VecNormalize.load(path + "_normalizador.pkl", DummyVecEnv([lambda: gym.make(ambiente)]))
         normalizer.training = False
         normalizer.norm_reward = False
         return cls(model, normalizer)

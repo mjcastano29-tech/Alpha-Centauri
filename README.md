@@ -62,6 +62,19 @@ import rocket_env  # registra el entorno
 env = gym.make("RocketLanding3D-v0")
 ```
 
+## Niveles
+
+| Nivel | Ambiente | Qué cambia | Ficha |
+|---|---|---|---|
+| N1 · misión base | `RocketLanding3D-v0` (0.1.1) | plataforma, viento, temperatura, presión y combustible limitado | [docs/ambiente-v0.1.md](docs/ambiente-v0.1.md) |
+| N2 · obstáculos | `RocketLanding3D-N2-v0` (0.2) | tres torres de 300–420 m alrededor de la plataforma: hay que elegir por qué hueco entrar; chocar es "colisión" (−100); observación de 25 valores (familia nueva de modelos) | [docs/ambiente-v0.2.md](docs/ambiente-v0.2.md) |
+| N3 · operación exigente | pendiente | perturbación: viento de hasta 15 m/s con ráfagas más fuertes | — |
+
+Cada modelo se entrena y evalúa en el ambiente de su manifest (`ambiente.id`). `python cli.py entrenar-ppo --ambiente RocketLanding3D-N2-v0`
+entrena en el nivel 2; `python cli.py evaluar --run ppo-v2-v0.1-s0 --ambiente RocketLanding3D-N2-v0` hace jugar a un modelo del
+nivel 1 en el nivel 2 a través de `AdaptadorN1` (no ve las torres): así se mide cuánto cuesta el nivel. El catálogo lleva un
+recomendado y un anterior por nivel (`python catalogo.py recomendar <run>`, `python catalogo.py restaurar --nivel N2`).
+
 ## Ficha del ambiente (entrega del curso)
 
 [docs/ambiente-v0.1.md](docs/ambiente-v0.1.md) describe el ambiente siguiendo la plantilla del profesor: misión y mapa, variables, observaciones y acciones, dinámica, recompensa, éxito y fracaso, métricas e incidente, cinco transiciones, trampas y decisiones pendientes. El mapa está en [docs/mapa-ambiente-v0.1.svg](docs/mapa-ambiente-v0.1.svg).
@@ -75,14 +88,16 @@ python visualizar_experimento1.py    # genera experimento1.html con esas épocas
 
 ## Experimentos
 
-| | Experimento 1 | Experimento 2 |
-|---|---|---|
-| Modelo | Q-learning con dos tablas ([agente_qlearning.py](agente_qlearning.py)) | PPO, red neuronal con Stable-Baselines3 ([agente_ppo.py](agente_ppo.py)) |
-| Entrenar | `python cli.py entrenar` (~2 min) | `python cli.py entrenar-ppo` (~11 min en CPU) |
-| Aterrizajes en 200 épocas de evaluación | 157 (78 %) | 194 (97 %) |
-| Documento | [docs/ambiente-v0.1.md](docs/ambiente-v0.1.md) | [docs/experimento-2.md](docs/experimento-2.md) |
+| | Experimento 1 | Experimento 2 | Experimento 3 (nivel 2) |
+|---|---|---|---|
+| Modelo | Q-learning con dos tablas ([agente_qlearning.py](agente_qlearning.py)) | PPO, red neuronal con Stable-Baselines3 ([agente_ppo.py](agente_ppo.py)) | PPO con transferencia desde el modelo del nivel 1 (`--desde`) |
+| Ambiente | N1 · `RocketLanding3D-v0` 0.1 | N1 · `RocketLanding3D-v0` 0.1 | N2 · `RocketLanding3D-N2-v0` 0.2 (tres torres) |
+| Entrenar | `python cli.py entrenar` (~2 min) | `python cli.py entrenar-ppo` (~11 min en CPU) | `python cli.py entrenar-ppo --ambiente RocketLanding3D-N2-v0 --desde ppo-v2-v0.1-s0` (~14 min) |
+| Aterrizajes en 200 épocas de evaluación | 157 (78 %) | 194 (97 %) | 153 (77 %); desde cero, 16 (8 %) |
+| Documento | [docs/ambiente-v0.1.md](docs/ambiente-v0.1.md) | [docs/experimento-2.md](docs/experimento-2.md) | [docs/ambiente-v0.2.md](docs/ambiente-v0.2.md) |
 
-El ambiente es el mismo (versión 0.1) en los dos, para que los resultados sean comparables.
+Los experimentos 1 y 2 comparten ambiente (0.1) y son comparables entre sí; el 3 es otra familia de modelos (observación de 25 valores)
+y se compara con el modelo del nivel 1 jugando a ciegas en el nivel 2 (72 %).
 
 ### Diseño experimental: hipótesis, presupuesto y decisión
 
@@ -97,6 +112,8 @@ el **presupuesto** (épocas, pasos del agente, tiempo, máquina), la **suite** c
 | `ppo-v0.1-s0` | PPO sobre la acción cruda supera al Q-learning | tabla → red MLP | rechazado (0 %) |
 | `ppo-rel-v0.1-s0` | el fallo era la acción: empuje relativo al peso | acción relativa v1 (±23°) | rechazado (0 %, llega inclinado) |
 | `ppo-v2-v0.1-s0` | acotar la inclinación al límite de aterrizaje lo hace aprendible | acción relativa v2 (±9,6°) | seleccionado (97 %) |
+| `ppo-n2-v0.2-s0` | la receta del nivel 1 aprende el nivel 2 desde cero | ambiente N2 (torres) | rechazado (8 %: frena, pero fuera de la plataforma y choca con las torres) |
+| `ppo-n2-transfer-v0.2-s0` | partir de la política del nivel 1 y aprender solo a esquivar | transferencia de pesos y normalización | seleccionado N2 (77 %; las colisiones bajan poco: 42 frente a 53) |
 
 Suites: [configs/suites/suite-v1.json](configs/suites/suite-v1.json) (200 épocas, semillas desde 10 000 000, condiciones
 `normal` y `viento-15`) y `suite-reservada` (misma estructura, semilla fuera del repo, solo para los finalistas).

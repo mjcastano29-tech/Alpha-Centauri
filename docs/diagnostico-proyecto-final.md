@@ -4,6 +4,15 @@
 
 Contraste entre lo que pide el enunciado del proyecto final de MLOps (30 de octubre de 2026) y lo que hay en el repositorio hoy. Cada afirmación remite a un archivo o a un comando; lo que no se ha podido comprobar se dice.
 
+## Actualización · 5 de noviembre de 2026: nivel 2 en marcha y web 3D completa
+
+- **Web 3D**: el replay y la evaluación en vivo de la web usan ahora la escena cinematográfica completa de la fase 3D (cielo, terreno, cohete de acero, penacho, polvo, choques, tres cámaras, fantasmas, posproceso) portada a `web/src/escena.ts`; el 4 de noviembre se detectó que la web servía una escena simplificada.
+- **MLflow en línea**: https://alpha-centauri-mlflow.onrender.com (segundo servicio del blueprint de Render; arranca uvicorn directamente porque `mlflow server` no cabe en 512 MB y necesita `MLFLOW_SERVER_ALLOWED_HOSTS`). La web enlaza a la run de cada ejecución.
+- **Nivel 2 decidido e implementado** (candidato C, obstáculos): `RocketLanding3D-N2-v0`, ambiente 0.2, tres torres de 300–420 m alrededor de la plataforma, resultado nuevo "colisión", observación de 25 valores (familia nueva). Ficha [ambiente-v0.2.md](ambiente-v0.2.md) con mapa. Dificultad medida con los controladores del nivel 1 a ciegas (`AdaptadorN1`): el recomendado del nivel 1 baja de 97 % a 72 % (53 colisiones).
+- **Experimentos del nivel 2** (configs/ + MLflow `experimento-3-nivel2`): desde cero, rechazado (8 %); con transferencia de pesos desde el modelo del nivel 1 (`--desde`), 77 % y recomendado provisional del nivel 2 (catálogo v3, con recomendado y anterior por nivel). Un tercer intento con 1,5 M de pasos está en curso.
+- **API y web por nivel**: cada ejecución se evalúa en el ambiente de su manifest; `POST /evaluar` acepta `ambiente` para hacer jugar a un modelo del nivel 1 en el nivel 2; la escena 3D dibuja las torres y la colisión.
+- Pendiente del hito 2: tres semillas para los dos finalistas, pipeline con etapas (Prefect), incidente e intervención, rollback desde la web, monitoreo, release e informe.
+
 ## Actualización · 3 de noviembre de 2026: hito 2, primera entrega
 
 - **Hipótesis y estado por configuración**: `configs/<run_id>.json` para las cuatro configuraciones del nivel 1 (hipótesis, cambio frente al baseline, presupuesto en épocas/pasos/tiempo/máquina, suite, estado `seleccionado`/`rechazado`/`referencia`, decisión y fecha). Las mismas etiquetas (`diseno.*`, `presupuesto.*`) están en las runs de MLflow (`python seguimiento.py etiquetar`). La API las expone como `diseno` en `/catalogo` y la web las muestra en el catálogo (tabla "Hipótesis y decisiones"), en la ficha de cada ejecución y en la comparación.

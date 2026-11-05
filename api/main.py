@@ -31,8 +31,11 @@ import gymnasium as gym  # noqa: E402
 import rocket_env  # noqa: E402, F401  (registra RocketLanding3D-v0)
 import catalogo as catalogo_git  # noqa: E402
 from entrenamiento import CHECK_EPISODES, EVAL_SEED_BASE, OUTCOMES, episode_record, run_epoch  # noqa: E402
-from entrenar import RUNS, load_agent, load_registry, run_dir  # noqa: E402
+from entrenar import RUNS, ambiente_de, hacer_entorno, load_agent, load_registry, run_dir  # noqa: E402
+from rocket_env import AMBIENTES, AdaptadorN1, RocketLandingN2Env, clase_ambiente  # noqa: E402
 from rocket_env.rocket_landing import RocketLanding3DEnv  # noqa: E402
+
+AMBIENTES_INFO = [{"id": c.ID, "version": c.VERSION, "nivel": c.NIVEL, "obstaculos": c.obstaculos()} for c in AMBIENTES.values()]
 
 VERSION_API = "0.2.0"
 MLFLOW_UI_URL = os.environ.get("MLFLOW_UI_URL") or None
@@ -125,10 +128,13 @@ def resumen_ejecucion(run_id, cat):
     detalle = evaluacion_guardada(run_id)
     modelo = m["archivos"]["modelo"]
     archivos = modelo if isinstance(modelo, list) else [modelo]
+    clase = clase_ambiente(ambiente_de(m))
     return {
         "run_id": run_id,
         "experimento": m.get("experimento"),
-        "nivel": m.get("nivel", "N1"),
+        "nivel": m.get("nivel") or clase.NIVEL,
+        "ambiente_id": clase.ID,
+        "obstaculos": clase.obstaculos(),
         "agente": {"clase": m["agente"].get("clase", "qlearning"), "nombre": m["agente"].get("nombre"),
                    "accion": m["agente"].get("accion"), "red": m["agente"].get("red")},
         "ambiente": m["ambiente"]["id"] + " v" + m["ambiente"]["version"],
@@ -151,7 +157,7 @@ def resumen_ejecucion(run_id, cat):
         "diseno": diseno(run_id),
         "manifiesto": f"/ejecuciones/{run_id}/manifiesto" if (MANIFESTS / f"{run_id}.json").exists() else None,
         "checkpoint": all((RUNS / run_id / a).exists() for a in archivos),
-        "estado": "recomendado" if cat["recomendado"] == run_id else "anterior" if cat["anterior"] == run_id else "historico",
+        "estado": catalogo_git.estado_de(cat, run_id, m.get("nivel") or clase.NIVEL),
     }
 
 
@@ -185,7 +191,7 @@ def agente(run_id):
 def raiz():
     cat = catalogo_git.leer()
     return {"nombre": app.title, "version_api": VERSION_API, "commit": COMMIT, "mlflow_ui": MLFLOW_UI_URL,
-            "ambiente": {"id": "RocketLanding3D-v0", "version": RocketLanding3DEnv.VERSION},
+            "ambiente": {"id": RocketLanding3DEnv.ID, "version": RocketLanding3DEnv.VERSION}, "ambientes": AMBIENTES_INFO,
             "recomendado": cat["recomendado"], "documentacion": "/docs",
             "rutas": ["/salud", "/version", "/catalogo", "/ejecuciones/{run_id}", "/ejecuciones/{run_id}/vuelos",
                       "/ejecuciones/{run_id}/evaluacion", "/comparar?runs=a,b", "POST /evaluar"]}
@@ -206,8 +212,8 @@ def version():
     except ImportError:
         pass
     return {"api": VERSION_API, "commit": COMMIT, "arranque": ARRANQUE, "mlflow_ui": MLFLOW_UI_URL, "suites": list(suites()),
-            "ambiente": {"id": "RocketLanding3D-v0", "version": RocketLanding3DEnv.VERSION},
-            "catalogo": {"version": cat["version"], "actualizado": cat["actualizado"], "recomendado": cat["recomendado"],
+            "ambiente": {"id": RocketLanding3DEnv.ID, "version": RocketLanding3DEnv.VERSION}, "ambientes": AMBIENTES_INFO,
+            "catalogo": {"version": cat["version"], "actualizado": cat["actualizado"], "recomendado": cat["recomendado"], "niveles": cat["niveles"],
                          "anterior": cat["anterior"]},
             "modelos_cargados": sorted(_agentes), "software": software}
 
@@ -221,7 +227,7 @@ def catalogo():
         r = resumen_ejecucion(e["run_id"], cat)
         r["epocas"] = e["epochs"]
         ejecuciones.append(r)
-    return {"catalogo": cat, "ejecuciones": ejecuciones, "outcomes": OUTCOMES, "rewards": RocketLanding3DEnv.REWARDS}
+    return {"catalogo": cat, "ejecuciones": ejecuciones, "outcomes": OUTCOMES, "rewards": RocketLandingN2Env.REWARDS, "ambientes": AMBIENTES_INFO}
 
 
 @app.get("/comparar", summary="Resumen de varias ejecuciones lado a lado")
@@ -284,13 +290,20 @@ class PeticionEvaluacion(BaseModel):
     grabar: int = Field(1, ge=0, le=5, description="cuántas épocas devolver con su trayectoria completa")
     suite: str | None = Field(None, description="id de una suite de configs/suites (p. ej. suite-v1): fija semilla_base y viento")
     condicion: str = Field("normal", description="condición de la suite (normal, viento-15)")
+    ambiente: str | None = Field(None, description="otro ambiente (nivel) distinto del de entrenamiento; un modelo de N1 juega en N2 con AdaptadorN1")
 
 
 @app.post("/evaluar", summary="Ejecuta el modelo congelado de una ejecución en el ambiente (modo evaluación)")
 def evaluar(p: PeticionEvaluacion):
     m = manifest(p.run_id)
     ag = agente(p.run_id)
-    env = gym.make("RocketLanding3D-v0")
+    if p.ambiente and p.ambiente not in AMBIENTES:
+        raise HTTPException(404, f"Ambiente desconocido: {p.ambiente}")
+    try:
+        env = hacer_entorno(m, p.ambiente)
+    except SystemExit as e:
+        raise HTTPException(422, str(e))
+    rocket = env.unwrapped
     if p.suite:
         s = suites().get(p.suite)
         if s is None:
@@ -331,8 +344,10 @@ def evaluar(p: PeticionEvaluacion):
         "modo": "evaluacion",
         "modelo": {"run_id": p.run_id, "agente": m["agente"].get("nombre"), "accion": m["agente"].get("accion"),
                    "commit": m["git"]["commit"], "sha256": (m.get("sha256") or {}).get("archivos"), "mlflow": MLFLOW.get(p.run_id)},
-        "ambiente": {"id": "RocketLanding3D-v0", "version": RocketLanding3DEnv.VERSION, "entrenado_con": m["ambiente"]["version"],
-                     "compatible": RocketLanding3DEnv.compatible(m["ambiente"]["version"])},
+        "ambiente": {"id": rocket.ID, "version": rocket.VERSION, "nivel": rocket.NIVEL, "obstaculos": rocket.obstaculos(),
+                     "entrenado_en": ambiente_de(m), "entrenado_con": m["ambiente"]["version"],
+                     "compatible": rocket.ID == ambiente_de(m) and rocket.compatible(m["ambiente"]["version"]),
+                     "adaptador": isinstance(env, AdaptadorN1)},
         "suite": {"id": p.suite, "condicion": p.condicion if p.suite else None, "episodios": p.episodios, "semilla_base": p.semilla_base,
                   "viento": p.viento, "deterministico": True},
         "resumen": resumen,

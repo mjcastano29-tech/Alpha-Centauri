@@ -12,7 +12,7 @@ let limpiar: (() => void) | null = null
 async function estadoApi() {
   try {
     const v = await api.version()
-    cabecera.innerHTML = `<span class="ok">API conectada</span> · commit <code>${corto(v.commit)}</code> · catálogo v${v.catalogo.version} · recomendado <b>${esc(v.catalogo.recomendado ?? '—')}</b> · ambiente ${esc(v.ambiente.id)} v${esc(v.ambiente.version)} · <a href="${esc(api.API)}/docs" target="_blank" rel="noopener">docs de la API</a>`
+    cabecera.innerHTML = `<span class="ok">API conectada</span> · commit <code>${corto(v.commit)}</code> · catálogo v${v.catalogo.version} · recomendado <b>${esc(v.catalogo.recomendado ?? '—')}</b> · ambientes ${v.ambientes.map((a) => `${esc(a.nivel)} ${esc(a.id)} v${esc(a.version)}`).join(' · ')} · <a href="${esc(api.API)}/docs" target="_blank" rel="noopener">docs de la API</a>`
   } catch (e) {
     cabecera.innerHTML = `<span class="error">Sin conexión con la API en <code>${esc(api.API)}</code></span> · ${esc((e as Error).message)} · configura <code>VITE_API_BASE_URL</code>`
   }

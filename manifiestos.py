@@ -77,7 +77,7 @@ def generar(run_id):
         },
         "evaluation_suite_id": cfg.get("suite", "suite-v1"),
         "seed": m["config"].get("seed"),
-        "parent_run_id": None,
+        "parent_run_id": m["config"].get("desde"),
         "experiment_id": m.get("experimento"),
         "agent": {"class": m["agente"].get("clase"), "name": m["agente"].get("nombre"), "action": m["agente"].get("accion")},
         "hypothesis": cfg.get("hipotesis"),

@@ -1,6 +1,6 @@
 // Vistas de la aplicación: catálogo, detalle de una ejecución (con evaluación en vivo), comparación y replay 3D.
 import * as api from './api'
-import type { Catalogo, Detalle, Resumen, ResultadoEvaluacion, Vuelo } from './api'
+import type { Catalogo, Detalle, Obstaculo, Resumen, ResultadoEvaluacion, Vuelo } from './api'
 import { Reproductor, type Cohete, type ModoCamara } from './escena'
 import { barraResultados, corto, entero, esc, ICONO_RESULTADO, lineaSvg, num, pct, pillDiseno, pillEstado, tabla } from './ui'
 
@@ -8,7 +8,6 @@ const COLORES = ['var(--series-1)', 'var(--series-2)', 'var(--series-3)', 'var(-
 /** Última evaluación ejecutada en vivo, para poder reproducir sus vuelos. */
 let ultimaEvaluacion: ResultadoEvaluacion | null = null
 let catalogoCache: Catalogo | null = null
-const nombre = (r: Resumen) => `${r.run_id} · ${r.agente.nombre ?? r.agente.clase}`
 const ETIQUETA_PRESUPUESTO: Record<string, (v: string | number) => string> = {
   epocas: (v) => `${entero(+v)} épocas`, pasos_agente: (v) => `${entero(+v)} pasos del agente`, tiempo_s: (v) => `${num(+v / 60, 1)} min`, maquina: (v) => String(v),
 }
@@ -36,19 +35,24 @@ export async function vistaCatalogo(el: HTMLElement) {
     `<code>${corto(r.git.commit)}</code>${r.git.cambios_sin_commit ? '*' : ''}<br><span class="muted">${r.mlflow ? (r.mlflow.url ? `<a href="${esc(r.mlflow.url)}" target="_blank" rel="noopener">${esc(r.mlflow.modelo)} v${r.mlflow.version}</a>` : `${esc(r.mlflow.modelo)} v${r.mlflow.version}`) : 'sin registro MLflow'}</span>`,
     `<label class="check"><input type="checkbox" class="cmp" value="${esc(r.run_id)}"> comparar</label><br><a class="btn" href="#/replay/${esc(r.run_id)}">replay</a>`,
   ])
-  const rec = c.ejecuciones.find((r) => r.estado === 'recomendado')
+  const rec = c.ejecuciones.find((r) => r.estado === 'recomendado' && r.nivel === 'N1')
+  const porNivel = Object.entries(c.catalogo.niveles).map(([nivel, v]) => {
+    const r = c.ejecuciones.find((e) => e.run_id === v.recomendado), a = c.ambientes.find((x) => x.nivel === nivel)
+    return `<b>${esc(nivel)}</b>${a ? ` <span class="muted">(${esc(a.id)} v${esc(a.version)})</span>` : ''}: recomendado ${r ? `<a href="#/ejecucion/${esc(r.run_id)}">${esc(r.run_id)}</a> (${pct(r.evaluacion.aterrizajes)})` : '—'} · anterior (rollback) ${esc(v.anterior ?? '—')}`
+  })
   el.innerHTML = `
     <section class="hero card">
-      <div><div class="num">${rec ? pct(rec.evaluacion.aterrizajes) : '—'}</div><div class="muted">aterrizajes seguros del modelo recomendado</div></div>
+      <div><div class="num">${rec ? pct(rec.evaluacion.aterrizajes) : '—'}</div><div class="muted">aterrizajes seguros del modelo recomendado del nivel 1</div></div>
       <div class="sub">
-        <p><b>Recomendado:</b> ${rec ? `<a href="#/ejecucion/${esc(rec.run_id)}">${esc(nombre(rec))}</a>` : '—'} · <b>anterior (rollback):</b> ${esc(c.catalogo.anterior ?? '—')} · catálogo v${c.catalogo.version} (${esc(c.catalogo.actualizado ?? '—')}).</p>
+        <p>${porNivel.join('<br>')}</p>
+        <p class="muted">Catálogo v${c.catalogo.version} (${esc(c.catalogo.actualizado ?? '—')}). Cada nivel tiene su ambiente y su familia de modelos; un modelo del nivel 1 solo puede jugar en el nivel 2 a través de un adaptador que le oculta las torres.</p>
         <p class="muted">${c.ejecuciones.length} ejecuciones, incluidas las que no mejoraron. Evaluación: 200 épocas nuevas (suite v1, semillas desde 10 000 000) y la misma suite con viento lateral de 15 m/s. Cada configuración documenta su hipótesis, el cambio frente al baseline, el presupuesto y la decisión.</p>
       </div>
     </section>
     <h2>Ejecuciones</h2>
     ${tabla(['ejecución', 'catálogo · decisión', 'nivel · ambiente', 'agente', 'aterrizajes (suite v1)', 'con viento', 'épocas', 'commit · MLflow', ''], filas)}
     <h2>Hipótesis y decisiones</h2>
-    <p class="muted">La cadena de experimentos del nivel 1: cada fila es una configuración, qué cambió frente a la anterior y por qué se seleccionó o se rechazó.</p>
+    <p class="muted">La cadena de experimentos: cada fila es una configuración, qué cambió frente a la anterior y por qué se seleccionó o se rechazó.</p>
     ${tabla(['ejecución', 'hipótesis', 'cambio frente al baseline', 'presupuesto', 'decisión'], c.ejecuciones.filter((r) => r.diseno).map((r) => [
       `<a href="#/ejecucion/${esc(r.run_id)}"><b>${esc(r.run_id)}</b></a><br>${pillDiseno(r.diseno!.estado)}`,
       esc(r.diseno!.hipotesis ?? '—'),
@@ -58,7 +62,7 @@ export async function vistaCatalogo(el: HTMLElement) {
     ]))}
     <p><button id="btn-comparar" class="btn primario" disabled>Comparar seleccionadas</button> <span class="muted">marca 2 o más</span></p>
     <h2>Historial del catálogo</h2>
-    ${tabla(['v', 'fecha', 'acción', 'ejecución', 'motivo', 'commit base'], c.catalogo.historial.slice().reverse().map((h) => [h.version, esc(h.fecha), esc(h.accion), esc(h.run_id), esc(h.motivo), `<code>${corto(h.commit_base)}</code>`]))}
+    ${tabla(['v', 'fecha', 'acción', 'nivel', 'ejecución', 'motivo', 'commit base'], c.catalogo.historial.slice().reverse().map((h) => [h.version, esc(h.fecha), esc(h.accion), esc(h.nivel ?? 'N1'), esc(h.run_id), esc(h.motivo), `<code>${corto(h.commit_base)}</code>`]))}
   `
   const boton = el.querySelector<HTMLButtonElement>('#btn-comparar')!
   const casillas = [...el.querySelectorAll<HTMLInputElement>('input.cmp')]
@@ -125,6 +129,7 @@ export async function vistaEjecucion(el: HTMLElement, id: string) {
       <h2>Evaluar ahora este modelo</h2>
       <p class="muted">La API carga el modelo congelado y lo ejecuta en el ambiente ${esc(d.ambiente)} con las semillas que indiques. Es determinista: las mismas semillas dan el mismo resultado.</p>
       <form id="form-eval" class="fila">
+        <label>ambiente <select id="ev-ambiente"><option value="">el de la ejecución (${esc(d.nivel)})</option>${d.nivel === 'N1' ? c.ambientes.filter((a) => a.nivel === 'N2').map((a) => `<option value="${esc(a.id)}">${esc(a.nivel)} · ${esc(a.id)} (con adaptador: no ve las torres)</option>`).join('') : ''}</select></label>
         <label>suite <select id="ev-suite"><option value="">manual</option><option value="suite-v1|normal">suite-v1 · normal</option><option value="suite-v1|viento-15">suite-v1 · viento 15 m/s</option></select></label>
         <label>épocas <input type="number" id="ev-episodios" value="20" min="1" max="50"></label>
         <label>semilla inicial <input type="number" id="ev-semilla" value="10000000" min="0"></label>
@@ -141,12 +146,13 @@ export async function vistaEjecucion(el: HTMLElement, id: string) {
     const episodios = +(el.querySelector<HTMLInputElement>('#ev-episodios')!.value), semilla = +(el.querySelector<HTMLInputElement>('#ev-semilla')!.value)
     const vientoTxt = el.querySelector<HTMLInputElement>('#ev-viento')!.value, viento = vientoTxt === '' ? null : +vientoTxt
     const [suite, condicion] = el.querySelector<HTMLSelectElement>('#ev-suite')!.value.split('|')
+    const ambiente = el.querySelector<HTMLSelectElement>('#ev-ambiente')!.value || null
     boton.disabled = true; salida.innerHTML = `<p class="estado">Evaluando ${episodios} épocas en la API…</p>`
     try {
-      const r = await api.evaluar(suite ? { run_id: d.run_id, episodios, grabar: 3, suite, condicion } : { run_id: d.run_id, episodios, semilla_base: semilla, viento, grabar: 3 })
+      const r = await api.evaluar(suite ? { run_id: d.run_id, episodios, grabar: 3, suite, condicion, ambiente } : { run_id: d.run_id, episodios, semilla_base: semilla, viento, grabar: 3, ambiente })
       ultimaEvaluacion = r
       salida.innerHTML = `
-        <p class="modo modo-eval">Modo: evaluación en vivo${r.suite.id ? ` · ${esc(r.suite.id)} / ${esc(r.suite.condicion ?? '')}` : ''} · modelo ${esc(r.modelo.run_id)} (${r.modelo.mlflow ? esc(r.modelo.mlflow.modelo) + ' v' + r.modelo.mlflow.version : 'sin MLflow'}) · ambiente ${esc(r.ambiente.id)} v${esc(r.ambiente.version)}${r.ambiente.compatible ? '' : ' · <b>ambiente no compatible</b>'} · servido por commit <code>${corto(r.servido_por.commit)}</code> · ${r.latencia.total_ms} ms (${r.latencia.por_paso_ms} ms por paso)</p>
+        <p class="modo modo-eval">Modo: evaluación en vivo${r.suite.id ? ` · ${esc(r.suite.id)} / ${esc(r.suite.condicion ?? '')}` : ''} · modelo ${esc(r.modelo.run_id)} (${r.modelo.mlflow ? esc(r.modelo.mlflow.modelo) + ' v' + r.modelo.mlflow.version : 'sin MLflow'}) · ambiente ${esc(r.ambiente.id)} v${esc(r.ambiente.version)} (${esc(r.ambiente.nivel)})${r.ambiente.adaptador ? ' · <b>modelo del nivel 1 con adaptador: no ve las torres</b>' : r.ambiente.compatible ? '' : ' · <b>ambiente no compatible</b>'} · servido por commit <code>${corto(r.servido_por.commit)}</code> · ${r.latencia.total_ms} ms (${r.latencia.por_paso_ms} ms por paso)</p>
         <p><b>${pct(r.resumen.aterrizajes)}</b> aterrizajes en ${r.resumen.episodios} épocas ${barraResultados(r.resumen.resultados, c.outcomes)} · contacto ${num(r.resumen.velocidad_contacto, 2)} m/s · error ${num(r.resumen.error_posicion)} m · ${num(r.resumen.combustible, 0)} kg</p>
         <p><a class="btn" href="#/replay/${esc(d.run_id)}/evaluacion">Ver en 3D las ${r.vuelos.length} primeras épocas</a></p>
         ${tabla(['época', 'semilla', 'resultado', 'recompensa', 'pasos', 'vz contacto', 'vh', 'distancia', 'inclinación', 'combustible', 'viento'],
@@ -203,6 +209,8 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
     nota = 'vuelos grabados durante el entrenamiento (con exploración) y del modelo final (sin ruido)'
   }
   const c = await cargarCatalogo(), r = c.ejecuciones.find((e) => e.run_id === id)
+  const obstaculos: Obstaculo[] = fuente === 'evaluacion' ? ultimaEvaluacion!.ambiente.obstaculos : r?.obstaculos ?? []
+  const nivelVisto = fuente === 'evaluacion' ? ultimaEvaluacion!.ambiente.nivel : r?.nivel ?? 'N1'
   const finales = vuelos.filter((v) => !v.epoch && !v.epoca_evaluacion)
   const etiqueta = (v: Vuelo, _k: number) => v.epoch ? `Época ${entero(v.epoch)} · entrenamiento` : v.epoca_evaluacion ? `Evaluación · época ${v.epoca_evaluacion}` : `Modelo final · vuelo ${finales.indexOf(v) + 1} de ${finales.length}`
   el.innerHTML = `
@@ -235,7 +243,7 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
       <aside class="card lateral">
         <h2>${esc(id)}</h2>
         <p class="muted">${esc(nota)}</p>
-        <p class="muted">Modelo ${esc(r?.agente.nombre ?? '')} · ambiente ${esc(r?.ambiente ?? '')} · commit <code>${corto(r?.git.commit)}</code>${r?.mlflow ? ` · ${esc(r.mlflow.modelo)} v${r.mlflow.version}` : ''}</p>
+        <p class="muted">Modelo ${esc(r?.agente.nombre ?? '')} · ambiente ${esc(r?.ambiente ?? '')}${nivelVisto !== r?.nivel ? ` · <b>jugando en ${esc(nivelVisto)} con adaptador</b>` : ''}${obstaculos.length ? ` · ${obstaculos.length} torres` : ''} · commit <code>${corto(r?.git.commit)}</code>${r?.mlflow ? ` · ${esc(r.mlflow.modelo)} v${r.mlflow.version}` : ''}</p>
         <label>vuelo <select id="rp-vuelo">${vuelos.map((v, k) => `<option value="${k}">${esc(etiqueta(v, k))} · ${esc(v.reason)} · ${v.steps} pasos</option>`).join('')}</select></label>
         <p class="muted">La velocidad de reproducción no cambia las reglas ni el paso físico (0,1 s): solo cuánto tarda en verse. Entre dos muestras la posición se interpola con las velocidades grabadas. Arrastra para girar la cámara, rueda para acercar, doble clic para recentrar. El cohete se dibuja a tamaño real (42 m); los fantasmas son las trayectorias de los vuelos anteriores, con el color de su resultado.</p>
         <p class="muted" id="rp-fantasmas-n"></p>
@@ -244,6 +252,7 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
     </div>`
   const visor = el.querySelector<HTMLElement>('#visor3d')!
   const rp = new Reproductor(visor, { padRadius: 10, startAltitude: 600 })
+  rp.setObstaculos(obstaculos)
   const sel = el.querySelector<HTMLSelectElement>('#rp-vuelo')!, play = el.querySelector<HTMLButtonElement>('#rp-play')!, scrub = el.querySelector<HTMLInputElement>('#rp-scrub')!
   const telemetria = el.querySelector<HTMLElement>('#rp-telemetria')!
   let actual = vuelos[0]

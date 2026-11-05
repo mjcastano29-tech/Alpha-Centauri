@@ -18,7 +18,7 @@ import numpy as np
 
 import rocket_env  # noqa: F401  (registra RocketLanding3D-v0)
 from entrenamiento import CHECK_EPISODES, EVAL_SEED_BASE, OUTCOMES, run_epoch
-from entrenar import FINAL_EPISODES, RUNS, load_agent, load_registry
+from entrenar import FINAL_EPISODES, RUNS, hacer_entorno, load_agent, load_registry
 from rocket_env.rocket_landing import RocketLanding3DEnv
 from visualizacion.datos import write_page
 
@@ -62,8 +62,8 @@ def evaluacion(run_id, viento):
         data = json.loads(cache.read_text(encoding="utf-8"))
         if data.get("viento") == viento and data.get("episodios") == FINAL_EPISODES:
             return data
-    agent, _ = load_agent(run_id)
-    env = gym.make("RocketLanding3D-v0")
+    agent, path = load_agent(run_id)
+    env = hacer_entorno(json.loads((path / "manifest.json").read_text(encoding="utf-8")))
     normal = evaluar_detalle(env, agent, FINAL_EPISODES)
     perturbado = evaluar_detalle(env, agent, FINAL_EPISODES, options={"viento": viento})
     data = {"episodios": FINAL_EPISODES, "viento": viento,

@@ -1,0 +1,15 @@
+{
+  "run_id": "ppo-n2-transfer-v0.2-s0",
+  "experimento": "experimento-3-nivel2",
+  "nivel": "N2",
+  "ambiente": "RocketLanding3D-N2-v0@0.2",
+  "hipotesis": "Partir de la política del nivel 1 (ppo-v2-v0.1-s0: 72 % en el nivel 2 sin ver las torres) y aprender solo a esquivar las torres es más barato y mejor que aprender desde cero: con el mismo presupuesto de 600 000 pasos se superan el 72 % y las 53 colisiones del modelo a ciegas.",
+  "cambio": "Transferencia: se copian los pesos de ppo-v2-v0.1-s0 y la normalización de las 16 observaciones comunes; las columnas de la primera capa para las 9 entradas nuevas (torres) empiezan en cero. Mismos hiperparámetros y ambiente que ppo-n2-v0.2-s0.",
+  "baseline": "ppo-n2-v0.2-s0",
+  "comparacion_principal": "ppo-v2-v0.1-s0",
+  "presupuesto": {"pasos_agente": 600000, "epocas": 19940, "tiempo_s": 832, "maquina": "CPU de portátil (WSL2), 8 entornos en paralelo"},
+  "suite": "suite-v1",
+  "estado": "seleccionado",
+  "decision": "Seleccionado como recomendado del nivel 2 (catálogo v3): 153/200 aterrizajes (77 %) frente a 8 % desde cero y 72 % del modelo del nivel 1 a ciegas; aterriza en su cuarta época y la evaluación sin ruido llega a 45/50. La hipótesis se confirma solo en parte: la destreza de aterrizar se conserva, pero las colisiones bajan poco (42 frente a 53): esquivar las torres exige anticipar la ruta desde los 600 m y 600 000 pasos no bastan. Siguiente hipótesis: más presupuesto (1,5 M de pasos) con la misma transferencia.",
+  "fecha_decision": "2026-11-05"
+}

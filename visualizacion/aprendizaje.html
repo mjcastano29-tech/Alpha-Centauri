@@ -302,13 +302,14 @@ const color = (name) => getComputedStyle(document.documentElement).getPropertyVa
 const cur = () => DATA.episodes[state.ep];
 const idx = () => Math.min(Math.round(state.t), cur().f.t.length - 1);
 const compass = (deg) => ["E", "NE", "N", "NO", "O", "SO", "S", "SE"][Math.round(deg / 45) % 8];
-const OUT_TOKEN = { "aterrizaje": "--o-land", "fuera de plataforma": "--o-off", "choque": "--o-crash", "sin pasos": "--o-steps", "fuera de zona": "--o-zone" };
+const OUT_TOKEN = { "aterrizaje": "--o-land", "fuera de plataforma": "--o-off", "choque": "--o-crash", "sin pasos": "--o-steps", "fuera de zona": "--o-zone", "colisión": "--o-crash" };
 const OUT_WHEN = {
   "aterrizaje": "Toca el suelo a ≤ 3 m/s en vertical, ≤ 2 m/s en horizontal y a menos de 10 m del centro.",
   "fuera de plataforma": "Toca el suelo suave pero fuera de la plataforma.",
   "choque": "Toca el suelo demasiado rápido.",
   "sin pasos": `Agota los ${DATA.max_steps} pasos sin llegar al suelo.`,
   "fuera de zona": "Se aleja más de 300 m de la plataforma o sube por encima de 1200 m.",
+  "colisión": "Choca con una torre (nivel 2).",
 };
 const L = DATA.log, N = L.reward.length;
 const outName = (k) => DATA.outcomes[k];

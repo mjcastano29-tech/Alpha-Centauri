@@ -10,10 +10,14 @@ export interface Evaluacion {
   combustible: number
   resultados: Resultados
 }
+export interface Obstaculo { nombre: string; x: number; y: number; radio: number; altura: number }
+export interface Ambiente { id: string; version: string; nivel: string; obstaculos: Obstaculo[] }
 export interface Resumen {
   run_id: string
   experimento: string | null
   nivel: string
+  ambiente_id: string
+  obstaculos: Obstaculo[]
   agente: { clase: string; nombre: string | null; accion: string | null; red: string | null }
   ambiente: string
   ambiente_version: string
@@ -58,11 +62,13 @@ export interface Catalogo {
     actualizado: string | null
     recomendado: string | null
     anterior: string | null
-    historial: { version: number; fecha: string; accion: string; run_id: string; motivo: string; commit_base: string | null }[]
+    niveles: Record<string, { recomendado: string | null; anterior: string | null }>
+    historial: { version: number; fecha: string; accion: string; nivel?: string; run_id: string; motivo: string; commit_base: string | null }[]
   }
   ejecuciones: Resumen[]
   outcomes: string[]
   rewards: Record<string, number>
+  ambientes: Ambiente[]
 }
 export interface Detalle extends Resumen {
   manifest: Record<string, unknown> & { resultado: { evaluacion: { outcomes: Resultados } } }
@@ -87,6 +93,7 @@ export interface Version {
   commit: string | null
   arranque: string
   ambiente: { id: string; version: string }
+  ambientes: Ambiente[]
   mlflow_ui: string | null
   suites: string[]
   catalogo: { version: number; actualizado: string | null; recomendado: string | null; anterior: string | null }
@@ -96,7 +103,7 @@ export interface Version {
 export interface ResultadoEvaluacion {
   modo: 'evaluacion'
   modelo: { run_id: string; agente: string | null; accion: string | null; commit: string | null; sha256: Record<string, string> | null; mlflow: { modelo: string; version: number } | null }
-  ambiente: { id: string; version: string; entrenado_con: string; compatible: boolean }
+  ambiente: Ambiente & { entrenado_en: string; entrenado_con: string; compatible: boolean; adaptador: boolean }
   suite: { id: string | null; condicion: string | null; episodios: number; semilla_base: number; viento: number | null; deterministico: boolean }
   resumen: Evaluacion
   episodios: { epoca: number; semilla: number; resultado: string; recompensa: number; pasos: number; duracion_s: number; vz: number; vh: number; distancia: number; inclinacion: number; combustible: number; viento: number; toca_suelo: boolean }[]
@@ -130,5 +137,5 @@ export const vuelos = (id: string) => get<{ episodes: Vuelo[] }>(`/ejecuciones/$
 export const comparar = (ids: string[]) => get<{ ejecuciones: Resumen[] }>(`/comparar?runs=${encodeURIComponent(ids.join(','))}`)
 export const suites = () => get<{ suites: Record<string, Suite>; maximo_por_peticion: number }>('/suites')
 export const urlManifiesto = (id: string) => `${API}/ejecuciones/${encodeURIComponent(id)}/manifiesto`
-export const evaluar = (peticion: { run_id: string; episodios: number; viento?: number | null; semilla_base?: number; grabar?: number; suite?: string | null; condicion?: string }) =>
+export const evaluar = (peticion: { run_id: string; episodios: number; viento?: number | null; semilla_base?: number; grabar?: number; suite?: string | null; condicion?: string; ambiente?: string | null }) =>
   post<ResultadoEvaluacion>('/evaluar', peticion)

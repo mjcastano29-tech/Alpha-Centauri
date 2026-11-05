@@ -58,6 +58,14 @@ class RocketLanding3DEnv(gym.Env):
     # mayor.menor = reglas (física, recompensas, observación, acción); el tercer número = señales que no cambian
     # las reglas (0.1.1: "sin pasos" se informa como truncated). Los modelos de 0.1 siguen siendo válidos en 0.1.x.
 
+    ID = "RocketLanding3D-v0"  # id en Gymnasium; cada nivel tiene el suyo (ver rocket_env/__init__.py)
+    NIVEL = "N1"
+
+    @classmethod
+    def obstaculos(cls):
+        """Obstáculos del nivel (ninguno en el nivel 1); lo usan la API y la escena 3D."""
+        return []
+
     @classmethod
     def compatible(cls, version):
         """¿Un modelo entrenado con `version` del ambiente juega con las mismas reglas que esta clase?"""

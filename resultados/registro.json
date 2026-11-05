@@ -1,6 +1,6 @@
 {
   "formato": 1,
-  "ultimo": "ppo-v2-v0.1-s0",
+  "ultimo": "ppo-n2-transfer-v0.2-s0",
   "ejecuciones": [
     {
       "run_id": "base-v0.1-s0",
@@ -57,6 +57,36 @@
       "velocidad_contacto": 1.1975763256094811,
       "error_posicion": 4.943637642366295,
       "primer_aterrizaje": 1970
+    },
+    {
+      "run_id": "ppo-n2-v0.2-s0",
+      "experimento": "experimento-3-nivel2",
+      "agente": "PPO (red neuronal)",
+      "fecha": "2026-11-05T15:24:23",
+      "commit": "5b99fd685a66c4ae1c88dd64041fc212398e441e*",
+      "ambiente": "0.2",
+      "nivel": "N2",
+      "epochs": 20664,
+      "seed": 0,
+      "aterrizajes": 0.08,
+      "velocidad_contacto": 2.484173966002669,
+      "error_posicion": 27.757818927409197,
+      "primer_aterrizaje": 3501
+    },
+    {
+      "run_id": "ppo-n2-transfer-v0.2-s0",
+      "experimento": "experimento-3-nivel2",
+      "agente": "PPO (red neuronal)",
+      "fecha": "2026-11-05T15:38:26",
+      "commit": "5b99fd685a66c4ae1c88dd64041fc212398e441e*",
+      "ambiente": "0.2",
+      "nivel": "N2",
+      "epochs": 19905,
+      "seed": 0,
+      "aterrizajes": 0.765,
+      "velocidad_contacto": 1.4358745676830036,
+      "error_posicion": 9.422642825767019,
+      "primer_aterrizaje": 4
     }
   ]
 }

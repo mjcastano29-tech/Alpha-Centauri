@@ -1,0 +1,15 @@
+{
+  "run_id": "ppo-n2-v0.2-s0",
+  "experimento": "experimento-3-nivel2",
+  "nivel": "N2",
+  "ambiente": "RocketLanding3D-N2-v0@0.2",
+  "hipotesis": "La misma receta que funcionó en el nivel 1 (PPO, acción relativa v2, 600 000 pasos) aprende desde cero a entrar entre las torres y aterrizar en el nivel 2.",
+  "cambio": "Primer modelo del nivel 2. Mismos hiperparámetros que ppo-v2-v0.1-s0; cambia el ambiente (RocketLanding3D-N2-v0: 3 torres, observación de 25 valores, colisión −100, castigo de proximidad en el potencial).",
+  "baseline": "ppo-v2-v0.1-s0",
+  "comparacion_principal": "ppo-v2-v0.1-s0",
+  "presupuesto": {"pasos_agente": 600000, "epocas": 21376, "tiempo_s": 759, "maquina": "CPU de portátil (WSL2), 8 entornos en paralelo"},
+  "suite": "suite-v1",
+  "estado": "rechazado",
+  "decision": "Rechazado: 16/200 aterrizajes (8 %). Aprende a frenar (97 contactos suaves) pero fuera de la plataforma, y sigue chocando con las torres (54 colisiones): el −100 de la colisión en el 30 % de las salidas corta las épocas antes de que el agente practique el aterrizaje, y la red trata la plataforma rodeada de torres como zona peligrosa. Peor que el modelo del nivel 1 a ciegas (72 %). Siguiente hipótesis: partir de la política del nivel 1 y aprender solo a esquivar las torres.",
+  "fecha_decision": "2026-11-05"
+}

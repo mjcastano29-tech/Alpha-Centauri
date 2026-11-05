@@ -14,7 +14,8 @@ import type { Vuelo } from './api'
 
 const DT = 0.1 // s entre muestras grabadas
 const V = (x: number, y: number, z: number) => new THREE.Vector3(x, z, -y) // el entorno usa z hacia arriba; three.js, y hacia arriba
-const COLOR_RESULTADO: Record<string, number> = { aterrizaje: 0x3ee08a, 'fuera de plataforma': 0xf2c14e, choque: 0xff6b5c, 'sin pasos': 0xa5b2c4, 'fuera de zona': 0xc39bff }
+const COLOR_RESULTADO: Record<string, number> = { aterrizaje: 0x3ee08a, 'fuera de plataforma': 0xf2c14e, choque: 0xff6b5c, 'sin pasos': 0xa5b2c4, 'fuera de zona': 0xc39bff, 'colisión': 0xff8f6b }
+export interface Obstaculo { nombre: string; x: number; y: number; radio: number; altura: number }
 const smooth = (a: number, b: number, x: number) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t) }
 const col = (hex: number) => new THREE.Color(hex) // con la gestión de color de three.js, el hex sRGB se convierte solo a lineal
 // los ShaderMaterial no aplican solos el tone mapping ni la conversión de color de salida; esto los iguala al resto
@@ -69,7 +70,7 @@ function glowTexture() {
 }
 
 // ---------- recursos pesados compartidos entre reproductores (se generan una vez por sesión) ----------
-interface Recursos { GLOW: THREE.Texture; padTex: THREE.Texture; scorchTex: THREE.Texture; terreno: THREE.BufferGeometry; roca: THREE.BufferGeometry; skins: { body: THREE.Texture[][]; nose: THREE.Texture[][] }; tileTex: THREE.Texture; sootTex: THREE.Texture; gridTex: THREE.Texture }
+interface Recursos { GLOW: THREE.Texture; padTex: THREE.Texture; scorchTex: THREE.Texture; franjasTex: THREE.Texture; terreno: THREE.BufferGeometry; roca: THREE.BufferGeometry; skins: { body: THREE.Texture[][]; nose: THREE.Texture[][] }; tileTex: THREE.Texture; sootTex: THREE.Texture; gridTex: THREE.Texture }
 let recursos: Recursos | null = null
 const HEX = 2 / (Math.sqrt(3) * 6) // radio de las losetas (m): 6 por cada 2 m, así la textura se repite sin costuras
 function hexTiles(g: CanvasRenderingContext2D, rnd: () => number, x0: number, y0: number, x1: number, y1: number) {
@@ -193,7 +194,14 @@ function cargarRecursos(padRadius: number): Recursos {
     for (let k = -W; k < 2 * W; k += 28) { c.beginPath(); c.moveTo(k, 0); c.lineTo(k + W, H); c.stroke(); c.beginPath(); c.moveTo(k, H); c.lineTo(k + W, 0); c.stroke() }
     c.lineWidth = 16; c.strokeRect(0, 0, W, H)
   })
-  recursos = { GLOW: glowTexture(), padTex, scorchTex, terreno, roca, skins, tileTex, sootTex, gridTex }
+  // torres del nivel 2: acero oscuro con franjas rojas y blancas de señalización, desgastadas por el polvo
+  const franjasTex = canvasTexture(128, 512, (g, W, H) => {
+    for (let k = 0; k < 8; k++) { g.fillStyle = k % 2 ? '#c8c4bb' : '#b8372a'; g.fillRect(0, (k * H) / 8, W, H / 8) }
+    for (let k = 0; k < 1200; k++) { g.fillStyle = `rgba(90,60,40,${0.08 + rnd() * 0.18})`; g.fillRect(rnd() * W, rnd() * H, 1 + rnd() * 6, 1 + rnd() * 14) }
+    g.fillStyle = 'rgba(30,28,26,0.55)'; for (let x = 0; x < W; x += 32) g.fillRect(x, 0, 2, H) // nervios verticales
+  })
+  franjasTex.wrapS = franjasTex.wrapT = THREE.RepeatWrapping
+  recursos = { GLOW: glowTexture(), padTex, scorchTex, franjasTex, terreno, roca, skins, tileTex, sootTex, gridTex }
   return recursos
 }
 
@@ -383,6 +391,9 @@ export class Reproductor {
   private trailDone: THREE.Line | null = null
   private readonly markers = new THREE.Group()
   private readonly ghosts = new THREE.Group()
+  private readonly torres = new THREE.Group()
+  private torreBeacons: THREE.Sprite[] = []
+  private crashY = 0 // altura (m) a la que ocurrió el choque: suelo o, en una colisión con una torre, en el aire
   private readonly markerDone = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.75 })
   private readonly markerTodo = new THREE.MeshBasicMaterial({ color: 0x8fa3c0, transparent: true, opacity: 0.3 })
   private composer: EffectComposer | null = null
@@ -572,7 +583,7 @@ export class Reproductor {
     this.plumb = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineDashedMaterial({ color: 0xbfd0ea, dashSize: 6, gapSize: 6, transparent: true, opacity: 0.35 }))
     this.plumb.frustumCulled = false; this.guides.add(this.plumb)
     this.windArrow = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(), 20, 0x5fd0ff, 8, 5); this.guides.add(this.windArrow)
-    this.guides.add(this.markers); scene.add(this.ghosts)
+    this.guides.add(this.markers); scene.add(this.ghosts, this.torres)
 
     // posproceso: brillo de las luces intensas, tone mapping y, al final, viñeta, grano y aberración de lente
     if (renderer.capabilities.isWebGL2) {
@@ -682,6 +693,31 @@ export class Reproductor {
     this.plumeOuter.material.uniforms.c0.value.copy(this.ship.plume.outer[0]); this.plumeOuter.material.uniforms.c1.value.copy(this.ship.plume.outer[1])
     this.snap = true
   }
+  /** Torres del nivel 2 (o ninguna): acero con franjas de señalización, plataforma superior y baliza roja. */
+  setObstaculos(lista: Obstaculo[]) {
+    this.torres.clear(); this.torreBeacons = []
+    const acero = new THREE.MeshStandardMaterial({ map: this.R.franjasTex, roughness: 0.55, metalness: 0.75, envMapIntensity: 0.8 })
+    const oscuro = new THREE.MeshStandardMaterial({ color: 0x3a3c41, roughness: 0.6, metalness: 0.7 })
+    for (const o of lista) {
+      const g = new THREE.Group(); g.position.copy(V(o.x, o.y, terrainHeight(o.x, -o.y)))
+      const mat = acero.clone(); mat.map = this.R.franjasTex.clone(); mat.map.repeat.set(1, o.altura / 40); mat.map.needsUpdate = true
+      const cuerpo = new THREE.Mesh(new THREE.CylinderGeometry(o.radio * 0.85, o.radio, o.altura, 32, 1, false), mat)
+      cuerpo.position.y = o.altura / 2; cuerpo.castShadow = cuerpo.receiveShadow = true; g.add(cuerpo)
+      for (let y = 40; y < o.altura; y += 40) { // anillos de refuerzo
+        const r = o.radio * (1 - 0.15 * (y / o.altura)) + 0.4
+        const anillo = new THREE.Mesh(new THREE.TorusGeometry(r, 0.45, 8, 48), oscuro); anillo.rotation.x = Math.PI / 2; anillo.position.y = y; anillo.castShadow = true; g.add(anillo)
+      }
+      const tapa = new THREE.Mesh(new THREE.CylinderGeometry(o.radio * 0.85 + 1.6, o.radio * 0.85 + 1.6, 1.4, 32), oscuro); tapa.position.y = o.altura + 0.7; tapa.castShadow = true; g.add(tapa)
+      const mastil = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.35, 8, 8), oscuro); mastil.position.y = o.altura + 5; g.add(mastil)
+      const baliza = new THREE.Sprite(new THREE.SpriteMaterial({ map: this.R.GLOW, color: 0xff2a1a, transparent: true, opacity: 1, blending: THREE.AdditiveBlending, depthWrite: false }))
+      baliza.position.y = o.altura + 9.5; baliza.scale.set(6, 6, 1); g.add(baliza); this.torreBeacons.push(baliza)
+      for (let y = 60; y < o.altura; y += 60) { // luces de obstáculo a media altura
+        const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: this.R.GLOW, color: 0xff6a3a, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false }))
+        s.position.set(o.radio + 0.8, y, 0); s.scale.set(3, 3, 1); g.add(s)
+      }
+      this.torres.add(g)
+    }
+  }
   /** Escudo térmico de la nave (losetas negras en la mitad −z). */
   setEscudo(on: boolean) { this.ships.nave.heatShield?.(on) }
   /** "alta": sombras, posproceso y resolución nativa; "ligera": para equipos lentos. */
@@ -764,10 +800,13 @@ export class Reproductor {
     if (this.t < n - 1) { this.touched = false; return }
     if (this.touched) return
     this.touched = true
-    if (!this.snap && v.f.z[n - 1] <= 0.5) {
-      const crash = v.reason === 'choque'
-      this.dust.emit(p.x, 0.6, p.z, crash ? 380 : 200, crash ? 48 : 26, 5, 1.5 + (crash ? 48 : 26) * 0.09, 2.2)
-      if (crash) { this.flashT = 1.2; this.crashT = 0; this.fallDir.set(this.axis.x, 0, this.axis.z); if (this.fallDir.lengthSq() < 1e-4) this.fallDir.set(1, 0, 0); this.fallDir.normalize() }
+    if (this.snap) return
+    const crash = v.reason === 'choque', colision = v.reason === 'colisión'
+    if (v.f.z[n - 1] <= 0.5) this.dust.emit(p.x, 0.6, p.z, crash ? 380 : 200, crash ? 48 : 26, 5, 1.5 + (crash ? 48 : 26) * 0.09, 2.2)
+    if (crash || colision) { // bola de fuego en el suelo o contra la torre; el cohete se vuelca hacia donde estaba inclinado
+      this.flashT = 1.2; this.crashT = 0; this.crashY = colision ? p.y : 0
+      this.fallDir.set(this.axis.x, 0, this.axis.z); if (this.fallDir.lengthSq() < 1e-4) this.fallDir.set(1, 0, 0); this.fallDir.normalize()
+      if (colision) this.smoke.emit(p.x, p.y + 10, p.z, 40, 6, 4, 4, 6)
     }
   }
 
@@ -787,7 +826,7 @@ export class Reproductor {
       this.crashT += dt
       this.fallQ.setFromAxisAngle(this.fallAxis.crossVectors(UP, this.fallDir).normalize(), 1.42 * Math.pow(Math.min(1, this.crashT / 1.7), 2))
       rocket.quaternion.copy(qTarget).premultiply(this.fallQ)
-      if (this.crashT < 7) this.smoke.emit(p.x + this.fallDir.x * ship.height * 0.3, 2, p.z + this.fallDir.z * ship.height * 0.3, Math.random() < dt * 30 ? 1 : 0, 2, 6, 6, 7)
+      if (this.crashT < 7) this.smoke.emit(p.x + this.fallDir.x * ship.height * 0.3, this.crashY + 2, p.z + this.fallDir.z * ship.height * 0.3, Math.random() < dt * 30 ? 1 : 0, 2, 6, 6, 7)
     }
     rocket.updateMatrixWorld()
     axis.copy(UP).applyQuaternion(rocket.quaternion)
@@ -819,12 +858,13 @@ export class Reproductor {
     if (this.flashT > 0) { // bola de fuego: crece rápido y se apaga en 1,2 s
       this.flashT = Math.max(0, this.flashT - dt)
       const u = 1 - this.flashT / 1.2, fd = this.fallDir
-      this.flash.position.set(p.x + fd.x * 6, 8 + 10 * u, p.z + fd.z * 6); this.flash.scale.setScalar(30 + 80 * Math.sqrt(u)); this.flash.material.opacity = Math.min(1, 1.6 * Math.pow(1 - u, 1.2))
+      this.flash.position.set(p.x + fd.x * 6, this.crashY + 8 + 10 * u, p.z + fd.z * 6); this.flash.scale.setScalar(30 + 80 * Math.sqrt(u)); this.flash.material.opacity = Math.min(1, 1.6 * Math.pow(1 - u, 1.2))
       this.flashCore.position.copy(this.flash.position); this.flashCore.scale.setScalar(16 + 36 * Math.sqrt(u)); this.flashCore.material.opacity = Math.min(1, 1.4 * Math.pow(1 - u, 2))
       this.flashLight.position.copy(this.flash.position); this.flashLight.intensity = 8 * Math.PI * Math.pow(1 - u, 2)
     } else this.flashLight.intensity = 0
     this.flash.visible = this.flashCore.visible = this.flashT > 0
     const blink = Math.sin(this.clock * 2.6) > 0.55 ? 1 : 0.08; for (const b of this.beacons) b.material.opacity = blink
+    const blink2 = Math.sin(this.clock * 1.7 + 1) > 0.3 ? 1 : 0.15; for (const b of this.torreBeacons) b.material.opacity = blink2
 
     // guías
     this.shadow.position.set(p.x, ground + 0.05, p.z); this.shadow.scale.setScalar(1 + s.z / 150); this.shadow.material.opacity = 0.18 * smooth(400, 0, s.z)

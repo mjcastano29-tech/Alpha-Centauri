@@ -62,7 +62,7 @@ def test_suites_y_manifiestos_de_la_seccion_11():
         assert resumen["diseno"]["estado"] in ("seleccionado", "rechazado", "referencia") and resumen["diseno"]["hipotesis"]
         m = cliente.get(f"/ejecuciones/{run_id}/manifiesto").json()
         assert m["run_id"] == run_id and len(m["git_commit"]) == 40 and len(m["model_sha256"]) == 64
-        assert m["evaluation_suite_id"] == "suite-v1" and m["level_id"] == "N1" and m["status"] == resumen["diseno"]["estado"]
+        assert m["evaluation_suite_id"] == "suite-v1" and m["level_id"] == resumen["nivel"] and m["status"] == resumen["diseno"]["estado"]
 
 
 def test_evaluar_con_suite_fija_semilla_y_viento():

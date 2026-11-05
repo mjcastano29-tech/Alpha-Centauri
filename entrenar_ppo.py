@@ -47,12 +47,40 @@ DEFAULTS = {
     "eval_every": 20_000,  # pasos entre evaluaciones sin ruido
     "seed": 0,
     "accion": "relativa",  # relativa (empuje/peso e inclinación) o cruda (los 5 valores del entorno)
+    "ambiente": RocketLanding3DEnv.ID,  # nivel en el que se entrena (RocketLanding3D-v0 = N1, RocketLanding3D-N2-v0 = N2)
+    "desde": None,  # run_id de un modelo PPO del que partir (transferencia: pesos y normalización; ver transferir_desde)
 }
 
 
-def make_env(seed, accion="relativa"):
+def transferir_desde(model, venv, run_id):
+    """Inicializa la red y la normalización con las de otra ejecución PPO (p. ej. un modelo del nivel 1 para arrancar el nivel 2).
+
+    Los pesos de la misma forma se copian tal cual. En la primera capa, si la observación nueva es más larga, se copian
+    las columnas de las entradas que ya existían y las nuevas empiezan en cero: la red arranca comportándose como la
+    original y aprende el efecto de las entradas nuevas. La normalización de observaciones se copia para las entradas
+    comunes. Devuelve un resumen de lo transferido.
+    """
+    from entrenar import load_agent
+    origen, _ = load_agent(run_id)
+    src, dst = origen.model.policy.state_dict(), model.policy.state_dict()
+    copiados, ampliados = [], []
+    for name, w in src.items():
+        if name not in dst:
+            continue
+        if dst[name].shape == w.shape:
+            dst[name].copy_(w); copiados.append(name)
+        elif w.dim() == 2 and dst[name].dim() == 2 and dst[name].shape[0] == w.shape[0] and dst[name].shape[1] > w.shape[1]:
+            dst[name].zero_(); dst[name][:, : w.shape[1]].copy_(w); ampliados.append(name)
+    model.policy.load_state_dict(dst)
+    n = origen.normalizer.obs_rms.mean.shape[0]
+    venv.obs_rms.mean[:n] = origen.normalizer.obs_rms.mean; venv.obs_rms.var[:n] = origen.normalizer.obs_rms.var
+    venv.obs_rms.count = origen.normalizer.obs_rms.count
+    return {"desde": run_id, "parametros_copiados": len(copiados), "parametros_ampliados": ampliados, "observaciones_normalizadas_copiadas": int(n)}
+
+
+def make_env(seed, accion="relativa", ambiente=RocketLanding3DEnv.ID):
     def _init():
-        env = gym.make("RocketLanding3D-v0")
+        env = gym.make(ambiente)
         if accion == "relativa":
             env = AccionRelativa(env)
         env.reset(seed=seed)
@@ -130,16 +158,22 @@ def main(argv=None):
             parser.add_argument("--net-arch", type=int, nargs="+", default=value, help="neuronas por capa oculta")
         elif key == "accion":
             parser.add_argument("--accion", choices=["relativa", "cruda"], default=value, help="parametrización de la acción")
+        elif key == "ambiente":
+            parser.add_argument("--ambiente", choices=list(rocket_env.AMBIENTES), default=value, help="ambiente (nivel) en el que entrenar")
+        elif key == "desde":
+            parser.add_argument("--desde", default=None, help="run_id de un modelo PPO del que partir (transferencia de pesos y normalización)")
         else:
             parser.add_argument("--" + key.replace("_", "-"), type=type(value), default=value)
     parser.add_argument("--run-id", help="nombre de la ejecución (por defecto fecha-hora-semilla)")
+    parser.add_argument("--experimento", default=None, help="experimento de MLflow (por defecto experimento-2-ppo; el nivel 2 usa experimento-3-nivel2)")
     args = parser.parse_args(argv)
+    experimento = args.experimento or (EXPERIMENTO if args.ambiente == RocketLanding3DEnv.ID else "experimento-3-nivel2")
     config = {k: getattr(args, k) for k in DEFAULTS}
 
     torch.manual_seed(config["seed"])
-    venv = DummyVecEnv([make_env(config["seed"] * 1_000_000 + k, config["accion"]) for k in range(config["n_envs"])])
+    venv = DummyVecEnv([make_env(config["seed"] * 1_000_000 + k, config["accion"], config["ambiente"]) for k in range(config["n_envs"])])
     venv = VecNormalize(VecMonitor(venv), norm_obs=True, norm_reward=True, clip_obs=10.0, gamma=config["gamma"])
-    eval_env = gym.make("RocketLanding3D-v0")
+    eval_env = gym.make(config["ambiente"])
     model = PPO(
         "MlpPolicy", venv, seed=config["seed"], device="cpu", verbose=0,
         n_steps=config["n_steps"], batch_size=config["batch_size"], n_epochs=config["n_epochs"],
@@ -147,11 +181,15 @@ def main(argv=None):
         clip_range=config["clip_range"], ent_coef=config["ent_coef"],
         policy_kwargs={"net_arch": list(config["net_arch"]), "log_std_init": config["log_std_init"]},
     )
+    transferencia = transferir_desde(model, venv, config["desde"]) if config["desde"] else None
+    if transferencia:
+        print(f"Transferencia desde {config['desde']}: {transferencia['parametros_copiados']} tensores copiados, "
+              f"ampliados {transferencia['parametros_ampliados']}, normalización de {transferencia['observaciones_normalizadas_copiadas']} observaciones")
     run_id = args.run_id or f"{time.strftime('%Y%m%d-%H%M%S')}-ppo-s{config['seed']}"
-    print(f"Experimento 2 · PPO · acción {config['accion']} · red {config['net_arch']} · {config['total_timesteps']} pasos en {config['n_envs']} entornos "
+    print(f"Experimento 2 · PPO · {config['ambiente']} · acción {config['accion']} · red {config['net_arch']} · {config['total_timesteps']} pasos en {config['n_envs']} entornos "
           f"· evaluación cada {config['eval_every']} pasos · ejecución {run_id}\n")
 
-    seguimiento.experimento(EXPERIMENTO)
+    seguimiento.experimento(experimento)
     start = time.time()
     with tempfile.TemporaryDirectory() as tmp, mlflow.start_run(run_name=run_id):
         callback = Seguimiento(eval_env, config["eval_every"], tmp, start)
@@ -161,10 +199,10 @@ def main(argv=None):
 
         # modelo final = la mejor versión de las evaluaciones periódicas
         best = PPO.load(Path(tmp) / "mejor_modelo.zip", device="cpu")
-        normalizer = VecNormalize.load(str(Path(tmp) / "mejor_normalizador.pkl"), DummyVecEnv([make_env(0)]))
+        normalizer = VecNormalize.load(str(Path(tmp) / "mejor_normalizador.pkl"), DummyVecEnv([make_env(0, config["accion"], config["ambiente"])]))
         normalizer.training = False
         normalizer.norm_reward = False
-        agent = PPOAgent(best, normalizer, hiperparametros={k: v for k, v in config.items() if k not in ("seed", "net_arch", "accion")})
+        agent = PPOAgent(best, normalizer, hiperparametros={k: v for k, v in config.items() if k not in ("seed", "net_arch", "accion", "ambiente", "desde")})
         print(f"\nMejor versión: época {callback.best[1]} ({callback.best[0]}/{CHECK_EPISODES} aterrizajes en la evaluación)")
         evaluation = evaluate(eval_env, agent, FINAL_EPISODES)
         print(f"Modelo final ({FINAL_EPISODES} épocas sin ruido): {evaluation['outcomes']}")
@@ -173,11 +211,11 @@ def main(argv=None):
             "env": eval_env, "agent": agent, "config": config, "log": callback.log, "checks": callback.checks,
             "best_epoch": callback.best[1], "first_landing": callback.first_landing, "replays": callback.replays,
         }
-        path = save_run(result, evaluation, run_id, experimento=EXPERIMENTO,
+        path = save_run(result, evaluation, run_id, experimento=experimento,
                         software_extra={"torch": torch.__version__, "stable_baselines3": sb3.__version__,
                                         "hilos_cpu": torch.get_num_threads(), "maquina": platform.machine()})
         print(f"Ejecución guardada en {path}")
-        seguimiento.registrar_ejecucion(path, EXPERIMENTO)
+        seguimiento.registrar_ejecucion(path, experimento)
         for page in write_pages(path.name):
             print(f"Página guardada en {page}")
     print(f"Tiempo total: {time.time() - start:.0f} s · MLflow: mlflow ui --backend-store-uri sqlite:///mlflow.db")

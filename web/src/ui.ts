@@ -8,9 +8,9 @@ export const corto = (sha: string | null | undefined) => (sha ? sha.slice(0, 12)
 
 export const COLOR_RESULTADO: Record<string, string> = {
   aterrizaje: 'var(--good)', 'fuera de plataforma': 'var(--warning)', choque: 'var(--critical)',
-  'sin pasos': 'var(--neutral)', 'fuera de zona': 'var(--serious)',
+  'sin pasos': 'var(--neutral)', 'fuera de zona': 'var(--serious)', 'colisión': 'var(--critical)',
 }
-export const ICONO_RESULTADO: Record<string, string> = { aterrizaje: '✓', 'fuera de plataforma': '◐', choque: '✕', 'sin pasos': '…', 'fuera de zona': '↗' }
+export const ICONO_RESULTADO: Record<string, string> = { aterrizaje: '✓', 'fuera de plataforma': '◐', choque: '✕', 'sin pasos': '…', 'fuera de zona': '↗', 'colisión': '⊗' }
 
 export function pillEstado(estado: string) {
   const texto = { recomendado: 'recomendado', anterior: 'anterior (rollback)', historico: 'histórico' }[estado] ?? estado

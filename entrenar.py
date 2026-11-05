@@ -25,6 +25,7 @@ import gymnasium as gym
 import numpy as np
 
 from entrenamiento import CHECK_EPISODES, EVAL_SEED_BASE, OUTCOMES, TrainConfig, episode_record, evaluate, run_epoch, train
+from rocket_env import AMBIENTES, AdaptadorN1, clase_ambiente
 from rocket_env.rocket_landing import RocketLanding3DEnv
 from visualizacion.datos import write_page
 
@@ -47,11 +48,31 @@ def add_train_args(parser):
     parser.add_argument("--epsilon-decay", type=float, default=defaults.epsilon_decay,
                         help="fracción de épocas en la que la exploración baja de 1 al mínimo")
     parser.add_argument("--seed", type=int, default=defaults.seed)
+    parser.add_argument("--ambiente", choices=list(AMBIENTES), default=defaults.ambiente, help="ambiente (nivel) en el que entrenar")
     parser.add_argument("--run-id", help="nombre de la ejecución (por defecto fecha-hora-semilla)")
 
 
 def config_from_args(args):
-    return TrainConfig(args.epochs, args.alpha, args.alpha_end, args.gamma, args.epsilon_end, args.epsilon_decay, args.seed)
+    return TrainConfig(args.epochs, args.alpha, args.alpha_end, args.gamma, args.epsilon_end, args.epsilon_decay, args.seed, args.ambiente)
+
+
+def ambiente_de(manifest):
+    """Id del ambiente en el que se entrenó una ejecución (los manifests anteriores al nivel 2 no lo traen)."""
+    return manifest["ambiente"].get("id", RocketLanding3DEnv.ID)
+
+
+def hacer_entorno(manifest, ambiente=None):
+    """Entorno de una ejecución: el de su manifest, o el que se pida. Un modelo del nivel 1 puede jugar en el
+    nivel 2 a través de AdaptadorN1 (solo ve los 16 valores del nivel 1): sirve para medir la dificultad del nivel."""
+    propio = ambiente_de(manifest)
+    ambiente = ambiente or propio
+    env = gym.make(ambiente)
+    if ambiente != propio:
+        if clase_ambiente(propio).NIVEL == "N1" and clase_ambiente(ambiente).NIVEL == "N2":
+            env = AdaptadorN1(env)
+        else:
+            raise SystemExit(f"Un modelo de {propio} no puede jugar en {ambiente}")
+    return env
 
 
 # ---------- registro de ejecuciones ----------
@@ -114,7 +135,7 @@ def load_agent(run_id=None):
     clase = manifest["agente"].get("clase", "qlearning")
     if clase == "ppo":
         from agente_ppo import PPOAgent  # import tardío: carga PyTorch solo si hace falta
-        return PPOAgent.load(path / "modelo"), path
+        return PPOAgent.load(path / "modelo", ambiente=ambiente_de(manifest)), path
     from agente_qlearning import QLearningAgent
     return QLearningAgent.load(path / "modelo"), path
 
@@ -163,17 +184,18 @@ def save_run(result, evaluation, run_id=None, experimento="experimento-1-qlearni
     with gzip.open(path / "vuelos.json.gz", "wt", encoding="utf-8") as f:
         json.dump({"episodes": result["replays"] + final_runs}, f, default=float)
 
-    rocket = RocketLanding3DEnv
+    rocket = type(env.unwrapped)  # la clase del ambiente en el que se entrenó (nivel 1 o nivel 2)
     archivos = {"modelo": model_files, "entrenamiento": "entrenamiento.json", "episodios": "episodios.csv",
                 "vuelos": "vuelos.json.gz"}
     manifest = {
         "run_id": run_id,
         "experimento": experimento,
+        "nivel": rocket.NIVEL,
         "fecha": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "formato": DATA_FORMAT,
         "git": git_info(),
         "ambiente": {
-            "id": "RocketLanding3D-v0", "version": rocket.VERSION,
+            "id": rocket.ID, "version": rocket.VERSION, "nivel": rocket.NIVEL, "obstaculos": rocket.obstaculos(),
             "step_altitude": rocket.STEP_ALTITUDE, "step_time_limit": rocket.STEP_TIME_LIMIT, "max_steps": rocket.MAX_STEPS,
             "start_altitude": rocket.START_ALTITUDE, "pad_radius": rocket.PAD_RADIUS,
             "max_landing_vertical_speed": rocket.MAX_LANDING_VERTICAL_SPEED,
@@ -198,7 +220,7 @@ def save_run(result, evaluation, run_id=None, experimento="experimento-1-qlearni
     registry["ejecuciones"].append({
         "run_id": run_id, "experimento": experimento, "agente": agent.info().get("nombre", ""), "fecha": manifest["fecha"],
         "commit": (git["commit"] or "—") + ("*" if git["cambios_sin_commit"] else ""),
-        "ambiente": rocket.VERSION, "epochs": len(log["reward"]), "seed": config.get("seed"),
+        "ambiente": rocket.VERSION, "nivel": rocket.NIVEL, "epochs": len(log["reward"]), "seed": config.get("seed"),
         "aterrizajes": evaluation["landing_rate"], "velocidad_contacto": evaluation["contact_speed"],
         "error_posicion": evaluation["position_error"], "primer_aterrizaje": result["first_landing"],
     })

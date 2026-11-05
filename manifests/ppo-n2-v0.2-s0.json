@@ -1,0 +1,63 @@
+{
+  "run_id": "ppo-n2-v0.2-s0",
+  "level_id": "N2",
+  "environment_version": "RocketLanding3D-N2-v0@0.2",
+  "git_commit": "5b99fd685a66c4ae1c88dd64041fc212398e441e",
+  "git_branch": "main",
+  "config_sha256": "84a3ae65cbd59162affa5e4d81fb0a9a7575539ff2eebadf30fafb86edfb962e",
+  "model_uri": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/5b99fd685a66c4ae1c88dd64041fc212398e441e/resultados/runs/ppo-n2-v0.2-s0/modelo.zip",
+  "model_sha256": "330d3cbacbc2a8ae7baa6e38edbcf852341a6333c1af8ba6f0f59982d1e34b92",
+  "normalization_uri": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/5b99fd685a66c4ae1c88dd64041fc212398e441e/resultados/runs/ppo-n2-v0.2-s0/modelo_normalizador.pkl",
+  "normalization_sha256": "298ec2438371973c169d46f278e7333cf87cd7db5ab6c21511a8a0dc5b1faae7",
+  "model_registry": null,
+  "runtime_ref": {
+    "python": "3.10.12",
+    "requirements": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/5b99fd685a66c4ae1c88dd64041fc212398e441e/requirements.txt",
+    "docker": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/5b99fd685a66c4ae1c88dd64041fc212398e441e/Dockerfile",
+    "paquetes": {
+      "gymnasium": "1.4.0",
+      "numpy": "2.2.6",
+      "torch": "2.14.1+cpu",
+      "stable_baselines3": "2.9.2"
+    }
+  },
+  "evaluation_suite_id": "suite-v1",
+  "seed": 0,
+  "parent_run_id": null,
+  "experiment_id": "experimento-3-nivel2",
+  "agent": {
+    "class": "ppo",
+    "name": "PPO (red neuronal)",
+    "action": "relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12"
+  },
+  "hypothesis": "La misma receta que funcionó en el nivel 1 (PPO, acción relativa v2, 600 000 pasos) aprende desde cero a entrar entre las torres y aterrizar en el nivel 2.",
+  "change": "Primer modelo del nivel 2. Mismos hiperparámetros que ppo-v2-v0.1-s0; cambia el ambiente (RocketLanding3D-N2-v0: 3 torres, observación de 25 valores, colisión −100, castigo de proximidad en el potencial).",
+  "baseline_run_id": "ppo-v2-v0.1-s0",
+  "budget": {
+    "pasos_agente": 600000,
+    "epocas": 21376,
+    "tiempo_s": 759,
+    "maquina": "CPU de portátil (WSL2), 8 entornos en paralelo"
+  },
+  "status": "rechazado",
+  "decision": "Rechazado: 16/200 aterrizajes (8 %). Aprende a frenar (97 contactos suaves) pero fuera de la plataforma, y sigue chocando con las torres (54 colisiones): el −100 de la colisión en el 30 % de las salidas corta las épocas antes de que el agente practique el aterrizaje, y la red trata la plataforma rodeada de torres como zona peligrosa. Peor que el modelo del nivel 1 a ciegas (72 %). Siguiente hipótesis: partir de la política del nivel 1 y aprender solo a esquivar las torres.",
+  "evaluation": {
+    "suite": "suite-v1",
+    "episodes": 200,
+    "landing_rate": 0.08,
+    "contact_speed": 2.484173966002669,
+    "position_error": 27.757818927409197,
+    "fuel_used": 186.68413586047376,
+    "outcomes": {
+      "aterrizaje": 16,
+      "fuera de plataforma": 97,
+      "choque": 33,
+      "sin pasos": 0,
+      "fuera de zona": 0,
+      "colisión": 54
+    },
+    "per_case": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/5b99fd685a66c4ae1c88dd64041fc212398e441e/resultados/runs/ppo-n2-v0.2-s0/evaluacion.json"
+  },
+  "trained_at": "2026-11-05T15:24:23",
+  "generated_at": "2026-11-05T15:40:09"
+}

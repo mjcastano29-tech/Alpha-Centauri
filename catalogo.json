@@ -1,6 +1,6 @@
 {
-  "version": 2,
-  "actualizado": "2026-11-02T11:37:58",
+  "version": 3,
+  "actualizado": "2026-11-05T15:39:49",
   "recomendado": "ppo-v2-v0.1-s0",
   "anterior": "base-v0.1-s0",
   "historial": [
@@ -19,6 +19,25 @@
       "run_id": "ppo-v2-v0.1-s0",
       "motivo": "PPO con acción relativa v2: 97 % en la suite v1 y 63 % con viento de 15 m/s, frente a 78 % y 38 % del Q-learning",
       "commit_base": "68414c15f55471c0c5a91438b5bbdf1461ba0f8f"
+    },
+    {
+      "version": 3,
+      "fecha": "2026-11-05T15:39:49",
+      "accion": "recomendar",
+      "nivel": "N2",
+      "run_id": "ppo-n2-transfer-v0.2-s0",
+      "motivo": "primer recomendado del nivel 2: 77 % en la suite v1 (153/200) con transferencia desde ppo-v2-v0.1-s0; 8 % desde cero y 72 % el modelo del nivel 1 a ciegas",
+      "commit_base": "5b99fd685a66c4ae1c88dd64041fc212398e441e"
     }
-  ]
+  ],
+  "niveles": {
+    "N1": {
+      "recomendado": "ppo-v2-v0.1-s0",
+      "anterior": "base-v0.1-s0"
+    },
+    "N2": {
+      "recomendado": "ppo-n2-transfer-v0.2-s0",
+      "anterior": null
+    }
+  }
 }
