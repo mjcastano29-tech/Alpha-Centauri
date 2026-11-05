@@ -3,7 +3,8 @@
     "prefect_flow_run_id": "1c22c1a6-f82b-4240-9ed5-5261046358a1",
     "nombre": "light-lorikeet",
     "inicio": "2026-11-05T16:40:23",
-    "duracion_s": 1496
+    "duracion_s": 1674,
+    "estado": "completado"
   },
   "parametros": {
     "ambiente": "RocketLanding3D-v0",
@@ -73,6 +74,20 @@
         "margen_mejora": 0.02,
         "tolerancia_viento": 0.05
       }
+    },
+    "7 publicar": {
+      "commit": "a527ff9fb00842a4db1fd1ba8364c1768197826e",
+      "push": true
+    },
+    "8 comprobar": {
+      "modo": "público",
+      "api": "https://alpha-centauri-api.onrender.com",
+      "commit": "a527ff9fb00842a4db1fd1ba8364c1768197826e",
+      "catalogo": 5,
+      "recomendado": "ppo-v2-v0.1-s1",
+      "evaluacion": 1.0,
+      "latencia_ms": 1190,
+      "espera_s": 169
     }
   }
 }
