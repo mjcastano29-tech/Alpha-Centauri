@@ -3,7 +3,8 @@
     "prefect_flow_run_id": "ccb69032-5931-49cd-acff-0ae65b42a214",
     "nombre": "notorious-alligator",
     "inicio": "2026-11-05T17:51:33",
-    "duracion_s": 2728
+    "duracion_s": 2917,
+    "estado": "completado"
   },
   "parametros": {
     "ambiente": "RocketLanding3D-N2-v0",
@@ -73,6 +74,20 @@
         "margen_mejora": 0.02,
         "tolerancia_viento": 0.05
       }
+    },
+    "7 publicar": {
+      "commit": "e391a11486312507e586845ce5ab4574784714ec",
+      "push": true
+    },
+    "8 comprobar": {
+      "modo": "público",
+      "api": "https://alpha-centauri-api.onrender.com",
+      "commit": "e391a11486312507e586845ce5ab4574784714ec",
+      "catalogo": 6,
+      "recomendado": "ppo-n2-transfer-1m5-v0.2-s1",
+      "evaluacion": 1.0,
+      "latencia_ms": 1283,
+      "espera_s": 186
     }
   }
 }
