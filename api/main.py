@@ -286,11 +286,11 @@ class PeticionEvaluacion(BaseModel):
     run_id: str
     episodios: int = Field(20, ge=1, le=MAX_EPISODIOS, description=f"máximo {MAX_EPISODIOS} por petición")
     semilla_base: int = Field(EVAL_SEED_BASE, description="semilla de la primera época; la suite v1 usa 10 000 000")
-    viento: float | None = Field(None, ge=0, le=30, description="viento fijo a 10 m (m/s); None = aleatorio 0–10")
+    viento: float | None = Field(None, ge=0, le=30, description="viento fijo a 10 m (m/s); None = aleatorio entre 0 y el máximo del nivel (10 m/s; 15 en N3)")
     grabar: int = Field(1, ge=0, le=5, description="cuántas épocas devolver con su trayectoria completa")
     suite: str | None = Field(None, description="id de una suite de configs/suites (p. ej. suite-v1): fija semilla_base y viento")
     condicion: str = Field("normal", description="condición de la suite (normal, viento-15)")
-    ambiente: str | None = Field(None, description="otro ambiente (nivel) distinto del de entrenamiento; un modelo de N1 juega en N2 con AdaptadorN1")
+    ambiente: str | None = Field(None, description="otro ambiente (nivel) distinto del de entrenamiento; un modelo de N2 juega en N3 tal cual y uno de N1 en N2 o N3 con AdaptadorN1")
 
 
 @app.post("/evaluar", summary="Ejecuta el modelo congelado de una ejecución en el ambiente (modo evaluación)")
@@ -345,9 +345,11 @@ def evaluar(p: PeticionEvaluacion):
         "modelo": {"run_id": p.run_id, "agente": m["agente"].get("nombre"), "accion": m["agente"].get("accion"),
                    "commit": m["git"]["commit"], "sha256": (m.get("sha256") or {}).get("archivos"), "mlflow": MLFLOW.get(p.run_id)},
         "ambiente": {"id": rocket.ID, "version": rocket.VERSION, "nivel": rocket.NIVEL, "obstaculos": rocket.obstaculos(),
-                     "entrenado_en": ambiente_de(m), "entrenado_con": m["ambiente"]["version"],
+                     "entrenado_en": ambiente_de(m), "entrenado_con": m["ambiente"]["version"], "nivel_entrenado": clase_ambiente(ambiente_de(m)).NIVEL,
                      "compatible": rocket.ID == ambiente_de(m) and rocket.compatible(m["ambiente"]["version"]),
-                     "adaptador": isinstance(env, AdaptadorN1)},
+                     "adaptador": isinstance(env, AdaptadorN1),
+                     # otro nivel con la misma observación y acción (p. ej. un modelo de N2 en N3): mide la degradación
+                     "misma_familia": rocket.ID != ambiente_de(m) and not isinstance(env, AdaptadorN1)},
         "suite": {"id": p.suite, "condicion": p.condicion if p.suite else None, "episodios": p.episodios, "semilla_base": p.semilla_base,
                   "viento": p.viento, "deterministico": True},
         "resumen": resumen,

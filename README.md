@@ -27,9 +27,8 @@ Las pruebas comprueban la interfaz de Gymnasium, la reproducibilidad con semilla
 con su recompensa, y que cada modelo guardado repite el resultado de misión de las primeras 20 épocas de su evaluación
 registrada y su recompensa media. En otra máquina, la recompensa de una época concreta de `ppo-rel-v0.1-s0` puede
 variar unos puntos por redondeo numérico (esa política vuela al límite de inclinación), sin cambiar el resultado; las
-otras tres ejecuciones dan la misma recompensa al décimo. Una prueba
-está marcada como pendiente: en la versión 0.1 agotar los 50 pasos devuelve `terminated`, y la guía del curso pide
-`truncated` para el límite externo; cambiarlo es una versión nueva del ambiente.
+otras tres ejecuciones dan la misma recompensa al décimo. Desde la versión 0.1.1 agotar
+los 50 pasos se informa como `truncated`, como pide la guía para el límite externo de la época.
 
 `check_env.py` es la comprobación inicial con LunarLander; necesita además `pip install "gymnasium[box2d]==1.4.0"`
 (y `swig` si box2d no compila).
@@ -68,7 +67,7 @@ env = gym.make("RocketLanding3D-v0")
 |---|---|---|---|
 | N1 · misión base | `RocketLanding3D-v0` (0.1.1) | plataforma, viento, temperatura, presión y combustible limitado | [docs/ambiente-v0.1.md](docs/ambiente-v0.1.md) |
 | N2 · obstáculos | `RocketLanding3D-N2-v0` (0.2) | tres torres de 300–420 m alrededor de la plataforma: hay que elegir por qué hueco entrar; chocar es "colisión" (−100); observación de 25 valores (familia nueva de modelos) | [docs/ambiente-v0.2.md](docs/ambiente-v0.2.md) |
-| N3 · operación exigente | pendiente | perturbación: viento de hasta 15 m/s con ráfagas más fuertes | — |
+| N3 · operación exigente | `RocketLanding3D-N3-v0` (0.3) | el mundo del nivel 2 con viento de 0–15 m/s y ráfagas el doble de fuertes; misma observación que N2 (misma familia: un modelo de N2 juega en N3 tal cual). Incidente medido con `python incidente.py` | [docs/ambiente-v0.3.md](docs/ambiente-v0.3.md) |
 
 Cada modelo se entrena y evalúa en el ambiente de su manifest (`ambiente.id`). `python cli.py entrenar-ppo --ambiente RocketLanding3D-N2-v0`
 entrena en el nivel 2; `python cli.py evaluar --run ppo-v2-v0.1-s0 --ambiente RocketLanding3D-N2-v0` hace jugar a un modelo del
@@ -116,6 +115,9 @@ el **presupuesto** (épocas, pasos del agente, tiempo, máquina), la **suite** c
 | `ppo-n2-transfer-v0.2-s0` | partir de la política del nivel 1 y aprender solo a esquivar | transferencia de pesos y normalización | referencia (77 %; las colisiones bajan poco: 42 frente a 53); anterior del nivel 2 |
 | `ppo-n2-transfer-1m5-v0.2-s0` | el presupuesto era el cuello de botella | 1,5 M de pasos en vez de 600 000 | seleccionado N2 (86 %, 27 colisiones) |
 | `ppo-v2-v0.1-s1` | con otra semilla, v2 queda a menos de 5 puntos del 97 % | solo la semilla (1); entrenada y publicada por el pipeline | seleccionado N1 (99 %, 72 % con viento): el criterio del pipeline la promovió; s0 pasa a anterior |
+| `ppo-v2-v0.1-s2` | tercera semilla de v2: queda a menos de 5 puntos de s0 y s1 | solo la semilla (2); pipeline | rechazado (97,5 %: no supera en 2 puntos al recomendado s1) |
+| `ppo-n3-transfer-v0.3-s0` | intervención ante el viento: reentrenar el recomendado de N2 en N3 recupera ≥ 2 puntos frente a él jugando en N3 (72 %) sin más colisiones | ambiente N3 y transferencia desde `ppo-n2-transfer-1m5-v0.2-s0`; 600 000 pasos | rechazado (81,5 %, 0 choques, pero 37 colisiones frente a 35) |
+| `ppo-n3-transfer-1m5-v0.3-s0` | las colisiones eran falta de presupuesto, como en N2 | 1,5 M de pasos en vez de 600 000 | seleccionado N3 (86,5 %, 24 colisiones, 67,5 % con viento) |
 
 Suites: [configs/suites/suite-v1.json](configs/suites/suite-v1.json) (200 épocas, semillas desde 10 000 000, condiciones
 `normal` y `viento-15`) y `suite-reservada` (misma estructura, semilla fuera del repo, solo para los finalistas).

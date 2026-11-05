@@ -62,13 +62,18 @@ def ambiente_de(manifest):
 
 
 def hacer_entorno(manifest, ambiente=None):
-    """Entorno de una ejecución: el de su manifest, o el que se pida. Un modelo del nivel 1 puede jugar en el
-    nivel 2 a través de AdaptadorN1 (solo ve los 16 valores del nivel 1): sirve para medir la dificultad del nivel."""
+    """Entorno de una ejecución: el de su manifest, o el que se pida. Un modelo de la misma familia (misma
+    observación y acción, p. ej. del nivel 2 en el nivel 3) juega tal cual: mide la degradación al cambiar las
+    condiciones. Un modelo del nivel 1 juega en los niveles con torres a través de AdaptadorN1 (solo ve los 16
+    valores del nivel 1): mide la dificultad del nivel."""
     propio = ambiente_de(manifest)
     ambiente = ambiente or propio
     env = gym.make(ambiente)
     if ambiente != propio:
-        if clase_ambiente(propio).NIVEL == "N1" and clase_ambiente(ambiente).NIVEL == "N2":
+        obs_propia = clase_ambiente(propio)().observation_space.shape
+        if env.observation_space.shape == obs_propia:
+            pass
+        elif clase_ambiente(propio).NIVEL == "N1" and clase_ambiente(ambiente).obstaculos():
             env = AdaptadorN1(env)
         else:
             raise SystemExit(f"Un modelo de {propio} no puede jugar en {ambiente}")

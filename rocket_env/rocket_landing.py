@@ -37,7 +37,7 @@ class RocketLanding3DEnv(gym.Env):
     el cuerpo), así que la inclinación la decide el agente con la dirección de la acción.
 
     Opciones de reset (perturbaciones para evaluar robustez):
-        options={"viento": 15.0}  fija la velocidad del viento a 10 m (m/s) en vez de 0..10
+        options={"viento": 15.0}  fija la velocidad del viento a 10 m (m/s) en vez de 0..VIENTO_MAX
 
     Reglas del entorno:
         - Viento: empuja al cohete a través del arrastre aerodinámico.
@@ -99,6 +99,10 @@ class RocketLanding3DEnv(gym.Env):
     MAX_HORIZONTAL_DISTANCE = 300.0  # m, más lejos se considera fuera de zona
     MAX_ALTITUDE = 1200.0  # m
 
+    # Meteorología de cada época (el nivel 3 las endurece)
+    VIENTO_MAX = 10.0  # m/s: el viento a 10 m de altura se sortea entre 0 y este valor
+    RAFAGAS = 1.5  # m/s: intensidad de las ráfagas (desviación típica del proceso de Ornstein-Uhlenbeck)
+
     # Resultado de la época -> recompensa final
     REWARDS = {
         "aterrizaje": 100.0,  # suave y dentro de la plataforma
@@ -124,13 +128,13 @@ class RocketLanding3DEnv(gym.Env):
         # Condiciones meteorológicas de la época
         wind_angle = rng.uniform(0.0, 2.0 * np.pi)
         options = options or {}
-        wind_speed = float(options["viento"]) if "viento" in options else rng.uniform(0.0, 10.0)
+        wind_speed = float(options["viento"]) if "viento" in options else rng.uniform(0.0, self.VIENTO_MAX)
         self.atmosphere = Atmosphere(
             rng,
             ground_temp_k=rng.uniform(263.0, 313.0),  # -10 °C .. 40 °C
             ground_pressure_pa=rng.uniform(98000.0, 104000.0),
             ground_wind=[wind_speed * np.cos(wind_angle), wind_speed * np.sin(wind_angle), 0.0],
-            gust_strength=1.5,
+            gust_strength=self.RAFAGAS,
         )
 
         self.position = np.array([rng.uniform(-50, 50), rng.uniform(-50, 50), self.START_ALTITUDE])

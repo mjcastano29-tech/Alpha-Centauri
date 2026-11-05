@@ -70,3 +70,11 @@ def test_evaluar_con_suite_fija_semilla_y_viento():
     assert e["suite"]["semilla_base"] == 10_000_000 and e["suite"]["viento"] == 15.0 and e["resumen"]["episodios"] == 2
     assert cliente.post("/evaluar", json={"run_id": EJECUCIONES[0], "suite": "no-existe"}).status_code == 404
     assert cliente.post("/evaluar", json={"run_id": EJECUCIONES[0], "suite": "suite-v1", "condicion": "huracan"}).status_code == 422
+
+
+def test_un_modelo_del_nivel_2_juega_en_el_nivel_3_sin_adaptador():
+    run_id = next(r for r in EJECUCIONES if r.startswith("ppo-n2-"))
+    e = cliente.post("/evaluar", json={"run_id": run_id, "episodios": 2, "grabar": 0, "ambiente": "RocketLanding3D-N3-v0"}).json()
+    amb = e["ambiente"]
+    assert amb["nivel"] == "N3" and amb["nivel_entrenado"] == "N2" and amb["misma_familia"] and not amb["adaptador"] and not amb["compatible"]
+    assert cliente.post("/evaluar", json={"run_id": run_id, "episodios": 1, "ambiente": "RocketLanding3D-v0"}).status_code == 422

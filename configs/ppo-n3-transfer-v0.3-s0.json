@@ -1,0 +1,20 @@
+{
+  "run_id": "ppo-n3-transfer-v0.3-s0",
+  "experimento": "experimento-4-nivel3",
+  "nivel": "N3",
+  "ambiente": "RocketLanding3D-N3-v0@0.3",
+  "hipotesis": "Intervención ante el incidente de viento: reentrenar el recomendado del nivel 2 en las condiciones del nivel 3 (viento 0–15 m/s, ráfagas ×2) recupera al menos 2 puntos de aterrizajes frente a ese mismo modelo jugando en N3 (72,0 %) sin más colisiones",
+  "cambio": "Ambiente N3 (viento hasta 15 m/s, ráfagas 3 m/s) y transferencia de pesos y normalización desde ppo-n2-transfer-1m5-v0.2-s0; 600 000 pasos",
+  "baseline": "ppo-n2-transfer-1m5-v0.2-s0",
+  "comparacion_principal": "ppo-n2-transfer-1m5-v0.2-s0",
+  "presupuesto": {
+    "pasos_agente": 600000,
+    "epocas": 19440,
+    "maquina": "pipeline Prefect en CPU de portátil (WSL2)"
+  },
+  "suite": "suite-v1",
+  "estado": "rechazado",
+  "decision": "Rechazado por el pipeline: 81.5% de aterrizajes en la suite v1 (37 colisiones), 74.5% con viento de 15 m/s. más colisiones que ppo-n2-transfer-1m5-v0.2-s0 (37 frente a 35).",
+  "fecha_decision": "2026-11-05",
+  "pipeline": true
+}
