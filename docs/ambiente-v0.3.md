@@ -41,4 +41,18 @@ Los choques contra el suelo del recomendado de N2 pasan de 1 a 17: el viento le 
 
 Hipótesis: reentrenar el recomendado del nivel 2 en las condiciones del nivel 3 (transferencia de pesos y normalización, 600 000 pasos) recupera al menos 2 puntos de aterrizajes frente a ese mismo modelo jugando en N3 (72,0 %), sin más colisiones y sin perder más de 5 puntos con viento de 15 m/s. Es el criterio del pipeline ([pipelines/entrenar_publicar.py](../pipelines/entrenar_publicar.py)), fijado antes de entrenar.
 
-Resultado: ver `configs/ppo-n3-transfer-v0.3-s0.json` y la evidencia del pipeline en `pipelines/ejecuciones/`.
+Dos intentos, los dos ejecutados por el pipeline y conservados (`configs/`, `manifests/`, MLflow `experimento-4-nivel3`, `pipelines/ejecuciones/`):
+
+| En N3, suite v1 | Referencia: `ppo-n2-transfer-1m5-v0.2-s0` sin reentrenar | Intervención 1: `ppo-n3-transfer-v0.3-s0` (600 000 pasos) | Intervención 2: `ppo-n3-transfer-1m5-v0.3-s0` (1,5 M pasos) |
+|---|---|---|---|
+| Aterrizajes | 72,0 % | 81,5 % | **86,5 %** |
+| Con viento fijo de 15 m/s | 46,5 % | **74,5 %** | 67,5 % |
+| Choques contra el suelo | 17 | 0 | 3 |
+| Colisiones con torres | 35 | 37 | **24** |
+| Decisión del pipeline | — | **rechazada**: más colisiones que la referencia | **seleccionada**: recomendado de N3 (catálogo v6) |
+
+Lectura:
+- Reentrenar en las condiciones nuevas recupera la frenada (los choques contra el suelo pasan de 17 a 0–3) y casi todo el terreno perdido: 86,5 % en N3, el mismo nivel que tenía el modelo en N2 (86,0 %).
+- La primera intervención aprendió antes a frenar con viento que a esquivar torres con viento. Con más presupuesto las colisiones bajan de 37 a 24, como pasó en el nivel 2 (42 → 27). Se confirma la hipótesis del segundo intento.
+- Hay una contrapartida: con viento fijo de 15 m/s la intervención 1 aguanta mejor (74,5 % frente a 67,5 %). El criterio fijado antes de entrenar prioriza las condiciones normales del nivel y no tener más colisiones, así que se selecciona la 2. La 1 queda como evidencia y como candidata si la operación pasara a ser siempre de viento máximo.
+- Pendiente: las semillas 1 y 2 de la intervención 2, para separar el efecto del presupuesto de la variabilidad entre semillas (en N1 fue de 2 puntos).

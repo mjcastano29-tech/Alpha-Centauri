@@ -115,6 +115,9 @@ el **presupuesto** (épocas, pasos del agente, tiempo, máquina), la **suite** c
 | `ppo-n2-transfer-v0.2-s0` | partir de la política del nivel 1 y aprender solo a esquivar | transferencia de pesos y normalización | referencia (77 %; las colisiones bajan poco: 42 frente a 53); anterior del nivel 2 |
 | `ppo-n2-transfer-1m5-v0.2-s0` | el presupuesto era el cuello de botella | 1,5 M de pasos en vez de 600 000 | seleccionado N2 (86 %, 27 colisiones) |
 | `ppo-v2-v0.1-s1` | con otra semilla, v2 queda a menos de 5 puntos del 97 % | solo la semilla (1); entrenada y publicada por el pipeline | seleccionado N1 (99 %, 72 % con viento): el criterio del pipeline la promovió; s0 pasa a anterior |
+| `ppo-v2-v0.1-s2` | tercera semilla de v2: queda a menos de 5 puntos de s0 y s1 | solo la semilla (2); pipeline | rechazado (97,5 %: no supera en 2 puntos al recomendado s1) |
+| `ppo-n3-transfer-v0.3-s0` | intervención ante el viento: reentrenar el recomendado de N2 en N3 recupera ≥ 2 puntos frente a él jugando en N3 (72 %) sin más colisiones | ambiente N3 y transferencia desde `ppo-n2-transfer-1m5-v0.2-s0`; 600 000 pasos | rechazado (81,5 %, 0 choques, pero 37 colisiones frente a 35) |
+| `ppo-n3-transfer-1m5-v0.3-s0` | las colisiones eran falta de presupuesto, como en N2 | 1,5 M de pasos en vez de 600 000 | seleccionado N3 (86,5 %, 24 colisiones, 67,5 % con viento) |
 
 Suites: [configs/suites/suite-v1.json](configs/suites/suite-v1.json) (200 épocas, semillas desde 10 000 000, condiciones
 `normal` y `viento-15`) y `suite-reservada` (misma estructura, semilla fuera del repo, solo para los finalistas).
