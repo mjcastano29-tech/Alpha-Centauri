@@ -1,0 +1,78 @@
+{
+  "flujo": {
+    "prefect_flow_run_id": "41fefe09-9b01-4191-88ee-619a98d5b102",
+    "nombre": "glaring-chowchow",
+    "inicio": "2026-11-05T17:14:19",
+    "duracion_s": 1242
+  },
+  "parametros": {
+    "ambiente": "RocketLanding3D-v0",
+    "seed": 2,
+    "run_id": "ppo-v2-v0.1-s2",
+    "run_existente": null,
+    "desde": null,
+    "total_timesteps": null,
+    "hipotesis": "Tercera semilla (2) de la configuración v2 del nivel 1: queda a menos de 5 puntos de las semillas 0 (97 %) y 1 (99 %).",
+    "cambio": "Solo la semilla: 2. Mismos hiperparámetros, ambiente y presupuesto (600 000 pasos).",
+    "baseline": "ppo-v2-v0.1-s1",
+    "push": true,
+    "sin_commit": false,
+    "api": "https://alpha-centauri-api.onrender.com",
+    "espera_api": 900
+  },
+  "etapas": {
+    "1 validar": {
+      "id": "RocketLanding3D-v0",
+      "version": "0.1.1",
+      "nivel": "N1",
+      "observacion": 16,
+      "accion": 5,
+      "obstaculos": 0,
+      "suite": "suite-v1",
+      "git_limpio": true
+    },
+    "2 probar": "18 passed in 0.34s",
+    "3 entrenar": {
+      "run_id": "ppo-v2-v0.1-s2",
+      "reutilizada": false
+    },
+    "4 evaluar": {
+      "episodios": 200,
+      "viento": 15.0,
+      "aterrizajes": 0.975,
+      "colisiones": 0,
+      "velocidad_contacto": 1.18665,
+      "error_posicion": 3.908000000000001,
+      "resultados": {
+        "aterrizaje": 195,
+        "fuera de plataforma": 4,
+        "choque": 1,
+        "sin pasos": 0,
+        "fuera de zona": 0,
+        "colisión": 0
+      },
+      "aterrizajes_viento": 0.715,
+      "colisiones_viento": 0
+    },
+    "5 registrar": {
+      "config": "configs/ppo-v2-v0.1-s2.json",
+      "manifest": "manifests/ppo-v2-v0.1-s2.json",
+      "sha256": "OK"
+    },
+    "6 decidir": {
+      "aceptado": false,
+      "estado": "rechazado",
+      "decision": "Rechazado por el pipeline: 97.5% de aterrizajes en la suite v1 (0 colisiones), 71.5% con viento de 15 m/s. no mejora al recomendado ppo-v2-v0.1-s1 en al menos 2% (97.5% frente a 99.0%).",
+      "comparacion": {
+        "recomendado": "ppo-v2-v0.1-s1",
+        "aterrizajes": 0.99,
+        "aterrizajes_viento": 0.72,
+        "colisiones": 0
+      },
+      "criterio": {
+        "margen_mejora": 0.02,
+        "tolerancia_viento": 0.05
+      }
+    }
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "run_id": "ppo-v2-v0.1-s2",
+  "level_id": "N1",
+  "environment_version": "RocketLanding3D-v0@0.1.1",
+  "git_commit": "d298e217d87d1f70e977b0172a8e9e09e88152d6",
+  "git_branch": "main",
+  "config_sha256": "c69b7c426c36ce9bccb8f7b0c1bccb5eb96743875624cd5e2d32d6c5cab16c4f",
+  "model_uri": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/d298e217d87d1f70e977b0172a8e9e09e88152d6/resultados/runs/ppo-v2-v0.1-s2/modelo.zip",
+  "model_sha256": "3c08bf5b48d480d8d3b5f742b9f5e20cad73f272e7d9447b3446481e2f26b48d",
+  "normalization_uri": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/d298e217d87d1f70e977b0172a8e9e09e88152d6/resultados/runs/ppo-v2-v0.1-s2/modelo_normalizador.pkl",
+  "normalization_sha256": "f7ddb318b938aada9f797bef1d5934f15620966a05634181248c6e73c263f8a9",
+  "model_registry": null,
+  "runtime_ref": {
+    "python": "3.10.12",
+    "requirements": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/d298e217d87d1f70e977b0172a8e9e09e88152d6/requirements.txt",
+    "docker": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/d298e217d87d1f70e977b0172a8e9e09e88152d6/Dockerfile",
+    "paquetes": {
+      "gymnasium": "1.4.0",
+      "numpy": "2.2.6",
+      "torch": "2.14.1+cpu",
+      "stable_baselines3": "2.9.2"
+    }
+  },
+  "evaluation_suite_id": "suite-v1",
+  "seed": 2,
+  "parent_run_id": null,
+  "experiment_id": "experimento-2-ppo",
+  "agent": {
+    "class": "ppo",
+    "name": "PPO (red neuronal)",
+    "action": "relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12"
+  },
+  "hypothesis": "Tercera semilla (2) de la configuración v2 del nivel 1: queda a menos de 5 puntos de las semillas 0 (97 %) y 1 (99 %).",
+  "change": "Solo la semilla: 2. Mismos hiperparámetros, ambiente y presupuesto (600 000 pasos).",
+  "baseline_run_id": "ppo-v2-v0.1-s1",
+  "budget": {
+    "pasos_agente": 600000,
+    "epocas": 17748,
+    "maquina": "pipeline Prefect en CPU de portátil (WSL2)"
+  },
+  "status": "rechazado",
+  "decision": "Rechazado por el pipeline: 97.5% de aterrizajes en la suite v1 (0 colisiones), 71.5% con viento de 15 m/s. no mejora al recomendado ppo-v2-v0.1-s1 en al menos 2% (97.5% frente a 99.0%).",
+  "evaluation": {
+    "suite": "suite-v1",
+    "episodes": 200,
+    "landing_rate": 0.975,
+    "contact_speed": 1.1864639463317959,
+    "position_error": 3.906329236737742,
+    "fuel_used": 218.0711530114595,
+    "outcomes": {
+      "aterrizaje": 195,
+      "fuera de plataforma": 4,
+      "choque": 1,
+      "sin pasos": 0,
+      "fuera de zona": 0,
+      "colisión": 0
+    },
+    "per_case": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/d298e217d87d1f70e977b0172a8e9e09e88152d6/resultados/runs/ppo-v2-v0.1-s2/evaluacion.json"
+  },
+  "trained_at": "2026-11-05T17:33:34",
+  "generated_at": "2026-11-05T17:34:58"
+}
