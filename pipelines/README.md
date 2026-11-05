@@ -17,11 +17,14 @@ que registra el estado, la duración y los logs de cada una.
 
 La evidencia de cada ejecución queda en `ejecuciones/<run_id>-<fecha>.json` (resultado de cada etapa, decisión, commit,
 id del *flow run* de Prefect) y se versiona en git. La interfaz de Prefect se abre con `.venv-prefect/bin/prefect server start`
-(http://127.0.0.1:4200) y muestra los *flow runs* con sus tareas, tiempos y logs.
+(http://127.0.0.1:4200; entra por la raíz y navega a *Runs*, los enlaces profundos devuelven 404) y muestra los *flow runs* con sus tareas, tiempos y logs.
+Los flujos que se ejecutan sin servidor levantan uno efímero y guardan sus runs en la misma base de datos (`~/.prefect`), así que aparecen igual.
+
+![Flow run del pipeline en la interfaz de Prefect](../docs/evidencia-prefect-flow-run.png)
 
 ## Entorno
 
-Prefect 3 no convive con la versión de FastAPI que usa la API (0.162), así que el orquestador tiene su propio entorno:
+Prefect 3.8 no convive con la versión de FastAPI que usa la API (0.162: quitó `Body(min_items=)`), y su interfaz necesita FastAPI ≥ 0.139 (`FastAPI.frontend`); la 0.139.1 cumple las dos. Por eso el orquestador tiene su propio entorno:
 
 ```bash
 python -m venv .venv-prefect && .venv-prefect/bin/pip install -r requirements-pipeline.txt

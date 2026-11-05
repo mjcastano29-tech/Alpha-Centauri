@@ -1,4 +1,4 @@
 # Orquestador del pipeline (pipelines/entrenar_publicar.py). Entorno aparte (.venv-prefect): Prefect 3 no funciona con la
 # versión de FastAPI de la API (0.162); las etapas llaman a los scripts del proyecto con el intérprete de .venv.
 prefect==3.8.8
-fastapi==0.115.14
+fastapi==0.139.1  # la última que acepta Body(min_items=) y trae FastAPI.frontend: sirve para el flujo y para `prefect server start`
