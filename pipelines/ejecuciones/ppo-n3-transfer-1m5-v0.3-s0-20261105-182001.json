@@ -3,7 +3,8 @@
     "prefect_flow_run_id": "57476731-4180-485d-b85d-1fa801f940d3",
     "nombre": "unbeatable-gaur",
     "inicio": "2026-11-05T18:20:01",
-    "duracion_s": 953
+    "duracion_s": 954,
+    "estado": "completado"
   },
   "parametros": {
     "ambiente": "RocketLanding3D-N3-v0",
@@ -76,6 +77,18 @@
         "margen_mejora": 0.02,
         "tolerancia_viento": 0.05
       }
+    },
+    "7 publicar": {
+      "commit": "a97519ba945ee0b7ff5970312dc236ee0994cbd5",
+      "push": false
+    },
+    "8 comprobar": {
+      "commit": "a97519ba945ee0b7ff5970312dc236ee0994cbd5",
+      "catalogo": 6,
+      "recomendado": "ppo-n3-transfer-1m5-v0.3-s0",
+      "evaluacion": 0.6666666666666666,
+      "compatible": true,
+      "modo": "local (sin push)"
     }
   }
 }
