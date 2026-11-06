@@ -112,6 +112,26 @@ export interface ResultadoEvaluacion {
   servido_por: { api: string; commit: string | null }
 }
 
+export interface ResumenSuite { episodios: number; aterrizajes: number; velocidad_contacto: number | null; error_posicion: number; combustible: number; resultados: Resultados }
+export interface MedidaIncidente {
+  run_id: string
+  fecha: string
+  suite: string
+  episodios: number
+  viento: number
+  entrenado_en: string
+  nivel_entrenado: string
+  ambiente: { id: string; version: string; nivel: string; viento_max: number; rafagas: number }
+  adaptador: boolean
+  estado: string
+  antes: { normal: ResumenSuite; perturbado: ResumenSuite }
+  despues: { normal: ResumenSuite; perturbado: ResumenSuite }
+}
+export interface Incidentes {
+  medidas: MedidaIncidente[]
+  intervenciones: Record<string, Pick<Resumen, 'run_id' | 'evaluacion' | 'perturbado' | 'diseno' | 'estado' | 'mlflow'>[]>
+  outcomes: string[]
+}
 export class ErrorApi extends Error {
   status: number
   constructor(status: number, mensaje: string) { super(mensaje); this.status = status }
@@ -135,6 +155,7 @@ export const catalogo = () => get<Catalogo>('/catalogo')
 export const ejecucion = (id: string) => get<Detalle>(`/ejecuciones/${encodeURIComponent(id)}`)
 export const vuelos = (id: string) => get<{ episodes: Vuelo[] }>(`/ejecuciones/${encodeURIComponent(id)}/vuelos`)
 export const comparar = (ids: string[]) => get<{ ejecuciones: Resumen[] }>(`/comparar?runs=${encodeURIComponent(ids.join(','))}`)
+export const incidentes = () => get<Incidentes>('/incidentes')
 export const suites = () => get<{ suites: Record<string, Suite>; maximo_por_peticion: number }>('/suites')
 export const urlManifiesto = (id: string) => `${API}/ejecuciones/${encodeURIComponent(id)}/manifiesto`
 export const evaluar = (peticion: { run_id: string; episodios: number; viento?: number | null; semilla_base?: number; grabar?: number; suite?: string | null; condicion?: string; ambiente?: string | null }) =>
