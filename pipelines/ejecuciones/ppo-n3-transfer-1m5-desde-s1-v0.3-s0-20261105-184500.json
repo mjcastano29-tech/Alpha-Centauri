@@ -3,7 +3,8 @@
     "prefect_flow_run_id": "d91072b9-3d0e-4ef8-9cbd-8910e7ab1b9a",
     "nombre": "beautiful-oyster",
     "inicio": "2026-11-05T18:45:00",
-    "duracion_s": 978
+    "duracion_s": 979,
+    "estado": "completado"
   },
   "parametros": {
     "ambiente": "RocketLanding3D-N3-v0",
@@ -73,6 +74,18 @@
         "margen_mejora": 0.02,
         "tolerancia_viento": 0.05
       }
+    },
+    "7 publicar": {
+      "commit": "645c3667a8cf7e98e54f3b047887da45b0415d05",
+      "push": false
+    },
+    "8 comprobar": {
+      "commit": "645c3667a8cf7e98e54f3b047887da45b0415d05",
+      "catalogo": 8,
+      "recomendado": "ppo-n3-transfer-1m5-desde-s1-v0.3-s0",
+      "evaluacion": 0.6666666666666666,
+      "compatible": true,
+      "modo": "local (sin push)"
     }
   }
 }
