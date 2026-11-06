@@ -41,6 +41,7 @@ VERSION_API = "0.2.0"
 MLFLOW_UI_URL = os.environ.get("MLFLOW_UI_URL") or None
 CONFIGS = ROOT / "configs"
 MANIFESTS = ROOT / "manifests"
+INCIDENTES = ROOT / "resultados" / "incidentes"
 MAX_EPISODIOS = int(os.environ.get("MAX_EPISODIOS", "50"))
 ARRANQUE = time.strftime("%Y-%m-%dT%H:%M:%S")
 
@@ -194,7 +195,7 @@ def raiz():
             "ambiente": {"id": RocketLanding3DEnv.ID, "version": RocketLanding3DEnv.VERSION}, "ambientes": AMBIENTES_INFO,
             "recomendado": cat["recomendado"], "documentacion": "/docs",
             "rutas": ["/salud", "/version", "/catalogo", "/ejecuciones/{run_id}", "/ejecuciones/{run_id}/vuelos",
-                      "/ejecuciones/{run_id}/evaluacion", "/comparar?runs=a,b", "POST /evaluar"]}
+                      "/ejecuciones/{run_id}/evaluacion", "/comparar?runs=a,b", "/incidentes", "POST /evaluar"]}
 
 
 @app.get("/salud", summary="Comprobación de vida")
@@ -280,6 +281,33 @@ def ejecucion_vuelos(run_id: str):
     if not path.exists():
         raise HTTPException(404, "Sin vuelos grabados")
     return FileResponse(path, media_type="application/json", headers={"Content-Encoding": "gzip", "X-Modo": "replay"})
+
+
+@app.get("/incidentes", summary="Incidente controlado: degradación de cada modelo al cambiar de nivel e intervenciones del nivel")
+def incidentes():
+    """Lee resultados/incidentes/<run_id>@<ambiente>.json (python incidente.py): el modelo en su nivel (antes) y en el
+    nivel nuevo (después), normal y con viento de 15 m/s. Para cada nivel de destino añade las ejecuciones entrenadas en
+    él (las intervenciones), con su decisión, para compararlas con las mismas métricas."""
+    cat = catalogo_git.leer()
+    medidas = []
+    for path in sorted(INCIDENTES.glob("*.json")):
+        d = leer_json(path)
+        medidas.append({k: d[k] for k in ("run_id", "fecha", "suite", "episodios", "viento", "entrenado_en", "ambiente", "adaptador", "antes")}
+                       | {"nivel_entrenado": clase_ambiente(d["entrenado_en"]).NIVEL,
+                          "despues": {c: d["despues"][c]["resumen"] for c in ("normal", "perturbado")},
+                          "estado": catalogo_git.estado_de(cat, d["run_id"], clase_ambiente(d["entrenado_en"]).NIVEL)})
+    destinos = sorted({m["ambiente"]["id"] for m in medidas})
+    intervenciones = {}
+    for amb in destinos:
+        nivel = clase_ambiente(amb).NIVEL
+        filas = []
+        for e in load_registry()["ejecuciones"]:
+            if e.get("nivel") != nivel:
+                continue
+            r = resumen_ejecucion(e["run_id"], cat)
+            filas.append({k: r[k] for k in ("run_id", "evaluacion", "perturbado", "diseno", "estado", "mlflow")})
+        intervenciones[amb] = filas
+    return {"medidas": medidas, "intervenciones": intervenciones, "outcomes": OUTCOMES}
 
 
 class PeticionEvaluacion(BaseModel):

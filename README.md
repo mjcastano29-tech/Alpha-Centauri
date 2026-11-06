@@ -67,7 +67,7 @@ env = gym.make("RocketLanding3D-v0")
 |---|---|---|---|
 | N1 · misión base | `RocketLanding3D-v0` (0.1.1) | plataforma, viento, temperatura, presión y combustible limitado | [docs/ambiente-v0.1.md](docs/ambiente-v0.1.md) |
 | N2 · obstáculos | `RocketLanding3D-N2-v0` (0.2) | tres torres de 300–420 m alrededor de la plataforma: hay que elegir por qué hueco entrar; chocar es "colisión" (−100); observación de 25 valores (familia nueva de modelos) | [docs/ambiente-v0.2.md](docs/ambiente-v0.2.md) |
-| N3 · operación exigente | `RocketLanding3D-N3-v0` (0.3) | el mundo del nivel 2 con viento de 0–15 m/s y ráfagas el doble de fuertes; misma observación que N2 (misma familia: un modelo de N2 juega en N3 tal cual). Incidente medido con `python incidente.py` | [docs/ambiente-v0.3.md](docs/ambiente-v0.3.md) |
+| N3 · operación exigente | `RocketLanding3D-N3-v0` (0.3) | el mundo del nivel 2 con viento de 0–15 m/s y ráfagas el doble de fuertes; misma observación que N2 (misma familia: un modelo de N2 juega en N3 tal cual). Incidente medido con `python incidente.py`, visible en la web (`#/incidente`) y en `GET /incidentes` | [docs/ambiente-v0.3.md](docs/ambiente-v0.3.md) |
 
 Cada modelo se entrena y evalúa en el ambiente de su manifest (`ambiente.id`). `python cli.py entrenar-ppo --ambiente RocketLanding3D-N2-v0`
 entrena en el nivel 2; `python cli.py evaluar --run ppo-v2-v0.1-s0 --ambiente RocketLanding3D-N2-v0` hace jugar a un modelo del
@@ -119,6 +119,8 @@ el **presupuesto** (épocas, pasos del agente, tiempo, máquina), la **suite** c
 | `ppo-n3-transfer-v0.3-s0` | intervención ante el viento: reentrenar el recomendado de N2 en N3 recupera ≥ 2 puntos frente a él jugando en N3 (72 %) sin más colisiones | ambiente N3 y transferencia desde `ppo-n2-transfer-1m5-v0.2-s0`; 600 000 pasos | rechazado (81,5 %, 0 choques, pero 37 colisiones frente a 35) |
 | `ppo-n3-transfer-1m5-v0.3-s0` | las colisiones eran falta de presupuesto, como en N2 | 1,5 M de pasos en vez de 600 000 | seleccionado N3 (86,5 %, 24 colisiones, 67,5 % con viento); anterior desde el catálogo v8 |
 | `ppo-n3-transfer-1m5-desde-s1-v0.3-s0` | partir del nuevo recomendado de N2 (s1) mejora al recomendado de N3 sin más colisiones | modelo de partida N2-s1 en vez de N2-s0 | seleccionado N3 (92,0 %, 15 colisiones, 79,0 % con viento) |
+| `ppo-n3-transfer-1m5-desde-s1-v0.3-s1` | con otra semilla, la configuración seleccionada en N3 queda a menos de 5 puntos del 92 % | solo la semilla (1); pipeline | rechazado (91,5 %, 16 colisiones, 87,5 % con viento): se cumple la hipótesis, no mejora al recomendado |
+| `ppo-n3-transfer-1m5-desde-s1-v0.3-s2` | ídem con la semilla 2 | solo la semilla (2); pipeline | rechazado (84,5 %, 18 colisiones): no se cumple la hipótesis. Las tres semillas: 89,3 ± 4,2 % |
 
 Suites: [configs/suites/suite-v1.json](configs/suites/suite-v1.json) (200 épocas, semillas desde 10 000 000, condiciones
 `normal` y `viento-15`) y `suite-reservada` (misma estructura, semilla fuera del repo, solo para los finalistas).
@@ -174,7 +176,7 @@ El orquestador tiene su propio entorno (`requirements-pipeline.txt`, carpeta `.v
                                                 └──────────────────────────────────┘
 ```
 
-- **API** ([api/main.py](api/main.py)): `GET /version` (commit, catálogo y software servidos), `GET /catalogo`, `GET /ejecuciones/{id}` (+ `/manifest`, `/evaluacion`, `/vuelos`), `GET /comparar?runs=a,b`, `POST /evaluar` (modelo congelado en el ambiente, modo `evaluacion`, trayectorias para replay). Documentación interactiva en `/docs`.
+- **API** ([api/main.py](api/main.py)): `GET /version` (commit, catálogo y software servidos), `GET /catalogo`, `GET /ejecuciones/{id}` (+ `/manifest`, `/evaluacion`, `/vuelos`), `GET /comparar?runs=a,b`, `GET /incidentes` (degradación al cambiar de nivel e intervenciones), `POST /evaluar` (modelo congelado en el ambiente, modo `evaluacion`, trayectorias para replay). Documentación interactiva en `/docs`.
   ```bash
   pip install -r requirements-api.txt
   uvicorn api.main:app --reload --port 8000

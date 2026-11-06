@@ -2,7 +2,18 @@
 
 **Equipo Alpha Centauri · Rocket Landing · 2 de noviembre de 2026 · rama `fase-3d` (commit `c0058c4`) + rama `isaias/arreglos-rapidos` sin fusionar**
 
+Las secciones 1 a 6 son el diagnóstico inicial del 2 de noviembre; lo hecho desde entonces está en las actualizaciones, de la más reciente a la más antigua.
+
 Contraste entre lo que pide el enunciado del proyecto final de MLOps (30 de octubre de 2026) y lo que hay en el repositorio hoy. Cada afirmación remite a un archivo o a un comando; lo que no se ha podido comprobar se dice.
+
+## Actualización · 5 de noviembre de 2026 (cierre): nivel 3, incidente e intervención
+
+- **Nivel 3** (`RocketLanding3D-N3-v0`, ambiente 0.3): el mundo del nivel 2 con viento de 0–15 m/s y ráfagas el doble de fuertes. Misma observación que N2: misma familia, un modelo de N2 juega en N3 sin adaptador. Ficha [ambiente-v0.3.md](ambiente-v0.3.md); pruebas en `tests/test_ambiente_n3.py`.
+- **Incidente controlado medido** (`python incidente.py`, `resultados/incidentes/`, `GET /incidentes`, vista web `#/incidente`): el recomendado de N2 baja de 93,5 % a 82,5 % en N3 (choques contra el suelo 0 → 15); el de N1 con adaptador, de 99 % a 61 %.
+- **Intervención** (reentrenar en N3 con transferencia de pesos), cinco ejecuciones del pipeline, todas conservadas: 600 000 pasos rechazada (más colisiones), 1,5 M seleccionada y después sustituida, 1,5 M desde N2-s1 **seleccionada: 92,0 %, 15 colisiones, 79 % con viento** (catálogo v8). Tres semillas del finalista: 89,3 ± 4,2 %.
+- El pipeline decide en un nivel nuevo comparando con el modelo anterior jugando en ese nivel (`--baseline`), y la etapa 8 admite un nivel sin recomendado.
+- `terminated`/`truncated` (brecha 10) estaba resuelto desde el ambiente 0.1.1.
+- Pendiente: rollback demostrado en producción, monitoreo, release final, informe y defensa.
 
 ## Actualización · 5 de noviembre de 2026 (noche): pipeline orquestado con Prefect
 

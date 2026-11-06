@@ -56,7 +56,6 @@ Lectura:
 - Reentrenar en las condiciones nuevas recupera la frenada (los choques contra el suelo pasan de 17 a 0–3) y casi todo el terreno perdido: 86,5 % en N3, el mismo nivel que tenía el modelo en N2 (86,0 %).
 - La primera intervención aprendió antes a frenar con viento que a esquivar torres con viento. Con más presupuesto las colisiones bajan de 37 a 24, como pasó en el nivel 2 (42 → 27). Se confirma la hipótesis del segundo intento.
 - Hay una contrapartida: con viento fijo de 15 m/s la intervención 1 aguanta mejor (74,5 % frente a 67,5 %). El criterio fijado antes de entrenar prioriza las condiciones normales del nivel y no tener más colisiones, así que se selecciona la 2. La 1 queda como evidencia y como candidata si la operación pasara a ser siempre de viento máximo.
-- Pendiente: las semillas 1 y 2 de la intervención 2, para separar el efecto del presupuesto de la variabilidad entre semillas (en N1 fue de 2 puntos).
 
 **Tercera intervención: partir del nuevo recomendado de N2.** Mientras se hacía el nivel 3, el pipeline promovió `ppo-n2-transfer-1m5-v0.2-s1` como recomendado de N2 (93,5 %). Jugando en N3 sin reentrenar da 82,5 % con 18 colisiones. Frente a esa referencia, el recomendado de N3 de entonces no pasaba el criterio (24 colisiones frente a 18). Se repitió la receta seleccionada (transferencia + 1,5 M de pasos en N3) cambiando solo el modelo de partida:
 
@@ -69,3 +68,20 @@ Lectura:
 | Decisión del pipeline | — | recomendado de N3 hasta el catálogo v8; queda como anterior (rollback) | **seleccionado**: recomendado de N3 (catálogo v8) |
 
 La mejora viene del punto de partida: un modelo de N2 que ya esquiva mejor las torres (13 colisiones frente a 27) da un modelo de N3 que también las esquiva mejor. Supera en las tres métricas tanto al recomendado anterior de N3 como al recomendado de N2 jugando en N3.
+
+## Tres semillas del finalista
+
+La guía pide tres semillas de entrenamiento para los finalistas. Las semillas 1 y 2 de la configuración seleccionada (transferencia desde N2-s1, 1,5 M de pasos en N3) se entrenaron con el pipeline. Hipótesis de cada una: quedar a menos de 5 puntos del 92,0 % de la semilla 0. Son entrenamientos independientes, cada uno evaluado con las mismas 200 épocas de la suite v1; no son episodios de un mismo modelo.
+
+| Semilla | Aterrizajes | Con viento fijo de 15 m/s | Colisiones | Choques contra el suelo | Decisión del pipeline |
+|---|---|---|---|---|---|
+| s0 | 92,0 % | 79,0 % | 15 | 1 | seleccionada: recomendado de N3 |
+| s1 | 91,5 % | 87,5 % | 16 | 0 | rechazada: no mejora en 2 puntos y tiene una colisión más |
+| s2 | 84,5 % | 76,5 % | 18 | 11 | rechazada: 7,5 puntos por debajo |
+| **media ± desviación típica** | **89,3 ± 4,2 %** | **81,0 ± 5,8 %** | **16,3 ± 1,5** | | |
+
+Lectura:
+- La hipótesis se cumple para s1 (−0,5 puntos) y **no para s2** (−7,5 puntos: once choques contra el suelo, la frenada final con viento es lo menos estable).
+- El recomendado es la mejor de tres semillas: lo esperable de la receta es ~89 %, no 92 %. La variabilidad entre semillas es mayor que en N1 (2 puntos) y que el margen de mejora del criterio (2 puntos); por eso una sola semilla no basta para comparar recetas.
+- La intervención funciona en las tres semillas: hasta la peor (84,5 %, 18 colisiones) supera al recomendado de N2 jugando en N3 sin reentrenar (82,5 %, 18 colisiones), y la media lo supera en 7 puntos de aterrizajes y 23 con viento de 15 m/s.
+- Las semillas rechazadas no sustituyen al recomendado: el pipeline compara cada candidato con el recomendado vigente, y ninguna lo mejora.

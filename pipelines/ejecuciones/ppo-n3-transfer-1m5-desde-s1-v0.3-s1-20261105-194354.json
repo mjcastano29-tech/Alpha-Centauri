@@ -1,0 +1,91 @@
+{
+  "flujo": {
+    "prefect_flow_run_id": "d699c3e4-c913-48d6-a2c9-d0934a5b8fcf",
+    "nombre": "omniscient-parrot",
+    "inicio": "2026-11-05T19:43:54",
+    "duracion_s": 1052,
+    "estado": "completado"
+  },
+  "parametros": {
+    "ambiente": "RocketLanding3D-N3-v0",
+    "seed": 1,
+    "run_id": "ppo-n3-transfer-1m5-desde-s1-v0.3-s1",
+    "run_existente": null,
+    "desde": "ppo-n2-transfer-1m5-v0.2-s1",
+    "total_timesteps": 1500000,
+    "hipotesis": "Semilla 1 de la configuración seleccionada en N3 (transferencia desde N2-s1, 1,5 M de pasos): queda a menos de 5 puntos del 92,0 % de la semilla 0",
+    "cambio": "Solo la semilla de entrenamiento: 1. Mismo modelo de partida, ambiente y presupuesto",
+    "baseline": "ppo-n3-transfer-1m5-desde-s1-v0.3-s0",
+    "push": false,
+    "sin_commit": false,
+    "api": "https://alpha-centauri-api.onrender.com",
+    "espera_api": 900
+  },
+  "etapas": {
+    "1 validar": {
+      "id": "RocketLanding3D-N3-v0",
+      "version": "0.3",
+      "nivel": "N3",
+      "observacion": 25,
+      "accion": 5,
+      "obstaculos": 3,
+      "suite": "suite-v1",
+      "git_limpio": true
+    },
+    "2 probar": "using dumb terminal settings.",
+    "3 entrenar": {
+      "run_id": "ppo-n3-transfer-1m5-desde-s1-v0.3-s1",
+      "reutilizada": false
+    },
+    "4 evaluar": {
+      "episodios": 200,
+      "viento": 15.0,
+      "aterrizajes": 0.915,
+      "colisiones": 16,
+      "velocidad_contacto": 1.3600543478260867,
+      "error_posicion": 4.805499999999999,
+      "resultados": {
+        "aterrizaje": 183,
+        "fuera de plataforma": 0,
+        "choque": 1,
+        "sin pasos": 0,
+        "fuera de zona": 0,
+        "colisión": 16
+      },
+      "aterrizajes_viento": 0.875,
+      "colisiones_viento": 25
+    },
+    "5 registrar": {
+      "config": "configs/ppo-n3-transfer-1m5-desde-s1-v0.3-s1.json",
+      "manifest": "manifests/ppo-n3-transfer-1m5-desde-s1-v0.3-s1.json",
+      "sha256": "OK"
+    },
+    "6 decidir": {
+      "aceptado": false,
+      "estado": "rechazado",
+      "decision": "Rechazado por el pipeline: 91.5% de aterrizajes en la suite v1 (16 colisiones), 87.5% con viento de 15 m/s. no mejora a ppo-n3-transfer-1m5-desde-s1-v0.3-s0 en al menos 2% (91.5% frente a 92.0%); más colisiones que ppo-n3-transfer-1m5-desde-s1-v0.3-s0 (16 frente a 15).",
+      "comparacion": {
+        "recomendado": "ppo-n3-transfer-1m5-desde-s1-v0.3-s0",
+        "aterrizajes": 0.92,
+        "aterrizajes_viento": 0.79,
+        "colisiones": 15
+      },
+      "criterio": {
+        "margen_mejora": 0.02,
+        "tolerancia_viento": 0.05
+      }
+    },
+    "7 publicar": {
+      "commit": "a4d5d8b0c58f1a9cfe3af501d98f8bc76b7221c1",
+      "push": false
+    },
+    "8 comprobar": {
+      "commit": "a4d5d8b0c58f1a9cfe3af501d98f8bc76b7221c1",
+      "catalogo": 8,
+      "recomendado": "ppo-n3-transfer-1m5-desde-s1-v0.3-s0",
+      "evaluacion": 0.6666666666666666,
+      "compatible": true,
+      "modo": "local (sin push)"
+    }
+  }
+}
