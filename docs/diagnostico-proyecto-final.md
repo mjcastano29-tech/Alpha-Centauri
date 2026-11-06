@@ -13,7 +13,8 @@ Contraste entre lo que pide el enunciado del proyecto final de MLOps (30 de octu
 - **Intervención** (reentrenar en N3 con transferencia de pesos), cinco ejecuciones del pipeline, todas conservadas: 600 000 pasos rechazada (más colisiones), 1,5 M seleccionada y después sustituida, 1,5 M desde N2-s1 **seleccionada: 92,0 %, 15 colisiones, 79 % con viento** (catálogo v8). Tres semillas del finalista: 89,3 ± 4,2 %.
 - El pipeline decide en un nivel nuevo comparando con el modelo anterior jugando en ese nivel (`--baseline`), y la etapa 8 admite un nivel sin recomendado.
 - `terminated`/`truncated` (brecha 10) estaba resuelto desde el ambiente 0.1.1.
-- Pendiente: rollback demostrado en producción, monitoreo, release final, informe y defensa.
+- **Rollback demostrado en producción** (PR #7 y #8): restaurar el anterior de N3 (catálogo v9, 75 % en vivo) y volver al recomendado (v10, 95 %), con evidencia de `comprobar_api.py` en `pipelines/ejecuciones/rollback-n3-*.json`.
+- Pendiente: monitoreo, release final, informe y defensa.
 
 ## Actualización · 5 de noviembre de 2026 (noche): pipeline orquestado con Prefect
 
