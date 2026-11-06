@@ -1,6 +1,6 @@
 // Vistas de la aplicación: catálogo, detalle de una ejecución (con evaluación en vivo), comparación y replay 3D.
 import * as api from './api'
-import type { Catalogo, Detalle, Obstaculo, Resumen, ResultadoEvaluacion, Vuelo } from './api'
+import type { Ambiente, Catalogo, Detalle, Obstaculo, Resumen, ResultadoEvaluacion, Vuelo } from './api'
 import { Reproductor, type Cohete, type ModoCamara } from './escena'
 import { barraResultados, corto, entero, esc, ICONO_RESULTADO, lineaSvg, num, pct, pillDiseno, pillEstado, tabla } from './ui'
 
@@ -58,6 +58,73 @@ export async function vistaIncidente(el: HTMLElement) {
     <h1>Incidente controlado</h1>
     <p>Qué le pasa a un modelo cuando cambian las condiciones de operación, y si reentrenarlo lo recupera. Los datos salen de <code>resultados/incidentes/</code> (<code>python incidente.py</code>) y de las ejecuciones entrenadas en cada nivel. Para repetir una de estas evaluaciones en vivo, abre la ejecución y elige otro ambiente.</p>
     ${bloques.join('') || '<p class="muted">Sin incidentes medidos.</p>'}`
+}
+
+// ---------- experimentos: progresión de complejidad y variables de cada configuración ----------
+const valorVariable = (v: unknown) => (Array.isArray(v) ? v.join(' × ') : v === null || v === undefined ? '—' : String(v))
+
+export async function vistaExperimentos(el: HTMLElement, seleccionado?: string) {
+  const [c, inc] = await Promise.all([cargarCatalogo(), api.incidentes().catch(() => null)])
+  const experimentos = c.experimentos ?? [...new Set(c.ejecuciones.map((r) => r.experimento ?? ''))].map((id, k) => ({ id, numero: k + 1, titulo: id, nivel: '', ambiente: '', pregunta: '', variables: '' }))
+  const actual = experimentos.find((e) => e.id === seleccionado) ?? experimentos[0]
+  const niveles = [...c.ambientes].sort((a, b) => a.nivel.localeCompare(b.nivel))
+  const recomendadoDe = (nivel: string) => c.ejecuciones.find((r) => r.nivel === nivel && r.estado === 'recomendado')
+  const anterior = (i: number) => (i > 0 ? recomendadoDe(niveles[i - 1].nivel) : undefined)
+  const medida = (a: Ambiente, run?: Resumen) => inc?.medidas.find((m) => m.ambiente.id === a.id && m.run_id === run?.run_id)
+  const filaNivel = (titulo: string, f: (a: Ambiente, i: number) => string) => [titulo, ...niveles.map(f)]
+  const complejidad = tabla(['', ...niveles.map((a) => `<b>${esc(a.nivel)}</b><br><span class="muted">${esc(a.id)} v${esc(a.version)}</span>`)], [
+    filaNivel('qué es', (a) => esc(a.resumen ?? '')),
+    filaNivel('qué añade', (a) => `<b>${esc(a.novedad ?? '')}</b>`),
+    filaNivel('observación · acción', (a) => `${a.observacion ?? '—'} valores · ${a.accion ?? '—'} valores`),
+    filaNivel('resultados posibles', (a) => (a.resultados ?? []).map((o) => `${esc(ICONO_RESULTADO[o] ?? '')} ${esc(o)}`).join('<br>')),
+    filaNivel('obstáculos', (a) => (a.obstaculos.length ? a.obstaculos.map((o) => `${esc(o.nombre)}: ${o.altura} m a (${o.x}, ${o.y})`).join('<br>') : 'ninguno')),
+    filaNivel('viento', (a) => `0–${a.viento_max ?? '—'} m/s a 10 m · ráfagas ${a.rafagas ?? '—'} m/s`),
+    filaNivel('familia de modelos', (a) => esc(a.familia ?? a.nivel)),
+    filaNivel('modelo recomendado', (a) => { const r = recomendadoDe(a.nivel); return r ? `<a href="#/ejecucion/${esc(r.run_id)}">${esc(r.run_id)}</a><br><b>${pct(r.evaluacion.aterrizajes)}</b> · ${r.perturbado ? pct(r.perturbado.aterrizajes) + ' con viento' : ''}` : '—' }),
+    filaNivel('el recomendado del nivel anterior, sin reentrenar', (a, i) => {
+      const prev = anterior(i), m = medida(a, prev)
+      if (!prev) return '—'
+      if (!m) return `<span class="muted">${esc(prev.run_id)}: sin medir</span>`
+      return `${esc(prev.run_id)}${m.adaptador ? ' (con adaptador)' : ''}<br><b>${pct(m.despues.normal.aterrizajes)}</b> frente a ${pct(m.antes.normal.aterrizajes)} en su nivel · <b>${Math.round((m.despues.normal.aterrizajes - m.antes.normal.aterrizajes) * 100)} puntos</b><br><span class="muted">${(m.despues.normal.resultados['colisión'] ?? 0)} colisiones</span>`
+    }),
+    filaNivel('ficha', (a) => (a.ficha ? `<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/main/${esc(a.ficha)}" target="_blank" rel="noopener">${esc(a.ficha)}</a>` : '—')),
+  ], 'comparar')
+  const runs = c.ejecuciones.filter((r) => r.experimento === actual.id)
+  const claves = [...new Set(runs.flatMap((r) => Object.keys(r.config)))].filter((k) => k !== 'ambiente')
+  const difiere = (k: string) => new Set(runs.map((r) => valorVariable(r.config[k]))).size > 1
+  const variables = tabla(['variable', ...runs.map((r) => `<a href="#/ejecucion/${esc(r.run_id)}">${esc(r.run_id)}</a>`)], [
+    ['agente · acción', ...runs.map((r) => esc(`${r.agente.nombre ?? r.agente.clase} · ${r.agente.accion ?? ''}`))],
+    ['ambiente', ...runs.map((r) => esc(r.ambiente))],
+    ...claves.map((k) => [difiere(k) ? `<b>${esc(k)}</b>` : esc(k), ...runs.map((r) => (difiere(k) ? `<b>${esc(valorVariable(r.config[k]))}</b>` : esc(valorVariable(r.config[k]))))]),
+    ['semilla / modelo de partida', ...runs.map((r) => `${esc(valorVariable(r.config.seed))}${r.config.desde ? ` · desde ${esc(String(r.config.desde))}` : ''}`)],
+  ], 'comparar')
+  const resultados = tabla(['ejecución', 'cambio frente al baseline', 'aterrizajes (suite v1)', 'con viento 15 m/s', 'épocas · 1.º aterrizaje', 'decisión', ''], runs.map((r) => [
+    `<a href="#/ejecucion/${esc(r.run_id)}"><b>${esc(r.run_id)}</b></a><br>${pillEstado(r.estado)} ${pillDiseno(r.diseno?.estado)}`,
+    `${esc(r.diseno?.cambio ?? '—')}${r.diseno?.baseline ? `<br><span class="muted">baseline: ${esc(r.diseno.baseline)}</span>` : ''}`,
+    `<b>${pct(r.evaluacion.aterrizajes)}</b> ${barraResultados(r.evaluacion.resultados, c.outcomes)}<br><span class="muted">${num(r.evaluacion.velocidad_contacto, 2)} m/s · ${num(r.evaluacion.error_posicion)} m${r.nivel !== 'N1' ? ` · ${r.evaluacion.resultados['colisión'] ?? 0} colisiones` : ''}</span>`,
+    r.perturbado ? `${pct(r.perturbado.aterrizajes)} ${barraResultados(r.perturbado.resultados, c.outcomes)}` : '—',
+    `${entero(r.epocas)}<br><span class="muted">${r.primer_aterrizaje ? 'época ' + entero(r.primer_aterrizaje) : 'nunca'}</span>`,
+    `${esc(r.diseno?.decision ?? '—')}`,
+    `<a class="btn" href="#/replay/${esc(r.run_id)}">replay</a>`,
+  ]))
+  el.innerHTML = `
+    <h1>Experimentos</h1>
+    <p>Cuatro experimentos, uno por pregunta, sobre tres niveles de complejidad creciente. Elige uno para ver sus configuraciones, las variables que se movieron y lo que se decidió; la tabla de arriba muestra cómo crece la complejidad de un nivel al siguiente y cuánto pierde el modelo del nivel anterior cuando se le pone en el nuevo.</p>
+    <h2>Cómo aumenta la complejidad</h2>
+    ${complejidad}
+    <h2>Experimento</h2>
+    <nav class="tabs" aria-label="experimentos">${experimentos.map((e) => `<a href="#/experimentos/${esc(e.id)}" class="tab${e.id === actual.id ? ' activa' : ''}">${e.numero} · ${esc(e.titulo)}<br><span class="muted">${esc(e.nivel)} · ${c.ejecuciones.filter((r) => r.experimento === e.id).length} ejecuciones</span></a>`).join('')}</nav>
+    <section class="card">
+      <h2>${actual.numero} · ${esc(actual.titulo)} <span class="muted">· ${esc(actual.nivel)} · ${esc(actual.ambiente)} · MLflow <code>${esc(actual.id)}</code></span></h2>
+      <p><b>Pregunta.</b> ${esc(actual.pregunta)}</p>
+      <p><b>Variables que se mueven.</b> ${esc(actual.variables)}</p>
+      <h3>Configuraciones y decisiones</h3>
+      ${resultados}
+      <p><a class="btn primario" href="#/comparar/${runs.map((r) => esc(r.run_id)).join(',')}">Comparar las ${runs.length} en detalle</a></p>
+      <h3>Variables de cada configuración</h3>
+      <p class="muted">En negrita, las variables que cambian dentro del experimento. El resto es común a todas las configuraciones.</p>
+      ${variables}
+    </section>`
 }
 
 // ---------- catálogo ----------

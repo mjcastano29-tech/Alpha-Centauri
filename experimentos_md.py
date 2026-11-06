@@ -16,12 +16,9 @@ RUNS = ROOT / "resultados" / "runs"
 SALIDA = ROOT / "EXPERIMENTOS.md"
 REPO = "https://github.com/mjcastano29-tech/Alpha-Centauri"
 MLFLOW_UI = "https://alpha-centauri-mlflow.onrender.com"
-NOMBRE_EXPERIMENTO = {
-    "experimento-1-qlearning": "Experimento 1 · Q-learning en el nivel 1",
-    "experimento-2-ppo": "Experimento 2 · PPO (red neuronal) en el nivel 1",
-    "experimento-3-nivel2": "Experimento 3 · nivel 2 (torres) con PPO y transferencia",
-    "experimento-4-nivel3": "Experimento 4 · nivel 3 (viento fuerte): intervención",
-}
+from experimentos import POR_ID  # noqa: E402
+
+NOMBRE_EXPERIMENTO = {k: f"Experimento {v['numero']} · {v['titulo']}" for k, v in POR_ID.items()}
 
 
 def leer(path, default=None):
@@ -104,6 +101,8 @@ def main():
     for exp, lista in grupos.items():
         L.append(f"## {NOMBRE_EXPERIMENTO.get(exp, exp)}\n")
         L.append(f"Experimento de MLflow `{exp}` ({len(lista)} ejecuciones). Las ejecuciones van en orden cronológico; cada una dice qué cambió frente a su baseline.\n")
+        if exp in POR_ID:
+            L.append(f"**Pregunta.** {POR_ID[exp]['pregunta']}\n\n**Variables que se mueven.** {POR_ID[exp]['variables']}\n")
         for x in lista:
             m, c, s11, ev = x["manifest"], x["config"], x["s11"], x["ev"]
             nivel = m.get("nivel", "N1"); amb = m["ambiente"]; cfg = m["config"]

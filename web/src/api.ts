@@ -11,7 +11,12 @@ export interface Evaluacion {
   resultados: Resultados
 }
 export interface Obstaculo { nombre: string; x: number; y: number; radio: number; altura: number }
-export interface Ambiente { id: string; version: string; nivel: string; obstaculos: Obstaculo[] }
+export interface Ambiente {
+  id: string; version: string; nivel: string; obstaculos: Obstaculo[]
+  resumen?: string; novedad?: string; ficha?: string | null; observacion?: number; accion?: number; resultados?: string[]
+  viento_max?: number | null; rafagas?: number | null; pasos?: number; altitud_salida?: number; radio_plataforma?: number; familia?: string
+}
+export interface Experimento { id: string; numero: number; titulo: string; nivel: string; ambiente: string; pregunta: string; variables: string }
 export interface Resumen {
   run_id: string
   experimento: string | null
@@ -69,6 +74,7 @@ export interface Catalogo {
   outcomes: string[]
   rewards: Record<string, number>
   ambientes: Ambiente[]
+  experimentos?: Experimento[]
 }
 export interface Detalle extends Resumen {
   manifest: Record<string, unknown> & { resultado: { evaluacion: { outcomes: Resultados } } }

@@ -22,6 +22,9 @@ class RocketLandingN2Env(RocketLanding3DEnv):
     ID = "RocketLanding3D-N2-v0"
     NIVEL = "N2"
     VERSION = "0.2"
+    RESUMEN = "El nivel 1 más tres torres de 300 a 420 m alrededor de la plataforma: hay que elegir por qué hueco entrar antes de bajar de sus cimas."
+    NOVEDAD = "Decisión de ruta; resultado nuevo \"colisión\" (−100); observación de 25 valores (familia nueva de modelos); castigo de proximidad en el potencial."
+    FICHA = "docs/ambiente-v0.2.md"
 
     ROCKET_RADIUS = 3.0  # m: radio del fuselaje; chocar es que el eje pase a menos de radio + ROCKET_RADIUS de la torre
     # Tres torres altas alrededor de la plataforma, a 120° entre sí y a 28 m del centro: desde casi cualquier salida

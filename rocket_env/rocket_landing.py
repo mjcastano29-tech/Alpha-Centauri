@@ -60,6 +60,11 @@ class RocketLanding3DEnv(gym.Env):
 
     ID = "RocketLanding3D-v0"  # id en Gymnasium; cada nivel tiene el suyo (ver rocket_env/__init__.py)
     NIVEL = "N1"
+    RESUMEN = "Misión base: aterrizar en la plataforma con viento de 0 a 10 m/s, temperatura y presión variables y combustible limitado."
+    NOVEDAD = "Punto de partida: pasos de 20 m, 50 pasos por época, cinco resultados posibles."
+    VIENTO_MAX = 10.0  # m/s a 10 m
+    RAFAGAS = 1.5  # m/s
+    FICHA = "docs/ambiente-v0.1.md"
 
     @classmethod
     def obstaculos(cls):

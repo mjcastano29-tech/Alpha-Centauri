@@ -35,7 +35,19 @@ from entrenar import RUNS, ambiente_de, hacer_entorno, load_agent, load_registry
 from rocket_env import AMBIENTES, AdaptadorN1, RocketLandingN2Env, clase_ambiente  # noqa: E402
 from rocket_env.rocket_landing import RocketLanding3DEnv  # noqa: E402
 
-AMBIENTES_INFO = [{"id": c.ID, "version": c.VERSION, "nivel": c.NIVEL, "obstaculos": c.obstaculos()} for c in AMBIENTES.values()]
+from experimentos import EXPERIMENTOS  # noqa: E402
+
+
+def _info_ambiente(c):
+    env = c()
+    return {"id": c.ID, "version": c.VERSION, "nivel": c.NIVEL, "obstaculos": c.obstaculos(), "resumen": getattr(c, "RESUMEN", ""),
+            "novedad": getattr(c, "NOVEDAD", ""), "ficha": getattr(c, "FICHA", None), "observacion": int(env.observation_space.shape[0]),
+            "accion": int(env.action_space.shape[0]), "resultados": list(c.OUTCOMES), "viento_max": getattr(c, "VIENTO_MAX", None),
+            "rafagas": getattr(c, "RAFAGAS", None), "pasos": c.MAX_STEPS, "altitud_salida": c.START_ALTITUDE, "radio_plataforma": c.PAD_RADIUS,
+            "familia": "N2" if c.NIVEL in ("N2", "N3") else c.NIVEL}
+
+
+AMBIENTES_INFO = [_info_ambiente(c) for c in AMBIENTES.values()]
 
 VERSION_API = "0.2.0"
 MLFLOW_UI_URL = os.environ.get("MLFLOW_UI_URL") or None
@@ -228,7 +240,8 @@ def catalogo():
         r = resumen_ejecucion(e["run_id"], cat)
         r["epocas"] = e["epochs"]
         ejecuciones.append(r)
-    return {"catalogo": cat, "ejecuciones": ejecuciones, "outcomes": OUTCOMES, "rewards": RocketLandingN2Env.REWARDS, "ambientes": AMBIENTES_INFO}
+    return {"catalogo": cat, "ejecuciones": ejecuciones, "outcomes": OUTCOMES, "rewards": RocketLandingN2Env.REWARDS, "ambientes": AMBIENTES_INFO,
+            "experimentos": EXPERIMENTOS}
 
 
 @app.get("/comparar", summary="Resumen de varias ejecuciones lado a lado")

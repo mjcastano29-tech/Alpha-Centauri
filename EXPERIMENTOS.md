@@ -1,6 +1,6 @@
 # Experimentos y modelos de Alpha Centauri
 
-Generado el 2026-11-06 14:47 con `python experimentos_md.py` a partir de los archivos versionados del repositorio. 16 ejecuciones en 4 experimentos.
+Generado el 2026-11-06 14:52 con `python experimentos_md.py` a partir de los archivos versionados del repositorio. 16 ejecuciones en 4 experimentos.
 
 ## Dónde se guarda cada cosa
 
@@ -41,6 +41,10 @@ Generado el 2026-11-06 14:47 con `python experimentos_md.py` a partir de los arc
 ## Experimento 1 · Q-learning en el nivel 1
 
 Experimento de MLflow `experimento-1-qlearning` (1 ejecuciones). Las ejecuciones van en orden cronológico; cada una dice qué cambió frente a su baseline.
+
+**Pregunta.** ¿Se puede aprender a aterrizar en el ambiente base con un modelo tabular pequeño? Fija el baseline aprendido y las métricas.
+
+**Variables que se mueven.** épocas, tasas de aprendizaje y exploración (α, ε), descuento γ, semilla; dos tablas Q discretas (motor y dirección).
 
 ### `base-v0.1-s0` · referencia · 78.5 %
 
@@ -85,6 +89,10 @@ Experimento de MLflow `experimento-1-qlearning` (1 ejecuciones). Las ejecuciones
 ## Experimento 2 · PPO (red neuronal) en el nivel 1
 
 Experimento de MLflow `experimento-2-ppo` (5 ejecuciones). Las ejecuciones van en orden cronológico; cada una dice qué cambió frente a su baseline.
+
+**Pregunta.** ¿Una red neuronal entrenada con PPO supera al Q-learning en el mismo ambiente? Qué parametrización de la acción lo hace aprendible y cuánto varía entre semillas.
+
+**Variables que se mueven.** pasos del agente, entornos en paralelo, tamaño de lote, tasa de aprendizaje, γ, λ de GAE, recorte, entropía, red, desviación inicial, acción (cruda / relativa v1 / relativa v2), semilla.
 
 ### `ppo-v0.1-s0` · rechazado · 0.0 %
 
@@ -340,9 +348,13 @@ Experimento de MLflow `experimento-2-ppo` (5 ejecuciones). Las ejecuciones van e
 
 **Decisión (2026-11-05).** Rechazado por el pipeline: 97.5% de aterrizajes en la suite v1 (0 colisiones), 71.5% con viento de 15 m/s. no mejora al recomendado ppo-v2-v0.1-s1 en al menos 2% (97.5% frente a 99.0%).
 
-## Experimento 3 · nivel 2 (torres) con PPO y transferencia
+## Experimento 3 · Nivel 2: torres alrededor de la plataforma
 
 Experimento de MLflow `experimento-3-nivel2` (5 ejecuciones). Las ejecuciones van en orden cronológico; cada una dice qué cambió frente a su baseline.
+
+**Pregunta.** Con una decisión nueva (por qué hueco entrar entre tres torres), ¿aprende PPO desde cero o hace falta partir del modelo del nivel 1? Cuánto presupuesto exige y cuánto varía entre semillas.
+
+**Variables que se mueven.** las del experimento 2 más el ambiente (observación de 25 valores), el modelo de partida (transferencia) y el presupuesto (600 000 o 1 500 000 pasos).
 
 ### `ppo-n2-v0.2-s0` · rechazado · 8.0 %
 
@@ -607,9 +619,13 @@ Experimento de MLflow `experimento-3-nivel2` (5 ejecuciones). Las ejecuciones va
 
 **Decisión (2026-11-06).** Rechazado por el pipeline: 85.5% de aterrizajes en la suite v1 (24 colisiones), 56.5% con viento de 15 m/s. no mejora al recomendado ppo-n2-transfer-1m5-v0.2-s1 en al menos 2% (85.5% frente a 93.5%); con viento de 15 m/s pierde más de 5% (56.5% frente a 63.0%); más colisiones que el recomendado (24 frente a 13).
 
-## Experimento 4 · nivel 3 (viento fuerte): intervención
+## Experimento 4 · Nivel 3: viento fuerte (incidente e intervención)
 
 Experimento de MLflow `experimento-4-nivel3` (5 ejecuciones). Las ejecuciones van en orden cronológico; cada una dice qué cambió frente a su baseline.
+
+**Pregunta.** Cuando cambian las condiciones de operación (viento de hasta 15 m/s y ráfagas dobles), ¿cuánto se degrada el modelo del nivel 2 y lo recupera reentrenarlo en el nivel 3? Desde qué modelo conviene partir.
+
+**Variables que se mueven.** las del experimento 3 con el ambiente N3; cambia el modelo de partida (recomendado de N2, semilla 0 o 1) y el presupuesto.
 
 ### `ppo-n3-transfer-v0.3-s0` · rechazado · 81.5 %
 

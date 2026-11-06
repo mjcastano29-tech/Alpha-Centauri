@@ -18,6 +18,9 @@ class RocketLandingN3Env(RocketLandingN2Env):
     ID = "RocketLanding3D-N3-v0"
     NIVEL = "N3"
     VERSION = "0.3"
+    RESUMEN = "El nivel 2 en condiciones de operación exigentes: viento de 0 a 15 m/s y ráfagas el doble de fuertes."
+    NOVEDAD = "Misma observación y acción que el nivel 2 (misma familia): un modelo del nivel 2 juega aquí tal cual y se mide cuánto se degrada (incidente)."
+    FICHA = "docs/ambiente-v0.3.md"
 
     VIENTO_MAX = 15.0  # m/s a 10 m (nivel 2: 10)
     RAFAGAS = 3.0  # m/s (nivel 2: 1,5)
