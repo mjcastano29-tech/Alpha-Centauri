@@ -3,7 +3,8 @@
     "prefect_flow_run_id": "7dc6fc7b-7f4e-4b27-acf4-4c3069cd569a",
     "nombre": "unique-quoll",
     "inicio": "2026-11-05T18:40:32",
-    "duracion_s": 72001
+    "duracion_s": 72001,
+    "estado": "fallido: git push -q terminó con código 1"
   },
   "parametros": {
     "ambiente": "RocketLanding3D-N2-v0",
