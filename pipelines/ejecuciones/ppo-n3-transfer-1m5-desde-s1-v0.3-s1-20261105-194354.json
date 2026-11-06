@@ -3,7 +3,8 @@
     "prefect_flow_run_id": "d699c3e4-c913-48d6-a2c9-d0934a5b8fcf",
     "nombre": "omniscient-parrot",
     "inicio": "2026-11-05T19:43:54",
-    "duracion_s": 1050
+    "duracion_s": 1052,
+    "estado": "completado"
   },
   "parametros": {
     "ambiente": "RocketLanding3D-N3-v0",
@@ -73,6 +74,18 @@
         "margen_mejora": 0.02,
         "tolerancia_viento": 0.05
       }
+    },
+    "7 publicar": {
+      "commit": "a4d5d8b0c58f1a9cfe3af501d98f8bc76b7221c1",
+      "push": false
+    },
+    "8 comprobar": {
+      "commit": "a4d5d8b0c58f1a9cfe3af501d98f8bc76b7221c1",
+      "catalogo": 8,
+      "recomendado": "ppo-n3-transfer-1m5-desde-s1-v0.3-s0",
+      "evaluacion": 0.6666666666666666,
+      "compatible": true,
+      "modo": "local (sin push)"
     }
   }
 }
