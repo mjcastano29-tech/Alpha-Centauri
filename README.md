@@ -98,6 +98,8 @@ python visualizar_experimento1.py    # genera experimento1.html con esas épocas
 Los experimentos 1 y 2 comparten ambiente (0.1) y son comparables entre sí; el 3 es otra familia de modelos (observación de 25 valores)
 y se compara con el modelo del nivel 1 jugando a ciegas en el nivel 2 (72 %).
 
+[EXPERIMENTOS.md](EXPERIMENTOS.md) reúne, ejecución por ejecución, dónde está guardado cada modelo (archivo, SHA-256, commit, versión en MLflow), sus variables, el cambio frente a su baseline, el resultado y la decisión. Se regenera con `python experimentos_md.py`.
+
 ### Diseño experimental: hipótesis, presupuesto y decisión
 
 Cada configuración entrenada tiene su `configs/<run_id>.json` con la **hipótesis**, el **cambio** frente al baseline,
