@@ -31,7 +31,8 @@ Sin cambios respecto al nivel 2: mismos seis resultados ("colisión" incluida), 
 
 | Modelo | En su nivel (suite v1) | En N3, condiciones normales | En N3, viento fijo de 15 m/s | Colisiones en N3 |
 |---|---|---|---|---|
-| `ppo-n2-transfer-1m5-v0.2-s0`, recomendado de N2 | 86,0 % | **72,0 %** (−14) | 46,5 % | 35 (27 en N2) |
+| `ppo-n2-transfer-1m5-v0.2-s1`, recomendado de N2 desde el catálogo v6 | 93,5 % | **82,5 %** (−11) | 57,5 % | 18 (13 en N2) |
+| `ppo-n2-transfer-1m5-v0.2-s0`, recomendado de N2 al empezar el nivel 3 | 86,0 % | **72,0 %** (−14) | 46,5 % | 35 (27 en N2) |
 | `ppo-n2-transfer-v0.2-s0`, anterior de N2 | 76,5 % | 61,5 % (−15) | 38,0 % | 49 (42 en N2) |
 | `ppo-v2-v0.1-s1`, recomendado de N1 (con adaptador) | 99,0 % | 61,0 % (−38) | 40,5 % | 58 |
 
@@ -49,10 +50,22 @@ Dos intentos, los dos ejecutados por el pipeline y conservados (`configs/`, `man
 | Con viento fijo de 15 m/s | 46,5 % | **74,5 %** | 67,5 % |
 | Choques contra el suelo | 17 | 0 | 3 |
 | Colisiones con torres | 35 | 37 | **24** |
-| Decisión del pipeline | — | **rechazada**: más colisiones que la referencia | **seleccionada**: recomendado de N3 (catálogo v6) |
+| Decisión del pipeline | — | **rechazada**: más colisiones que la referencia | **seleccionada**: recomendado de N3 (catálogo v7); anterior desde el v8 |
 
 Lectura:
 - Reentrenar en las condiciones nuevas recupera la frenada (los choques contra el suelo pasan de 17 a 0–3) y casi todo el terreno perdido: 86,5 % en N3, el mismo nivel que tenía el modelo en N2 (86,0 %).
 - La primera intervención aprendió antes a frenar con viento que a esquivar torres con viento. Con más presupuesto las colisiones bajan de 37 a 24, como pasó en el nivel 2 (42 → 27). Se confirma la hipótesis del segundo intento.
 - Hay una contrapartida: con viento fijo de 15 m/s la intervención 1 aguanta mejor (74,5 % frente a 67,5 %). El criterio fijado antes de entrenar prioriza las condiciones normales del nivel y no tener más colisiones, así que se selecciona la 2. La 1 queda como evidencia y como candidata si la operación pasara a ser siempre de viento máximo.
 - Pendiente: las semillas 1 y 2 de la intervención 2, para separar el efecto del presupuesto de la variabilidad entre semillas (en N1 fue de 2 puntos).
+
+**Tercera intervención: partir del nuevo recomendado de N2.** Mientras se hacía el nivel 3, el pipeline promovió `ppo-n2-transfer-1m5-v0.2-s1` como recomendado de N2 (93,5 %). Jugando en N3 sin reentrenar da 82,5 % con 18 colisiones. Frente a esa referencia, el recomendado de N3 de entonces no pasaba el criterio (24 colisiones frente a 18). Se repitió la receta seleccionada (transferencia + 1,5 M de pasos en N3) cambiando solo el modelo de partida:
+
+| En N3, suite v1 | `ppo-n2-transfer-1m5-v0.2-s1` sin reentrenar | `ppo-n3-transfer-1m5-v0.3-s0` (desde N2-s0) | `ppo-n3-transfer-1m5-desde-s1-v0.3-s0` (desde N2-s1) |
+|---|---|---|---|
+| Aterrizajes | 82,5 % | 86,5 % | **92,0 %** |
+| Con viento fijo de 15 m/s | 57,5 % | 67,5 % | **79,0 %** |
+| Choques contra el suelo | 15 | 3 | 1 |
+| Colisiones con torres | 18 | 24 | **15** |
+| Decisión del pipeline | — | recomendado de N3 hasta el catálogo v8; queda como anterior (rollback) | **seleccionado**: recomendado de N3 (catálogo v8) |
+
+La mejora viene del punto de partida: un modelo de N2 que ya esquiva mejor las torres (13 colisiones frente a 27) da un modelo de N3 que también las esquiva mejor. Supera en las tres métricas tanto al recomendado anterior de N3 como al recomendado de N2 jugando en N3.
