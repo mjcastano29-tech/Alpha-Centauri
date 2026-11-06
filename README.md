@@ -66,12 +66,13 @@ env = gym.make("RocketLanding3D-v0")
 | Nivel | Ambiente | Qué cambia | Ficha |
 |---|---|---|---|
 | N1 · misión base | `RocketLanding3D-v0` (0.1.1) | plataforma, viento, temperatura, presión y combustible limitado | [docs/ambiente-v0.1.md](docs/ambiente-v0.1.md) |
-| N2 · obstáculos | `RocketLanding3D-N2-v0` (0.2) | tres torres de 300–420 m alrededor de la plataforma: hay que elegir por qué hueco entrar; chocar es "colisión" (−100); observación de 25 valores (familia nueva de modelos) | [docs/ambiente-v0.2.md](docs/ambiente-v0.2.md) |
-| N3 · operación exigente | `RocketLanding3D-N3-v0` (0.3) | el mundo del nivel 2 con viento de 0–15 m/s y ráfagas el doble de fuertes; misma observación que N2 (misma familia: un modelo de N2 juega en N3 tal cual). Incidente medido con `python incidente.py`, visible en la web (`#/incidente`) y en `GET /incidentes` | [docs/ambiente-v0.3.md](docs/ambiente-v0.3.md) |
+| N2 · obstáculo | `RocketLanding3D-N2-v1` (0.4) | una pasarela a 180 m cubre la plataforma y el cuadrado de salida; la única abertura (12 m de radio) está desplazada 30 m del centro: hay que entrar por ella y trasladarse por debajo; chocar con la pasarela o sus pilares es "colisión" (−100); observación de 20 valores (familia nueva) | [docs/ambiente-v0.4.md](docs/ambiente-v0.4.md) |
+| N3 · operación exigente | `RocketLanding3D-N3-v1` (0.5) | la pasarela con viento de 0–15 m/s y ráfagas el doble de fuertes; misma observación que N2 (misma familia). Incidente medido con `python incidente.py`, visible en la web (`#/incidente`) y en `GET /incidentes` | [docs/ambiente-v0.5.md](docs/ambiente-v0.5.md) |
+| retirados (históricos) | `RocketLanding3D-N2-v0` (0.2) y `RocketLanding3D-N3-v0` (0.3) | tres torres de 300–420 m alrededor de la plataforma, y lo mismo con viento fuerte; el equipo las sustituyó por la pasarela el 6 de noviembre; sus modelos siguen siendo reproducibles y evaluables | [docs/ambiente-v0.2.md](docs/ambiente-v0.2.md), [docs/ambiente-v0.3.md](docs/ambiente-v0.3.md) |
 
-Cada modelo se entrena y evalúa en el ambiente de su manifest (`ambiente.id`). `python cli.py entrenar-ppo --ambiente RocketLanding3D-N2-v0`
-entrena en el nivel 2; `python cli.py evaluar --run ppo-v2-v0.1-s0 --ambiente RocketLanding3D-N2-v0` hace jugar a un modelo del
-nivel 1 en el nivel 2 a través de `AdaptadorN1` (no ve las torres): así se mide cuánto cuesta el nivel. El catálogo lleva un
+Cada modelo se entrena y evalúa en el ambiente de su manifest (`ambiente.id`). `python cli.py entrenar-ppo --ambiente RocketLanding3D-N2-v1`
+entrena en el nivel 2; `python cli.py evaluar --run ppo-v2-v0.1-s1 --ambiente RocketLanding3D-N2-v1` hace jugar a un modelo del
+nivel 1 en el nivel 2 a través de `AdaptadorN1` (no ve los obstáculos): así se mide cuánto cuesta el nivel. El catálogo lleva un
 recomendado y un anterior por nivel (`python catalogo.py recomendar <run>`, `python catalogo.py restaurar --nivel N2`).
 
 ## Ficha del ambiente (entrega del curso)

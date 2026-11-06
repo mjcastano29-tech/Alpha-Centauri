@@ -15,7 +15,7 @@ import type { Vuelo } from './api'
 const DT = 0.1 // s entre muestras grabadas
 const V = (x: number, y: number, z: number) => new THREE.Vector3(x, z, -y) // el entorno usa z hacia arriba; three.js, y hacia arriba
 const COLOR_RESULTADO: Record<string, number> = { aterrizaje: 0x3ee08a, 'fuera de plataforma': 0xf2c14e, choque: 0xff6b5c, 'sin pasos': 0xa5b2c4, 'fuera de zona': 0xc39bff, 'colisión': 0xff8f6b }
-export interface Obstaculo { nombre: string; x: number; y: number; radio: number; altura: number }
+export interface Obstaculo { tipo?: 'torre' | 'pasarela'; nombre: string; x: number; y: number; radio: number; altura: number; radio_abertura?: number; grosor?: number }
 const smooth = (a: number, b: number, x: number) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t) }
 const col = (hex: number) => new THREE.Color(hex) // con la gestión de color de three.js, el hex sRGB se convierte solo a lineal
 // los ShaderMaterial no aplican solos el tone mapping ni la conversión de color de salida; esto los iguala al resto
@@ -393,6 +393,7 @@ export class Reproductor {
   private readonly ghosts = new THREE.Group()
   private readonly torres = new THREE.Group()
   private torreBeacons: THREE.Sprite[] = []
+  private pasarela: { altura: number; materiales: THREE.Material[]; opacidades: number[] } | null = null
   private crashY = 0 // altura (m) a la que ocurrió el choque: suelo o, en una colisión con una torre, en el aire
   private readonly markerDone = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.75 })
   private readonly markerTodo = new THREE.MeshBasicMaterial({ color: 0x8fa3c0, transparent: true, opacity: 0.3 })
@@ -695,10 +696,11 @@ export class Reproductor {
   }
   /** Torres del nivel 2 (o ninguna): acero con franjas de señalización, plataforma superior y baliza roja. */
   setObstaculos(lista: Obstaculo[]) {
-    this.torres.clear(); this.torreBeacons = []
+    this.torres.clear(); this.torreBeacons = []; this.pasarela = null
     const acero = new THREE.MeshStandardMaterial({ map: this.R.franjasTex, roughness: 0.55, metalness: 0.75, envMapIntensity: 0.8 })
     const oscuro = new THREE.MeshStandardMaterial({ color: 0x3a3c41, roughness: 0.6, metalness: 0.7 })
     for (const o of lista) {
+      if (o.tipo === 'pasarela') { this.construirPasarela(o, oscuro); continue }
       const g = new THREE.Group(); g.position.copy(V(o.x, o.y, terrainHeight(o.x, -o.y)))
       const mat = acero.clone(); mat.map = this.R.franjasTex.clone(); mat.map.repeat.set(1, o.altura / 40); mat.map.needsUpdate = true
       const cuerpo = new THREE.Mesh(new THREE.CylinderGeometry(o.radio * 0.85, o.radio, o.altura, 32, 1, false), mat)
@@ -717,6 +719,33 @@ export class Reproductor {
       }
       this.torres.add(g)
     }
+  }
+  /** Pasarela: tablero translúcido con la abertura, celosía de vigas, baranda y luces en el borde de la abertura. El tablero
+   *  y las vigas se vuelven casi transparentes cuando quedan entre la cámara y el cohete, para no taparlo. */
+  private construirPasarela(o: Obstaculo, oscuro: THREE.Material) {
+    const g = new THREE.Group(), R = o.radio, H = o.altura, grosor = o.grosor ?? 3, ra = o.radio_abertura ?? 12
+    const forma = new THREE.Shape(); forma.absarc(0, 0, R, 0, Math.PI * 2, false)
+    const hueco = new THREE.Path(); hueco.absarc(o.x, -o.y, ra, 0, Math.PI * 2, true); forma.holes.push(hueco)
+    const tablero = new THREE.Mesh(new THREE.ExtrudeGeometry(forma, { depth: grosor, bevelEnabled: false, curveSegments: 96 }),
+      new THREE.MeshStandardMaterial({ color: 0x8a8f99, roughness: 0.6, metalness: 0.5, transparent: true, opacity: 0.42, depthWrite: false, side: THREE.DoubleSide, envMapIntensity: 0.6 }))
+    tablero.rotation.x = Math.PI / 2; tablero.position.y = H + grosor / 2; tablero.renderOrder = 1; g.add(tablero)
+    const vigaMat = new THREE.MeshStandardMaterial({ color: 0x5c6069, roughness: 0.5, metalness: 0.8, transparent: true, opacity: 0.9 })
+    for (let k = 0; k < 12; k++) { // vigas radiales bajo el tablero
+      const a = (k / 12) * Math.PI * 2, viga = new THREE.Mesh(new THREE.BoxGeometry(R - 14, 1.6, 1.0), vigaMat)
+      viga.position.set(Math.cos(a) * (R + 14) / 2, H - grosor / 2 - 0.8, Math.sin(a) * (R + 14) / 2); viga.rotation.y = -a; viga.castShadow = true; g.add(viga)
+    }
+    for (const r of [R * 0.45, R * 0.75, R - 0.6]) { // anillos de la celosía y borde
+      const anillo = new THREE.Mesh(new THREE.TorusGeometry(r, 0.7, 8, 128), vigaMat); anillo.rotation.x = Math.PI / 2; anillo.position.y = H - grosor / 2 - 0.8; g.add(anillo)
+    }
+    const baranda = new THREE.Mesh(new THREE.TorusGeometry(R - 1, 0.25, 6, 128), oscuro); baranda.rotation.x = Math.PI / 2; baranda.position.y = H + grosor + 1.2; g.add(baranda)
+    const borde = new THREE.Mesh(new THREE.TorusGeometry(ra + 0.4, 0.6, 8, 64), new THREE.MeshStandardMaterial({ color: 0xc8c4bb, emissive: 0xb8372a, emissiveIntensity: 0.6, roughness: 0.5, metalness: 0.4 }))
+    borde.rotation.x = Math.PI / 2; borde.position.set(o.x, H + grosor / 2, -o.y); g.add(borde)
+    for (let k = 0; k < 12; k++) { // luces alrededor de la abertura, para verla desde arriba y desde abajo
+      const a = (k / 12) * Math.PI * 2, s = new THREE.Sprite(new THREE.SpriteMaterial({ map: this.R.GLOW, color: k % 2 ? 0xff6a3a : 0xfff0c8, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }))
+      s.position.set(o.x + Math.cos(a) * (ra + 1.2), H + grosor / 2 + 0.6, -o.y + Math.sin(a) * (ra + 1.2)); s.scale.set(4, 4, 1); g.add(s); this.torreBeacons.push(s)
+    }
+    this.torres.add(g)
+    this.pasarela = { altura: H, materiales: [tablero.material, vigaMat], opacidades: [0.42, 0.9] }
   }
   /** Escudo térmico de la nave (losetas negras en la mitad −z). */
   setEscudo(on: boolean) { this.ships.nave.heatShield?.(on) }
@@ -865,6 +894,10 @@ export class Reproductor {
     this.flash.visible = this.flashCore.visible = this.flashT > 0
     const blink = Math.sin(this.clock * 2.6) > 0.55 ? 1 : 0.08; for (const b of this.beacons) b.material.opacity = blink
     const blink2 = Math.sin(this.clock * 1.7 + 1) > 0.3 ? 1 : 0.15; for (const b of this.torreBeacons) b.material.opacity = blink2
+    if (this.pasarela) { // si la pasarela queda entre la cámara y el cohete, se vuelve casi transparente
+      const tapa = (this.camera.position.y > this.pasarela.altura) !== (p.y + ship.height * 0.5 > this.pasarela.altura)
+      this.pasarela.materiales.forEach((m, k) => { const objetivo = tapa ? this.pasarela!.opacidades[k] * 0.22 : this.pasarela!.opacidades[k]; m.opacity += (objetivo - m.opacity) * Math.min(1, dt * 6) })
+    }
 
     // guías
     this.shadow.position.set(p.x, ground + 0.05, p.z); this.shadow.scale.setScalar(1 + s.z / 150); this.shadow.material.opacity = 0.18 * smooth(400, 0, s.z)

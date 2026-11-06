@@ -10,11 +10,11 @@ export interface Evaluacion {
   combustible: number
   resultados: Resultados
 }
-export interface Obstaculo { nombre: string; x: number; y: number; radio: number; altura: number }
+export interface Obstaculo { tipo?: 'torre' | 'pasarela'; nombre: string; x: number; y: number; radio: number; altura: number; radio_abertura?: number; grosor?: number }
 export interface Ambiente {
   id: string; version: string; nivel: string; obstaculos: Obstaculo[]
   resumen?: string; novedad?: string; ficha?: string | null; observacion?: number; accion?: number; resultados?: string[]
-  viento_max?: number | null; rafagas?: number | null; pasos?: number; altitud_salida?: number; radio_plataforma?: number; familia?: string
+  viento_max?: number | null; rafagas?: number | null; pasos?: number; altitud_salida?: number; radio_plataforma?: number; familia?: string; vigente?: boolean
 }
 export interface Experimento { id: string; numero: number; titulo: string; nivel: string; ambiente: string; pregunta: string; variables: string }
 export interface Resumen {

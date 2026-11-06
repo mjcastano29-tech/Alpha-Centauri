@@ -31,7 +31,7 @@ export async function vistaIncidente(el: HTMLElement) {
     const col = (r: api.Resultados) => r['colisión'] ?? 0
     const degradacion = tabla(['modelo', 'entrenado en', `en su nivel (suite v1)`, `en ${esc(a.nivel)}, normal`, `en ${esc(a.nivel)}, viento ${medidas[0].viento} m/s`, 'cambio', 'causas de fallo en ' + esc(a.nivel)], medidas.map((m) => [
       `<a href="#/ejecucion/${esc(m.run_id)}"><b>${esc(m.run_id)}</b></a><br>${pillEstado(m.estado)}`,
-      `${esc(m.nivel_entrenado)}<br><span class="muted">${m.adaptador ? 'con adaptador: no ve las torres' : 'misma observación, sin adaptador'}</span>`,
+      `${esc(m.nivel_entrenado)}<br><span class="muted">${m.adaptador ? 'con adaptador: no ve los obstáculos' : 'misma observación, sin adaptador'}</span>`,
       `${pct(m.antes.normal.aterrizajes)} ${barraResultados(m.antes.normal.resultados, d.outcomes)}<br><span class="muted">${col(m.antes.normal.resultados)} colisiones</span>`,
       `<b>${pct(m.despues.normal.aterrizajes)}</b> ${barraResultados(m.despues.normal.resultados, d.outcomes)}<br><span class="muted">${col(m.despues.normal.resultados)} colisiones</span>`,
       `${pct(m.despues.perturbado.aterrizajes)} ${barraResultados(m.despues.perturbado.resultados, d.outcomes)}`,
@@ -90,7 +90,8 @@ export async function vistaExperimentos(el: HTMLElement, seleccionado?: string) 
   const [c, inc] = await Promise.all([cargarCatalogo(), api.incidentes().catch(() => null)])
   const experimentos = c.experimentos ?? [...new Set(c.ejecuciones.map((r) => r.experimento ?? ''))].map((id, k) => ({ id, numero: k + 1, titulo: id, nivel: '', ambiente: '', pregunta: '', variables: '' }))
   const actual = experimentos.find((e) => e.id === seleccionado) ?? experimentos[0]
-  const niveles = [...c.ambientes].sort((a, b) => a.nivel.localeCompare(b.nivel))
+  const niveles = c.ambientes.filter((a) => a.vigente !== false).sort((a, b) => a.nivel.localeCompare(b.nivel))
+  const retirados = c.ambientes.filter((a) => a.vigente === false)
   const recomendadoDe = (nivel: string) => c.ejecuciones.find((r) => r.nivel === nivel && r.estado === 'recomendado')
   const anterior = (i: number) => (i > 0 ? recomendadoDe(niveles[i - 1].nivel) : undefined)
   const medida = (a: Ambiente, run?: Resumen) => inc?.medidas.find((m) => m.ambiente.id === a.id && m.run_id === run?.run_id)
@@ -100,7 +101,7 @@ export async function vistaExperimentos(el: HTMLElement, seleccionado?: string) 
     filaNivel('qué añade', (a) => `<b>${esc(a.novedad ?? '')}</b>`),
     filaNivel('observación · acción', (a) => `${a.observacion ?? '—'} valores · ${a.accion ?? '—'} valores`),
     filaNivel('resultados posibles', (a) => (a.resultados ?? []).map((o) => `${esc(ICONO_RESULTADO[o] ?? '')} ${esc(o)}`).join('<br>')),
-    filaNivel('obstáculos', (a) => (a.obstaculos.length ? a.obstaculos.map((o) => `${esc(o.nombre)}: ${o.altura} m a (${o.x}, ${o.y})`).join('<br>') : 'ninguno')),
+    filaNivel('obstáculos', (a) => (a.obstaculos.length ? a.obstaculos.map((o) => o.tipo === 'pasarela' ? `${esc(o.nombre)}: radio ${o.radio} m a ${o.altura} m de altura; abertura de ${o.radio_abertura} m de radio en (${o.x}, ${o.y})` : `${esc(o.nombre)}: ${o.altura} m a (${o.x}, ${o.y})`).join('<br>') : 'ninguno')),
     filaNivel('viento', (a) => `0–${a.viento_max ?? '—'} m/s a 10 m · ráfagas ${a.rafagas ?? '—'} m/s`),
     filaNivel('familia de modelos', (a) => esc(a.familia ?? a.nivel)),
     filaNivel('modelo recomendado', (a) => { const r = recomendadoDe(a.nivel); return r ? `<a href="#/ejecucion/${esc(r.run_id)}">${esc(r.run_id)}</a><br><b>${pct(r.evaluacion.aterrizajes)}</b> · ${r.perturbado ? pct(r.perturbado.aterrizajes) + ' con viento' : ''}` : '—' }),
@@ -135,6 +136,7 @@ export async function vistaExperimentos(el: HTMLElement, seleccionado?: string) 
     <p>Cuatro experimentos, uno por pregunta, sobre tres niveles de complejidad creciente. Elige uno para ver sus configuraciones, las variables que se movieron y lo que se decidió; la tabla de arriba muestra cómo crece la complejidad de un nivel al siguiente y cuánto pierde el modelo del nivel anterior cuando se le pone en el nuevo.</p>
     <h2>Cómo aumenta la complejidad</h2>
     ${complejidad}
+    ${retirados.length ? `<p class="muted">Ambientes retirados (modelos históricos, siguen siendo reproducibles): ${retirados.map((a) => `${esc(a.nivel)} ${esc(a.id)} v${esc(a.version)} (${esc(a.familia ?? '')})`).join(' · ')}.</p>` : ''}
     <h2>Experimento</h2>
     <nav class="tabs" aria-label="experimentos">${experimentos.map((e) => `<a href="#/experimentos/${esc(e.id)}" class="tab${e.id === actual.id ? ' activa' : ''}">${e.numero} · ${esc(e.titulo)}<br><span class="muted">${esc(e.nivel)} · ${c.ejecuciones.filter((r) => r.experimento === e.id).length} ejecuciones</span></a>`).join('')}</nav>
     <section class="card">
@@ -174,7 +176,7 @@ export async function vistaCatalogo(el: HTMLElement) {
       <div><div class="num">${rec ? pct(rec.evaluacion.aterrizajes) : '—'}</div><div class="muted">aterrizajes seguros del modelo recomendado del nivel 1</div></div>
       <div class="sub">
         <p>${porNivel.join('<br>')}</p>
-        <p class="muted">Catálogo v${c.catalogo.version} (${esc(c.catalogo.actualizado ?? '—')}). Cada nivel tiene su ambiente. Los niveles 2 y 3 comparten familia de modelos (misma observación): un modelo del nivel 2 juega en el nivel 3 tal cual, y así se mide la degradación con viento fuerte. Un modelo del nivel 1 solo puede jugar en los niveles con torres a través de un adaptador que se las oculta.</p>
+        <p class="muted">Catálogo v${c.catalogo.version} (${esc(c.catalogo.actualizado ?? '—')}). Cada nivel tiene su ambiente. Los niveles 2 y 3 comparten familia de modelos (misma observación): un modelo del nivel 2 juega en el nivel 3 tal cual, y así se mide la degradación con viento fuerte. Un modelo del nivel 1 solo puede jugar en los niveles con obstáculos a través de un adaptador que se los oculta.</p>
         <p class="muted">${c.ejecuciones.length} ejecuciones, incluidas las que no mejoraron. Evaluación: 200 épocas nuevas (suite v1, semillas desde 10 000 000) y la misma suite con viento lateral de 15 m/s. Cada configuración documenta su hipótesis, el cambio frente al baseline, el presupuesto y la decisión.</p>
       </div>
     </section>
@@ -258,7 +260,7 @@ export async function vistaEjecucion(el: HTMLElement, id: string) {
       <h2>Evaluar ahora este modelo</h2>
       <p class="muted">La API carga el modelo congelado y lo ejecuta en el ambiente ${esc(d.ambiente)} con las semillas que indiques. Es determinista: las mismas semillas dan el mismo resultado.</p>
       <form id="form-eval" class="fila">
-        <label>ambiente <select id="ev-ambiente"><option value="">el de la ejecución (${esc(d.nivel)})</option>${c.ambientes.filter((a) => a.id !== d.ambiente_id && (d.nivel === 'N1' ? a.obstaculos.length > 0 : a.nivel !== 'N1')).map((a) => `<option value="${esc(a.id)}">${esc(a.nivel)} · ${esc(a.id)} (${d.nivel === 'N1' ? 'con adaptador: no ve las torres' : 'misma observación, otras condiciones'})</option>`).join('')}</select></label>
+        <label>ambiente <select id="ev-ambiente"><option value="">el de la ejecución (${esc(d.nivel)})</option>${c.ambientes.filter((a) => a.id !== d.ambiente_id && (d.nivel === 'N1' ? a.obstaculos.length > 0 : a.familia === c.ambientes.find((x) => x.id === d.ambiente_id)?.familia)).map((a) => `<option value="${esc(a.id)}">${esc(a.nivel)} · ${esc(a.id)} (${d.nivel === 'N1' ? 'con adaptador: no ve los obstáculos' : 'misma observación, otras condiciones'})</option>`).join('')}</select></label>
         <label>suite <select id="ev-suite"><option value="">manual</option><option value="suite-v1|normal">suite-v1 · normal</option><option value="suite-v1|viento-15">suite-v1 · viento 15 m/s</option></select></label>
         <label>épocas <input type="number" id="ev-episodios" value="20" min="1" max="50"></label>
         <label>semilla inicial <input type="number" id="ev-semilla" value="10000000" min="0"></label>
@@ -281,7 +283,7 @@ export async function vistaEjecucion(el: HTMLElement, id: string) {
       const r = await api.evaluar(suite ? { run_id: d.run_id, episodios, grabar: 3, suite, condicion, ambiente } : { run_id: d.run_id, episodios, semilla_base: semilla, viento, grabar: 3, ambiente })
       ultimaEvaluacion = r
       salida.innerHTML = `
-        <p class="modo modo-eval">Modo: evaluación en vivo${r.suite.id ? ` · ${esc(r.suite.id)} / ${esc(r.suite.condicion ?? '')}` : ''} · modelo ${esc(r.modelo.run_id)} (${r.modelo.mlflow ? esc(r.modelo.mlflow.modelo) + ' v' + r.modelo.mlflow.version : 'sin MLflow'}) · ambiente ${esc(r.ambiente.id)} v${esc(r.ambiente.version)} (${esc(r.ambiente.nivel)})${r.ambiente.adaptador ? ' · <b>modelo del nivel 1 con adaptador: no ve las torres</b>' : r.ambiente.misma_familia ? ` · <b>modelo de ${esc(r.ambiente.nivel_entrenado ?? '')} jugando en las condiciones de ${esc(r.ambiente.nivel)}</b>` : r.ambiente.compatible ? '' : ' · <b>ambiente no compatible</b>'} · servido por commit <code>${corto(r.servido_por.commit)}</code> · ${r.latencia.total_ms} ms (${r.latencia.por_paso_ms} ms por paso)</p>
+        <p class="modo modo-eval">Modo: evaluación en vivo${r.suite.id ? ` · ${esc(r.suite.id)} / ${esc(r.suite.condicion ?? '')}` : ''} · modelo ${esc(r.modelo.run_id)} (${r.modelo.mlflow ? esc(r.modelo.mlflow.modelo) + ' v' + r.modelo.mlflow.version : 'sin MLflow'}) · ambiente ${esc(r.ambiente.id)} v${esc(r.ambiente.version)} (${esc(r.ambiente.nivel)})${r.ambiente.adaptador ? ' · <b>modelo del nivel 1 con adaptador: no ve los obstáculos</b>' : r.ambiente.misma_familia ? ` · <b>modelo de ${esc(r.ambiente.nivel_entrenado ?? '')} jugando en las condiciones de ${esc(r.ambiente.nivel)}</b>` : r.ambiente.compatible ? '' : ' · <b>ambiente no compatible</b>'} · servido por commit <code>${corto(r.servido_por.commit)}</code> · ${r.latencia.total_ms} ms (${r.latencia.por_paso_ms} ms por paso)</p>
         <p><b>${pct(r.resumen.aterrizajes)}</b> aterrizajes en ${r.resumen.episodios} épocas ${barraResultados(r.resumen.resultados, c.outcomes)} · contacto ${num(r.resumen.velocidad_contacto, 2)} m/s · error ${num(r.resumen.error_posicion)} m · ${num(r.resumen.combustible, 0)} kg</p>
         <p><a class="btn" href="#/replay/${esc(d.run_id)}/evaluacion">Ver en 3D las ${r.vuelos.length} primeras épocas</a></p>
         ${tabla(['época', 'semilla', 'resultado', 'recompensa', 'pasos', 'vz contacto', 'vh', 'distancia', 'inclinación', 'combustible', 'viento'],
@@ -372,7 +374,7 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
       <aside class="card lateral">
         <h2>${esc(id)}</h2>
         <p class="muted">${esc(nota)}</p>
-        <p class="muted">Modelo ${esc(r?.agente.nombre ?? '')} · ambiente ${esc(r?.ambiente ?? '')}${nivelVisto !== r?.nivel ? ` · <b>jugando en ${esc(nivelVisto)}${r?.nivel === 'N1' ? ' con adaptador' : ''}</b>` : ''}${obstaculos.length ? ` · ${obstaculos.length} torres` : ''} · commit <code>${corto(r?.git.commit)}</code>${r?.mlflow ? ` · ${esc(r.mlflow.modelo)} v${r.mlflow.version}` : ''}</p>
+        <p class="muted">Modelo ${esc(r?.agente.nombre ?? '')} · ambiente ${esc(r?.ambiente ?? '')}${nivelVisto !== r?.nivel ? ` · <b>jugando en ${esc(nivelVisto)}${r?.nivel === 'N1' ? ' con adaptador' : ''}</b>` : ''}${obstaculos.length ? ` · ${obstaculos.some((o) => o.tipo === 'pasarela') ? `pasarela y ${obstaculos.filter((o) => o.tipo !== 'pasarela').length} pilares` : `${obstaculos.length} torres`}` : ''} · commit <code>${corto(r?.git.commit)}</code>${r?.mlflow ? ` · ${esc(r.mlflow.modelo)} v${r.mlflow.version}` : ''}</p>
         <label>vuelo <select id="rp-vuelo">${vuelos.map((v, k) => `<option value="${k}">${esc(etiqueta(v, k))} · ${esc(v.reason)} · ${v.steps} pasos</option>`).join('')}</select></label>
         <p class="muted">La velocidad de reproducción no cambia las reglas ni el paso físico (0,1 s): solo cuánto tarda en verse. Entre dos muestras la posición se interpola con las velocidades grabadas. Arrastra para girar la cámara, rueda para acercar, doble clic para recentrar. El cohete se dibuja a tamaño real (42 m); los fantasmas son las trayectorias de los vuelos anteriores, con el color de su resultado.</p>
         <p class="muted" id="rp-fantasmas-n"></p>
