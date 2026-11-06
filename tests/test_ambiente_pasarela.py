@@ -89,9 +89,9 @@ def test_el_potencial_apunta_a_la_abertura_por_encima_y_a_la_plataforma_por_deba
     colocar(env, A["x"], A["y"], 60.0); bajo_abertura = r._shaping()
     colocar(env, 0.0, 0.0, 60.0); bajo_centro = r._shaping()
     assert bajo_centro > bajo_abertura  # abajo conviene estar sobre la plataforma
-    colocar(env, 0.0, 0.0, H + 5.0); pegado = r._shaping()
-    colocar(env, 0.0, 0.0, H + 100.0); lejos = r._shaping()
-    assert pegado < lejos - P.PESO_PASARELA * 0.5 + (H + 100.0 - (H + 5.0)) / 10.0  # el castigo supera la ganancia por bajar
+    colocar(env, 0.0, 0.0, H + 5.0); fuera = r._shaping()  # pegado a la pasarela, fuera de la abertura
+    colocar(env, A["x"], A["y"], H + 5.0); dentro = r._shaping()  # a la misma altura, sobre la abertura
+    assert dentro - fuera > np.hypot(A["x"], A["y"]) / 5.0 + P.PESO_PASARELA * 0.5  # además de la distancia, el castigo
 
 
 def test_el_adaptador_deja_jugar_a_un_modelo_del_nivel_1():
