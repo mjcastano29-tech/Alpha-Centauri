@@ -3,7 +3,8 @@
     "prefect_flow_run_id": "e2df6d95-de69-4a7a-80aa-38d5a319127a",
     "nombre": "delicate-phoenix",
     "inicio": "2026-11-05T20:01:31",
-    "duracion_s": 1014
+    "duracion_s": 1016,
+    "estado": "completado"
   },
   "parametros": {
     "ambiente": "RocketLanding3D-N3-v0",
@@ -73,6 +74,18 @@
         "margen_mejora": 0.02,
         "tolerancia_viento": 0.05
       }
+    },
+    "7 publicar": {
+      "commit": "c405eceee6303895bc98031a413edd8752922762",
+      "push": false
+    },
+    "8 comprobar": {
+      "commit": "c405eceee6303895bc98031a413edd8752922762",
+      "catalogo": 8,
+      "recomendado": "ppo-n3-transfer-1m5-desde-s1-v0.3-s0",
+      "evaluacion": 0.6666666666666666,
+      "compatible": true,
+      "modo": "local (sin push)"
     }
   }
 }
