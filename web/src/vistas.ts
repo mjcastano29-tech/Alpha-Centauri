@@ -60,6 +60,29 @@ export async function vistaIncidente(el: HTMLElement) {
     ${bloques.join('') || '<p class="muted">Sin incidentes medidos.</p>'}`
 }
 
+// ---------- inicio: el cohete en 3D, con pestañas para cambiar de experimento y de modelo ----------
+export async function vistaInicio(el: HTMLElement, expId?: string, runId?: string): Promise<() => void> {
+  const c = await cargarCatalogo()
+  const experimentos = c.experimentos ?? []
+  const actual = experimentos.find((e) => e.id === expId) ?? experimentos[experimentos.length - 1]
+  const runs = c.ejecuciones.filter((r) => r.experimento === actual?.id)
+  const run = runs.find((r) => r.run_id === runId) ?? runs.find((r) => r.estado === 'recomendado') ?? runs.find((r) => r.diseno?.estado === 'seleccionado') ?? runs[runs.length - 1]
+  if (!run) { el.innerHTML = '<p class="error">No hay ejecuciones en el catálogo.</p>'; return () => {} }
+  const amb = c.ambientes.find((a) => a.id === run.ambiente_id)
+  el.innerHTML = `
+    <nav class="tabs" aria-label="experimentos">${experimentos.map((e) => `<a href="#/inicio/${esc(e.id)}" class="tab${e.id === actual.id ? ' activa' : ''}">${e.numero} · ${esc(e.titulo)}<br><span class="muted">${esc(e.nivel)} · ${c.ejecuciones.filter((r) => r.experimento === e.id).length} ejecuciones</span></a>`).join('')}</nav>
+    <div class="chips" aria-label="modelos del experimento">${runs.map((r) => `<a href="#/inicio/${esc(actual.id)}/${esc(r.run_id)}" class="chip${r.run_id === run.run_id ? ' activa' : ''}">${esc(r.run_id)} <b>${pct(r.evaluacion.aterrizajes)}</b> ${r.estado === 'recomendado' ? pillEstado(r.estado) : pillDiseno(r.diseno?.estado)}</a>`).join('')}</div>
+    <div id="visor-inicio"></div>
+    <section class="card">
+      <h2>${esc(run.run_id)} · ${esc(run.nivel)} · ${esc(run.ambiente)}</h2>
+      ${amb ? `<p><b>Nivel.</b> ${esc(amb.resumen ?? '')} <span class="muted">${esc(amb.novedad ?? '')}</span></p>` : ''}
+      ${run.diseno ? `<p><b>Hipótesis.</b> ${esc(run.diseno.hipotesis ?? '—')}</p><p><b>Cambio.</b> ${esc(run.diseno.cambio ?? '—')}</p><p><b>Decisión.</b> ${esc(run.diseno.decision ?? '—')}</p>` : ''}
+      <p><b>${pct(run.evaluacion.aterrizajes)}</b> aterrizajes en la suite v1 ${barraResultados(run.evaluacion.resultados, c.outcomes)} · ${run.perturbado ? `${pct(run.perturbado.aterrizajes)} con viento de 15 m/s` : ''} · ${num(run.evaluacion.velocidad_contacto, 2)} m/s al contacto · ${num(run.evaluacion.error_posicion)} m del centro</p>
+      <p><a class="btn" href="#/ejecucion/${esc(run.run_id)}">Ficha, variables y evaluación en vivo</a> <a class="btn" href="#/experimentos/${esc(actual.id)}">Experimento ${actual.numero}: variables y comparación</a> <a class="btn" href="#/comparar/${runs.map((r) => esc(r.run_id)).join(',')}">Comparar las ${runs.length} del experimento</a></p>
+    </section>`
+  return vistaReplay(el.querySelector<HTMLElement>('#visor-inicio')!, run.run_id, 'grabados')
+}
+
 // ---------- experimentos: progresión de complejidad y variables de cada configuración ----------
 const valorVariable = (v: unknown) => (Array.isArray(v) ? v.join(' × ') : v === null || v === undefined ? '—' : String(v))
 
@@ -183,7 +206,7 @@ export async function vistaEjecucion(el: HTMLElement, id: string) {
   const c = await cargarCatalogo()
   const sha = d.sha256 ? Object.entries(d.sha256.archivos).map(([n, h]) => `<li><code>${esc(n)}</code> <span class="hash">${esc(h)}</span></li>`).join('') : '<li class="muted">sin huellas (ejecución anterior a las huellas SHA-256)</li>'
   el.innerHTML = `
-    <p><a href="#/">← catálogo</a></p>
+    <p><a href="#/catalogo">← catálogo</a> · <a href="#/">cohete</a></p>
     <h1>${esc(d.run_id)} ${pillEstado(d.estado)}</h1>
     <p class="muted">${esc(d.experimento ?? '')} · nivel ${esc(d.nivel)} · ${esc(d.ambiente)} · ${esc(d.agente.nombre ?? '')} · entrenada el ${esc(d.fecha)}</p>
     <section class="card">
@@ -274,7 +297,7 @@ export async function vistaComparar(el: HTMLElement, ids: string[]) {
   const [{ ejecuciones }, c] = await Promise.all([api.comparar(ids), cargarCatalogo()])
   const col = (f: (r: Resumen) => string | number) => ejecuciones.map(f)
   el.innerHTML = `
-    <p><a href="#/">← catálogo</a></p>
+    <p><a href="#/catalogo">← catálogo</a> · <a href="#/">cohete</a></p>
     <h1>Comparación</h1>
     <p class="muted">Mismas 200 épocas de evaluación para todas (suite v1). Solo son comparables entre sí modelos del mismo ambiente.</p>
     ${tabla(['', ...ejecuciones.map((r) => `<a href="#/ejecucion/${esc(r.run_id)}">${esc(r.run_id)}</a><br>${pillEstado(r.estado)}`)], [
@@ -320,7 +343,7 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
   const finales = vuelos.filter((v) => !v.epoch && !v.epoca_evaluacion)
   const etiqueta = (v: Vuelo, _k: number) => v.epoch ? `Época ${entero(v.epoch)} · entrenamiento` : v.epoca_evaluacion ? `Evaluación · época ${v.epoca_evaluacion}` : `Modelo final · vuelo ${finales.indexOf(v) + 1} de ${finales.length}`
   el.innerHTML = `
-    <p><a href="#/ejecucion/${esc(id)}">← ejecución</a></p>
+    <p><a href="#/ejecucion/${esc(id)}">Ficha de la ejecución, variables y evaluación en vivo →</a></p>
     <div class="replay">
       <div class="visor card"><div id="visor3d"></div>
         <div class="hud">

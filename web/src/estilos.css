@@ -90,6 +90,10 @@ p.modo { text-transform: none; letter-spacing: 0; font-weight: 500; font-family:
 .tab { flex: 1 1 220px; display: block; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--ink); text-decoration: none; font-weight: 600; line-height: 1.3; }
 .tab .muted { font-weight: 400; font-size: 12px; }
 .tab.activa { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--ink); text-decoration: none; font-size: 12px; }
+.chip.activa { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+#visor-inicio { margin-bottom: 14px; }
 h3 { font-size: 14px; margin: 16px 0 6px; }
 /* pantallas estrechas: una columna, tipografía algo menor, tablas con desplazamiento horizontal y controles al ancho */
 @media (max-width: 900px) { .dos, .replay { grid-template-columns: 1fr; } .hero { grid-template-columns: 1fr; gap: 10px; } }
