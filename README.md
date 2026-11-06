@@ -117,7 +117,8 @@ el **presupuesto** (épocas, pasos del agente, tiempo, máquina), la **suite** c
 | `ppo-v2-v0.1-s1` | con otra semilla, v2 queda a menos de 5 puntos del 97 % | solo la semilla (1); entrenada y publicada por el pipeline | seleccionado N1 (99 %, 72 % con viento): el criterio del pipeline la promovió; s0 pasa a anterior |
 | `ppo-v2-v0.1-s2` | tercera semilla de v2: queda a menos de 5 puntos de s0 y s1 | solo la semilla (2); pipeline | rechazado (97,5 %: no supera en 2 puntos al recomendado s1) |
 | `ppo-n3-transfer-v0.3-s0` | intervención ante el viento: reentrenar el recomendado de N2 en N3 recupera ≥ 2 puntos frente a él jugando en N3 (72 %) sin más colisiones | ambiente N3 y transferencia desde `ppo-n2-transfer-1m5-v0.2-s0`; 600 000 pasos | rechazado (81,5 %, 0 choques, pero 37 colisiones frente a 35) |
-| `ppo-n3-transfer-1m5-v0.3-s0` | las colisiones eran falta de presupuesto, como en N2 | 1,5 M de pasos en vez de 600 000 | seleccionado N3 (86,5 %, 24 colisiones, 67,5 % con viento) |
+| `ppo-n3-transfer-1m5-v0.3-s0` | las colisiones eran falta de presupuesto, como en N2 | 1,5 M de pasos en vez de 600 000 | seleccionado N3 (86,5 %, 24 colisiones, 67,5 % con viento); anterior desde el catálogo v8 |
+| `ppo-n3-transfer-1m5-desde-s1-v0.3-s0` | partir del nuevo recomendado de N2 (s1) mejora al recomendado de N3 sin más colisiones | modelo de partida N2-s1 en vez de N2-s0 | seleccionado N3 (92,0 %, 15 colisiones, 79,0 % con viento) |
 
 Suites: [configs/suites/suite-v1.json](configs/suites/suite-v1.json) (200 épocas, semillas desde 10 000 000, condiciones
 `normal` y `viento-15`) y `suite-reservada` (misma estructura, semilla fuera del repo, solo para los finalistas).

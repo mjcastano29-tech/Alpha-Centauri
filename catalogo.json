@@ -1,6 +1,6 @@
 {
-  "version": 7,
-  "actualizado": "2026-11-05T18:37:01",
+  "version": 8,
+  "actualizado": "2026-11-05T19:01:18",
   "recomendado": "ppo-v2-v0.1-s1",
   "anterior": "ppo-v2-v0.1-s0",
   "historial": [
@@ -64,6 +64,15 @@
       "run_id": "ppo-n3-transfer-1m5-v0.3-s0",
       "motivo": "pipeline: Seleccionado por el pipeline: 86.5% de aterrizajes en la suite v1 (24 colisiones), 67.5% con viento de 15 m/s; supera a ppo-n2-transfer-1m5-v0.2-s0 en este ambiente con el criterio de aceptación (+2% de tasa, viento −5% como mucho, no más colisiones).",
       "commit_base": "eeb0babbf79c2b4266b4bf843e856530960d8573"
+    },
+    {
+      "version": 8,
+      "fecha": "2026-11-05T19:01:18",
+      "accion": "recomendar",
+      "nivel": "N3",
+      "run_id": "ppo-n3-transfer-1m5-desde-s1-v0.3-s0",
+      "motivo": "pipeline: Seleccionado por el pipeline: 92.0% de aterrizajes en la suite v1 (15 colisiones), 79.0% con viento de 15 m/s; supera al recomendado ppo-n3-transfer-1m5-v0.3-s0 con el criterio de aceptación (+2% de tasa, viento −5% como mucho, no más colisiones).",
+      "commit_base": "4d9f5c8590153df34be2c370688849c2182f837b"
     }
   ],
   "niveles": {
@@ -76,8 +85,8 @@
       "anterior": "ppo-n2-transfer-1m5-v0.2-s0"
     },
     "N3": {
-      "recomendado": "ppo-n3-transfer-1m5-v0.3-s0",
-      "anterior": null
+      "recomendado": "ppo-n3-transfer-1m5-desde-s1-v0.3-s0",
+      "anterior": "ppo-n3-transfer-1m5-v0.3-s0"
     }
   }
 }
