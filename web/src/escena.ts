@@ -11,6 +11,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js'
 import type { Vuelo } from './api'
+import { Sonido } from './sonido'
 
 const DT = 0.1 // s entre muestras grabadas
 const V = (x: number, y: number, z: number) => new THREE.Vector3(x, z, -y) // el entorno usa z hacia arriba; three.js, y hacia arriba
@@ -342,6 +343,8 @@ export class Reproductor {
   camMode: ModoCamara = 'seguir'
   onFrame?: (estado: EstadoReproductor) => void
   onEnd?: () => void
+  /** Motor, contacto, choque y viento; apagado hasta que el usuario lo activa con un clic. */
+  readonly sonido = new Sonido()
   // estado interno
   private vuelo?: Vuelo
   private t = 0
@@ -831,6 +834,8 @@ export class Reproductor {
     this.touched = true
     if (this.snap) return
     const crash = v.reason === 'choque', colision = v.reason === 'colisión'
+    if (crash || colision) this.sonido.explosion()
+    else if (v.f.z[n - 1] <= 0.5) this.sonido.contacto(Math.min(1, 0.35 + Math.abs(v.f.vz[n - 1]) / 3))
     if (v.f.z[n - 1] <= 0.5) this.dust.emit(p.x, 0.6, p.z, crash ? 380 : 200, crash ? 48 : 26, 5, 1.5 + (crash ? 48 : 26) * 0.09, 2.2)
     if (crash || colision) { // bola de fuego en el suelo o contra la torre; el cohete se vuelca hacia donde estaba inclinado
       this.flashT = 1.2; this.crashT = 0; this.crashY = colision ? p.y : 0
@@ -882,6 +887,7 @@ export class Reproductor {
       this.scorchLevel = Math.min(0.8, this.scorchLevel + near * simDt * 0.12); this.scorch.position.set(hit.x, ground + 0.04, hit.z)
     }
     this.scorch.material.opacity = this.scorchLevel; this.scorch.visible = this.scorchLevel > 0.01
+    this.sonido.actualizar(this.playing ? thr : 0, this.camera.position.distanceTo(nozzle), hN, Math.hypot(s.wx, s.wy))
     this.touchdown(v, n, p)
     this.dust.update(fxDt, s.wx, s.wz, -s.wy); this.smoke.update(fxDt, s.wx, s.wz, -s.wy)
     if (this.flashT > 0) { // bola de fuego: crece rápido y se apaga en 1,2 s
@@ -966,5 +972,5 @@ export class Reproductor {
     this.raf = requestAnimationFrame(this.tick)
   }
 
-  destruir() { cancelAnimationFrame(this.raf); this.composer?.dispose(); this.renderer.dispose(); this.renderer.domElement.remove() }
+  destruir() { cancelAnimationFrame(this.raf); this.sonido.destruir(); this.composer?.dispose(); this.renderer.dispose(); this.renderer.domElement.remove() }
 }
