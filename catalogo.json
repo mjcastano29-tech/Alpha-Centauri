@@ -1,6 +1,6 @@
 {
-  "version": 9,
-  "actualizado": "2026-11-05T20:27:07",
+  "version": 10,
+  "actualizado": "2026-11-05T21:03:53",
   "recomendado": "ppo-v2-v0.1-s1",
   "anterior": "ppo-v2-v0.1-s0",
   "historial": [
@@ -82,6 +82,15 @@
       "run_id": "ppo-n3-transfer-1m5-v0.3-s0",
       "motivo": "rollback demostrado (incidente del nivel 3): se restaura el recomendado anterior de N3 y se comprueba en la API pública; después se vuelve a promover ppo-n3-transfer-1m5-desde-s1-v0.3-s0",
       "commit_base": "104fe059c6d960ce93234d552584c2f83412dd92"
+    },
+    {
+      "version": 10,
+      "fecha": "2026-11-05T21:03:53",
+      "accion": "recomendar",
+      "nivel": "N3",
+      "run_id": "ppo-n3-transfer-1m5-desde-s1-v0.3-s0",
+      "motivo": "fin del rollback demostrado: vuelve el recomendado de N3 seleccionado por el pipeline (92,0 % en la suite v1, 15 colisiones); el rollback a ppo-n3-transfer-1m5-v0.3-s0 quedó comprobado en la API pública (catálogo v9, pipelines/ejecuciones/rollback-n3-1-restaurado.json)",
+      "commit_base": "e8725654ebf77890dbfae5c485d2b12cc5e33225"
     }
   ],
   "niveles": {
@@ -94,8 +103,8 @@
       "anterior": "ppo-n2-transfer-1m5-v0.2-s0"
     },
     "N3": {
-      "recomendado": "ppo-n3-transfer-1m5-v0.3-s0",
-      "anterior": "ppo-n3-transfer-1m5-desde-s1-v0.3-s0"
+      "recomendado": "ppo-n3-transfer-1m5-desde-s1-v0.3-s0",
+      "anterior": "ppo-n3-transfer-1m5-v0.3-s0"
     }
   }
 }
