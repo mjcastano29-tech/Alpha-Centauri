@@ -1,0 +1,12 @@
+channels:
+- conda-forge
+dependencies:
+- python=3.10.12
+- pip<=26.2.2
+- pip:
+  - mlflow==3.17.2
+  - gymnasium
+  - numpy
+  - stable-baselines3
+  - torch
+name: mlflow-env

@@ -1,0 +1,62 @@
+{
+  "run_id": "ppo-n2-transfer-1m5-v0.2-s2",
+  "level_id": "N2",
+  "environment_version": "RocketLanding3D-N2-v0@0.2",
+  "git_commit": "f61e2a500ea2e3e05ca9c60f37f1147ae619ecbf",
+  "git_branch": "main",
+  "config_sha256": "8ecc1d8187acb4cbfc6452b7304e3997bb14cf5acb6a480d3151b610def27dd1",
+  "model_uri": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/f61e2a500ea2e3e05ca9c60f37f1147ae619ecbf/resultados/runs/ppo-n2-transfer-1m5-v0.2-s2/modelo.zip",
+  "model_sha256": "fb8dd6d2969df36331930e91b2ace6526690fdcd3d94c8b0a6655dd9e866d4f3",
+  "normalization_uri": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/f61e2a500ea2e3e05ca9c60f37f1147ae619ecbf/resultados/runs/ppo-n2-transfer-1m5-v0.2-s2/modelo_normalizador.pkl",
+  "normalization_sha256": "00de0033f9b5073f111acd4cd5ec46bc04d4a2838e25d373c1ab2b42ff179702",
+  "model_registry": null,
+  "runtime_ref": {
+    "python": "3.10.12",
+    "requirements": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/f61e2a500ea2e3e05ca9c60f37f1147ae619ecbf/requirements.txt",
+    "docker": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/f61e2a500ea2e3e05ca9c60f37f1147ae619ecbf/Dockerfile",
+    "paquetes": {
+      "gymnasium": "1.4.0",
+      "numpy": "2.2.6",
+      "torch": "2.14.1+cpu",
+      "stable_baselines3": "2.9.2"
+    }
+  },
+  "evaluation_suite_id": "suite-v1",
+  "seed": 2,
+  "parent_run_id": "ppo-v2-v0.1-s0",
+  "experiment_id": "experimento-3-nivel2",
+  "agent": {
+    "class": "ppo",
+    "name": "PPO (red neuronal)",
+    "action": "relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12"
+  },
+  "hypothesis": "Tercera semilla (2) del finalista del nivel 2: queda a menos de 5 puntos del 86 % de la semilla 0.",
+  "change": "Solo la semilla del entrenamiento PPO: 2. Misma transferencia, hiperparámetros, ambiente y presupuesto.",
+  "baseline_run_id": "ppo-n2-transfer-1m5-v0.2-s0",
+  "budget": {
+    "pasos_agente": 1500000,
+    "epocas": 47308,
+    "maquina": "pipeline Prefect en CPU de portátil (WSL2)"
+  },
+  "status": "rechazado",
+  "decision": "Rechazado por el pipeline: 85.5% de aterrizajes en la suite v1 (24 colisiones), 56.5% con viento de 15 m/s. no mejora al recomendado ppo-n2-transfer-1m5-v0.2-s1 en al menos 2% (85.5% frente a 93.5%); con viento de 15 m/s pierde más de 5% (56.5% frente a 63.0%); más colisiones que el recomendado (24 frente a 13).",
+  "evaluation": {
+    "suite": "suite-v1",
+    "episodes": 200,
+    "landing_rate": 0.855,
+    "contact_speed": 1.5097675796945615,
+    "position_error": 6.359242956668411,
+    "fuel_used": 187.83468004245282,
+    "outcomes": {
+      "aterrizaje": 171,
+      "fuera de plataforma": 0,
+      "choque": 5,
+      "sin pasos": 0,
+      "fuera de zona": 0,
+      "colisión": 24
+    },
+    "per_case": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/f61e2a500ea2e3e05ca9c60f37f1147ae619ecbf/resultados/runs/ppo-n2-transfer-1m5-v0.2-s2/evaluacion.json"
+  },
+  "trained_at": "2026-11-06T14:39:49",
+  "generated_at": "2026-11-06T14:40:30"
+}
