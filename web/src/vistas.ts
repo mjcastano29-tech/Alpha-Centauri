@@ -21,6 +21,45 @@ async function cargarCatalogo() {
   return catalogoCache
 }
 
+// ---------- incidente controlado ----------
+export async function vistaIncidente(el: HTMLElement) {
+  const d = await api.incidentes()
+  const destinos = [...new Set(d.medidas.map((m) => m.ambiente.id))]
+  const bloques = destinos.map((amb) => {
+    const medidas = d.medidas.filter((m) => m.ambiente.id === amb).sort((a, b) => b.antes.normal.aterrizajes - a.antes.normal.aterrizajes)
+    const a = medidas[0].ambiente
+    const col = (r: api.Resultados) => r['colisión'] ?? 0
+    const degradacion = tabla(['modelo', 'entrenado en', `en su nivel (suite v1)`, `en ${esc(a.nivel)}, normal`, `en ${esc(a.nivel)}, viento ${medidas[0].viento} m/s`, 'cambio', 'causas de fallo en ' + esc(a.nivel)], medidas.map((m) => [
+      `<a href="#/ejecucion/${esc(m.run_id)}"><b>${esc(m.run_id)}</b></a><br>${pillEstado(m.estado)}`,
+      `${esc(m.nivel_entrenado)}<br><span class="muted">${m.adaptador ? 'con adaptador: no ve las torres' : 'misma observación, sin adaptador'}</span>`,
+      `${pct(m.antes.normal.aterrizajes)} ${barraResultados(m.antes.normal.resultados, d.outcomes)}<br><span class="muted">${col(m.antes.normal.resultados)} colisiones</span>`,
+      `<b>${pct(m.despues.normal.aterrizajes)}</b> ${barraResultados(m.despues.normal.resultados, d.outcomes)}<br><span class="muted">${col(m.despues.normal.resultados)} colisiones</span>`,
+      `${pct(m.despues.perturbado.aterrizajes)} ${barraResultados(m.despues.perturbado.resultados, d.outcomes)}`,
+      `<b>${Math.round((m.despues.normal.aterrizajes - m.antes.normal.aterrizajes) * 100)} puntos</b>`,
+      d.outcomes.filter((o) => o !== 'aterrizaje' && m.despues.normal.resultados[o]).map((o) => `${esc(ICONO_RESULTADO[o] ?? '')} ${esc(o)}: ${m.despues.normal.resultados[o]}`).join('<br>') || '—',
+    ]))
+    const inter = (d.intervenciones[amb] ?? []).map((r) => [
+      `<a href="#/ejecucion/${esc(r.run_id)}"><b>${esc(r.run_id)}</b></a><br>${pillEstado(r.estado)} ${pillDiseno(r.diseno?.estado)}`,
+      esc(r.diseno?.cambio ?? '—'),
+      `<b>${pct(r.evaluacion.aterrizajes)}</b> ${barraResultados(r.evaluacion.resultados, d.outcomes)}<br><span class="muted">${col(r.evaluacion.resultados)} colisiones</span>`,
+      r.perturbado ? pct(r.perturbado.aterrizajes) : '—',
+      esc(r.diseno?.decision ?? '—'),
+    ])
+    return `
+      <h2>${esc(a.nivel)} · ${esc(a.id)} v${esc(a.version)}</h2>
+      <p class="muted">Condiciones de operación: viento a 10 m de 0 a ${a.viento_max} m/s y ráfagas de ${a.rafagas} m/s. Misma suite v1 en todos los casos (${medidas[0].episodios} épocas por condición, semillas desde 10 000 000), modelos congelados y sin exploración.</p>
+      <h3>1 · Degradación: modelos de otros niveles en estas condiciones</h3>
+      ${degradacion}
+      <h3>2 · Intervención: modelos reentrenados en ${esc(a.nivel)} y decisión del pipeline</h3>
+      <p class="muted">Criterio fijado antes de entrenar: +2 puntos de aterrizajes frente a la referencia, no perder más de 5 con viento de 15 m/s y no tener más colisiones. Se conservan los intentos rechazados.</p>
+      ${tabla(['ejecución', 'cambio', 'aterrizajes (suite v1)', 'con viento 15 m/s', 'decisión'], inter)}`
+  })
+  el.innerHTML = `
+    <h1>Incidente controlado</h1>
+    <p>Qué le pasa a un modelo cuando cambian las condiciones de operación, y si reentrenarlo lo recupera. Los datos salen de <code>resultados/incidentes/</code> (<code>python incidente.py</code>) y de las ejecuciones entrenadas en cada nivel. Para repetir una de estas evaluaciones en vivo, abre la ejecución y elige otro ambiente.</p>
+    ${bloques.join('') || '<p class="muted">Sin incidentes medidos.</p>'}`
+}
+
 // ---------- catálogo ----------
 export async function vistaCatalogo(el: HTMLElement) {
   const c = await cargarCatalogo()

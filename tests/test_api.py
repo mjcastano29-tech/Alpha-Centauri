@@ -78,3 +78,13 @@ def test_un_modelo_del_nivel_2_juega_en_el_nivel_3_sin_adaptador():
     amb = e["ambiente"]
     assert amb["nivel"] == "N3" and amb["nivel_entrenado"] == "N2" and amb["misma_familia"] and not amb["adaptador"] and not amb["compatible"]
     assert cliente.post("/evaluar", json={"run_id": run_id, "episodios": 1, "ambiente": "RocketLanding3D-v0"}).status_code == 422
+
+
+def test_incidentes_muestran_la_degradacion_y_las_intervenciones_del_nivel_3():
+    d = cliente.get("/incidentes").json()
+    n3 = "RocketLanding3D-N3-v0"
+    m = next(x for x in d["medidas"] if x["run_id"] == "ppo-n2-transfer-1m5-v0.2-s1" and x["ambiente"]["id"] == n3)
+    assert m["nivel_entrenado"] == "N2" and not m["adaptador"] and m["despues"]["normal"]["episodios"] == 200
+    assert m["despues"]["normal"]["aterrizajes"] < m["antes"]["normal"]["aterrizajes"]  # se degrada al cambiar de condiciones
+    ids = [r["run_id"] for r in d["intervenciones"][n3]]
+    assert "ppo-n3-transfer-v0.3-s0" in ids and any(r["estado"] == "recomendado" for r in d["intervenciones"][n3])
