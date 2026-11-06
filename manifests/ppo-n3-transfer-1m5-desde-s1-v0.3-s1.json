@@ -1,0 +1,62 @@
+{
+  "run_id": "ppo-n3-transfer-1m5-desde-s1-v0.3-s1",
+  "level_id": "N3",
+  "environment_version": "RocketLanding3D-N3-v0@0.3",
+  "git_commit": "0a994ae8f7a8a2bfad3e8797c9f1f6e605906822",
+  "git_branch": "nivel-3-cierre",
+  "config_sha256": "439edb556a7aa0af5b71bcdf1f40b0927a005e5d10d8d8bdd5e3f0efb6b09dda",
+  "model_uri": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/0a994ae8f7a8a2bfad3e8797c9f1f6e605906822/resultados/runs/ppo-n3-transfer-1m5-desde-s1-v0.3-s1/modelo.zip",
+  "model_sha256": "97df128d04c61247ce08a549257daa023171c2027141858fd35c6589217017b9",
+  "normalization_uri": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/0a994ae8f7a8a2bfad3e8797c9f1f6e605906822/resultados/runs/ppo-n3-transfer-1m5-desde-s1-v0.3-s1/modelo_normalizador.pkl",
+  "normalization_sha256": "636849d3a582390c188b799bf7f8614ade5cbd887dcf802c830773460685c686",
+  "model_registry": null,
+  "runtime_ref": {
+    "python": "3.10.12",
+    "requirements": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/0a994ae8f7a8a2bfad3e8797c9f1f6e605906822/requirements.txt",
+    "docker": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/0a994ae8f7a8a2bfad3e8797c9f1f6e605906822/Dockerfile",
+    "paquetes": {
+      "gymnasium": "1.4.0",
+      "numpy": "2.2.6",
+      "torch": "2.14.1+cpu",
+      "stable_baselines3": "2.9.2"
+    }
+  },
+  "evaluation_suite_id": "suite-v1",
+  "seed": 1,
+  "parent_run_id": "ppo-n2-transfer-1m5-v0.2-s1",
+  "experiment_id": "experimento-4-nivel3",
+  "agent": {
+    "class": "ppo",
+    "name": "PPO (red neuronal)",
+    "action": "relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12"
+  },
+  "hypothesis": "Semilla 1 de la configuración seleccionada en N3 (transferencia desde N2-s1, 1,5 M de pasos): queda a menos de 5 puntos del 92,0 % de la semilla 0",
+  "change": "Solo la semilla de entrenamiento: 1. Mismo modelo de partida, ambiente y presupuesto",
+  "baseline_run_id": "ppo-n3-transfer-1m5-desde-s1-v0.3-s0",
+  "budget": {
+    "pasos_agente": 1500000,
+    "epocas": 44720,
+    "maquina": "pipeline Prefect en CPU de portátil (WSL2)"
+  },
+  "status": "rechazado",
+  "decision": "Rechazado por el pipeline: 91.5% de aterrizajes en la suite v1 (16 colisiones), 87.5% con viento de 15 m/s. no mejora a ppo-n3-transfer-1m5-desde-s1-v0.3-s0 en al menos 2% (91.5% frente a 92.0%); más colisiones que ppo-n3-transfer-1m5-desde-s1-v0.3-s0 (16 frente a 15).",
+  "evaluation": {
+    "suite": "suite-v1",
+    "episodes": 200,
+    "landing_rate": 0.915,
+    "contact_speed": 1.3605856678929302,
+    "position_error": 4.802222122625069,
+    "fuel_used": 223.31658234589756,
+    "outcomes": {
+      "aterrizaje": 183,
+      "fuera de plataforma": 0,
+      "choque": 1,
+      "sin pasos": 0,
+      "fuera de zona": 0,
+      "colisión": 16
+    },
+    "per_case": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/0a994ae8f7a8a2bfad3e8797c9f1f6e605906822/resultados/runs/ppo-n3-transfer-1m5-desde-s1-v0.3-s1/evaluacion.json"
+  },
+  "trained_at": "2026-11-05T20:01:12",
+  "generated_at": "2026-11-05T20:01:23"
+}
