@@ -32,6 +32,7 @@ from rocket_env.rocket_landing import RocketLanding3DEnv
 
 EXPERIMENTO = "experimento-2-ppo"
 EXPERIMENTO_POR_NIVEL = {"N1": EXPERIMENTO, "N2": "experimento-3-nivel2", "N3": "experimento-4-nivel3"}
+EXPERIMENTO_POR_AMBIENTE = {"RocketLanding3D-N2-v1": "experimento-5-pasarela", "RocketLanding3D-N3-v1": "experimento-6-pasarela-viento"}
 DEFAULTS = {
     "total_timesteps": 600_000,
     "n_envs": 8,
@@ -168,7 +169,7 @@ def main(argv=None):
     parser.add_argument("--run-id", help="nombre de la ejecución (por defecto fecha-hora-semilla)")
     parser.add_argument("--experimento", default=None, help="experimento de MLflow (por defecto el del nivel: experimento-2-ppo, -3-nivel2, -4-nivel3)")
     args = parser.parse_args(argv)
-    experimento = args.experimento or EXPERIMENTO_POR_NIVEL[rocket_env.clase_ambiente(args.ambiente).NIVEL]
+    experimento = args.experimento or EXPERIMENTO_POR_AMBIENTE.get(args.ambiente) or EXPERIMENTO_POR_NIVEL[rocket_env.clase_ambiente(args.ambiente).NIVEL]
     config = {k: getattr(args, k) for k in DEFAULTS}
 
     torch.manual_seed(config["seed"])

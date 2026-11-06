@@ -140,6 +140,13 @@ def decidir(run_id, ambiente_info, evaluacion, baseline=None):
     nivel = ambiente_info["nivel"]
     cat = leer(ROOT / "catalogo.json")
     actual = (cat.get("niveles", {}).get(nivel) or {}).get("recomendado") or (cat.get("recomendado") if nivel == "N1" else None)
+    if actual and actual != run_id:
+        # el recomendado del nivel solo es referencia si juega en el mismo ambiente (una versión nueva del nivel, p. ej. la
+        # pasarela frente a las torres, no es comparable: se trata como nivel nuevo y se compara con --baseline)
+        amb_actual = leer(ROOT / "resultados" / "runs" / actual / "manifest.json")["ambiente"].get("id", AMBIENTE_N1)
+        if amb_actual != ambiente_info["id"]:
+            get_run_logger().info(f"el recomendado {actual} juega en {amb_actual}, no en {ambiente_info['id']}: no se compara con él")
+            actual = None
     motivos = []
     referencia = None
     if actual and actual != run_id:

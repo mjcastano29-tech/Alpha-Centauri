@@ -25,5 +25,15 @@ EXPERIMENTOS = [
         "pregunta": "Cuando cambian las condiciones de operación (viento de hasta 15 m/s y ráfagas dobles), ¿cuánto se degrada el modelo del nivel 2 y lo recupera reentrenarlo en el nivel 3? Desde qué modelo conviene partir.",
         "variables": "las del experimento 3 con el ambiente N3; cambia el modelo de partida (recomendado de N2, semilla 0 o 1) y el presupuesto.",
     },
+    {
+        "id": "experimento-5-pasarela", "numero": 5, "titulo": "Nivel 2 (v1): pasarela con abertura desplazada", "nivel": "N2", "ambiente": "RocketLanding3D-N2-v1",
+        "pregunta": "Con el obstáculo nuevo acordado por el equipo (una pasarela que cubre la plataforma y una sola abertura desplazada), ¿aprende PPO a entrar por la abertura y volver al centro partiendo del modelo del nivel 1? Las torres (ambiente 0.2) quedan como histórico.",
+        "variables": "las del experimento 2 más el ambiente (observación de 20 valores), el modelo de partida (transferencia desde el nivel 1) y el presupuesto.",
+    },
+    {
+        "id": "experimento-6-pasarela-viento", "numero": 6, "titulo": "Nivel 3 (v1): pasarela con viento fuerte", "nivel": "N3", "ambiente": "RocketLanding3D-N3-v1",
+        "pregunta": "Con viento de hasta 15 m/s y ráfagas dobles, ¿cuánto se degrada el modelo de la pasarela y lo recupera reentrenarlo en esas condiciones?",
+        "variables": "las del experimento 5 con el ambiente N3 v1; cambia el modelo de partida y el presupuesto.",
+    },
 ]
 POR_ID = {e["id"]: e for e in EXPERIMENTOS}
