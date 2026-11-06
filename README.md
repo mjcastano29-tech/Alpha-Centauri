@@ -66,7 +66,7 @@ env = gym.make("RocketLanding3D-v0")
 | Nivel | Ambiente | Qué cambia | Ficha |
 |---|---|---|---|
 | N1 · misión base | `RocketLanding3D-v0` (0.1.1) | plataforma, viento, temperatura, presión y combustible limitado | [docs/ambiente-v0.1.md](docs/ambiente-v0.1.md) |
-| N2 · obstáculo | `RocketLanding3D-N2-v1` (0.4) | una pasarela a 180 m cubre la plataforma y el cuadrado de salida; la única abertura (12 m de radio) está desplazada 30 m del centro: hay que entrar por ella y trasladarse por debajo; chocar con la pasarela o sus pilares es "colisión" (−100); observación de 20 valores (familia nueva) | [docs/ambiente-v0.4.md](docs/ambiente-v0.4.md) |
+| N2 · obstáculo | `RocketLanding3D-N2-v1` (0.4) | una pasarela a 180 m cubre la plataforma y el cuadrado de salida; la única abertura (16 m de radio) está desplazada 30 m del centro: hay que entrar por ella y trasladarse por debajo; chocar con la pasarela o sus pilares es "colisión" (−100); observación de 20 valores (familia nueva) | [docs/ambiente-v0.4.md](docs/ambiente-v0.4.md) |
 | N3 · operación exigente | `RocketLanding3D-N3-v1` (0.5) | la pasarela con viento de 0–15 m/s y ráfagas el doble de fuertes; misma observación que N2 (misma familia). Incidente medido con `python incidente.py`, visible en la web (`#/incidente`) y en `GET /incidentes` | [docs/ambiente-v0.5.md](docs/ambiente-v0.5.md) |
 | retirados (históricos) | `RocketLanding3D-N2-v0` (0.2) y `RocketLanding3D-N3-v0` (0.3) | tres torres de 300–420 m alrededor de la plataforma, y lo mismo con viento fuerte; el equipo las sustituyó por la pasarela el 6 de noviembre; sus modelos siguen siendo reproducibles y evaluables | [docs/ambiente-v0.2.md](docs/ambiente-v0.2.md), [docs/ambiente-v0.3.md](docs/ambiente-v0.3.md) |
 

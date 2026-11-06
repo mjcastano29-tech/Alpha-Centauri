@@ -22,17 +22,18 @@ y se anota aquí. Los modelos entrenados con versiones distintas del ambiente no
 
 ### 0.4 (N2-v1) y 0.5 (N3-v1) · 2026-11-06
 - El equipo cambió el obstáculo de los niveles 2 y 3: en vez de tres torres, una **pasarela** horizontal de 90 m de radio
-  a 180 m de altura que cubre la plataforma y todo el cuadrado de salida, con una sola abertura circular de 12 m de radio
+  a 180 m de altura que cubre la plataforma y todo el cuadrado de salida, con una sola abertura circular de 16 m de radio
   desplazada 30 m del centro (en (28, 12) m), sostenida por cuatro pilares en el borde. Chocar con la pasarela o con un
   pilar es "colisión" (−100). Ficha: [ambiente-v0.4.md](ambiente-v0.4.md); clases en `rocket_env/pasarela.py`.
 - Decisión nueva en dos tiempos: alinearse con la abertura antes de llegar a la pasarela y, debajo, trasladarse hasta la
-  plataforma mientras se frena. Observación de 16 + 4 valores (posición relativa de la abertura, altura hasta la pasarela
-  y margen hasta su borde): familia nueva. El potencial de la recompensa apunta a la abertura mientras el cohete está por
+  plataforma mientras se frena. Observación de 16 + 4 valores (posición relativa del objetivo de la fase: la abertura por
+  encima de la pasarela y la plataforma por debajo; altura hasta la pasarela; margen hasta el borde de la abertura):
+  familia nueva. `TRANSFERENCIA_ENTRADAS` indica cómo hereda un modelo del nivel 1 los pesos de posición para esas entradas. El potencial de la recompensa apunta a la abertura mientras el cohete está por
   encima de la pasarela y castiga acercarse a ella fuera de la abertura (hasta 8 puntos en los 20 m previos).
 - 0.5 = 0.4 con viento de 0 a 15 m/s y ráfagas de 3 m/s (como pasaba de 0.2 a 0.3).
 - Los ambientes con torres (0.2 y 0.3, ids `-v0`) siguen registrados: los modelos entrenados en ellos son históricos y se
   pueden evaluar igual. `rocket_env.VIGENTES` dice el ambiente actual de cada nivel; la API lo marca con `vigente`.
-- Dificultad medida: el recomendado del nivel 1 a ciegas (`AdaptadorN1`) baja de 99 % a 4 % (192 colisiones de 200).
+- Dificultad medida: el recomendado del nivel 1 a ciegas (`AdaptadorN1`) baja de 99 % a 5 % (190 colisiones de 200).
 
 ## Ambiente RocketLanding3D-N2-v0 (nivel 2, retirado el 2026-11-06)
 

@@ -15,8 +15,8 @@
     <circle r="20" fill="#e4efeb" stroke="#1f6f5c" stroke-width="2"/>
     <text x="0" y="4" text-anchor="middle" fill="#1f6f5c" font-weight="600" font-size="10">plataforma</text>
     <!-- abertura en (28, 12): x → +56 px, y → −24 px -->
-    <circle cx="56" cy="-24" r="24" fill="#fdfdfb" stroke="#b8372a" stroke-width="2.5"/>
-    <text x="84" y="-30" fill="#b8372a" font-weight="600">abertura: radio 12 m</text>
+    <circle cx="56" cy="-24" r="32" fill="#fdfdfb" stroke="#b8372a" stroke-width="2.5"/>
+    <text x="84" y="-30" fill="#b8372a" font-weight="600">abertura: radio 16 m</text>
     <text x="84" y="-15" fill="#b8372a" font-size="11">centro en (28, 12) m, a 30,5 m de la plataforma</text>
     <line x1="0" y1="0" x2="56" y2="-24" stroke="#1d2126" stroke-width="1.2" stroke-dasharray="3 3"/>
     <!-- pilares en el borde, azimuts 45°, 135°, 225°, 315° -->
@@ -36,11 +36,11 @@
     <rect x="200" y="416" width="30" height="4" fill="#1f6f5c"/>
     <text x="215" y="450" text-anchor="middle" fill="#1f6f5c" font-size="11">plataforma</text>
     <!-- pasarela a 180 m → y = 420 − 90 = 330; radio 90 m → 45 px a cada lado del centro (x = 215) -->
-    <rect x="170" y="328" width="60" height="4" fill="#8a8f99"/><rect x="258" y="328" width="47" height="4" fill="#8a8f99"/>
+    <rect x="170" y="328" width="52" height="4" fill="#8a8f99"/><rect x="266" y="328" width="39" height="4" fill="#8a8f99"/>
     <rect x="130" y="328" width="40" height="4" fill="#8a8f99"/>
     <rect x="130" y="332" width="3" height="88" fill="#4e2a1f"/><rect x="302" y="332" width="3" height="88" fill="#4e2a1f"/>
     <text x="310" y="333" fill="#5c6069" font-size="11">pasarela a 180 m (grosor 3 m)</text>
-    <text x="232" y="322" fill="#b8372a" font-size="11">abertura (24 m de ancho)</text>
+    <text x="232" y="322" fill="#b8372a" font-size="11">abertura (32 m de ancho)</text>
     <!-- ruta: desde la salida hacia la abertura, cruce y traslado hacia la plataforma -->
     <path d="M 150 120 C 200 180, 240 250, 244 326 C 246 350, 236 380, 218 416" fill="none" stroke="#1f6f5c" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#f)"/>
     <text x="4" y="200" fill="#1f6f5c" font-size="11">1. alinearse con la abertura antes de llegar</text>

@@ -2,12 +2,13 @@
 
 Sustituye a las torres de los ambientes 0.2 y 0.3 (que siguen registrados para los modelos históricos). Una pasarela
 horizontal de 90 m de radio cubre la plataforma a 180 m de altura; la única forma de bajar es una abertura circular
-de 12 m de radio desplazada 30 m del centro. La decisión nueva: alinearse con la abertura antes de llegar a la
+de 16 m de radio desplazada 30 m del centro. La decisión nueva: alinearse con la abertura antes de llegar a la
 pasarela y, una vez debajo, trasladarse en horizontal hasta la plataforma mientras se frena. Chocar con la pasarela
 o con uno de sus cuatro pilares termina la época con "colisión" (−100).
 
-Observación: los 16 valores del nivel 1 más 4 (posición relativa de la abertura, altura que queda hasta la pasarela
-y margen hasta el borde de la abertura): familia nueva de modelos. `AdaptadorN1` (rocket_env/nivel2.py) deja jugar
+Observación: los 16 valores del nivel 1 más 4: la posición relativa del objetivo de la fase (la abertura mientras el
+cohete está por encima de la pasarela, la plataforma una vez debajo: un sistema de navegación que da el siguiente punto
+de paso), la altura que queda hasta la pasarela y el margen hasta el borde de la abertura. Familia nueva de modelos. `AdaptadorN1` (rocket_env/nivel2.py) deja jugar
 a un modelo del nivel 1 a ciegas, que mide la dificultad del nivel. El nivel 3 es el mismo mundo con viento de hasta
 15 m/s y ráfagas dobles, como en el ambiente 0.3.
 """
@@ -28,7 +29,7 @@ class RocketLandingPasarelaEnv(RocketLanding3DEnv):
     FICHA = "docs/ambiente-v0.4.md"
 
     ROCKET_RADIUS = 3.0  # m: radio del fuselaje para la colisión
-    PASARELA = {"nombre": "pasarela", "altura": 180.0, "radio": 90.0, "grosor": 3.0, "abertura": {"x": 28.0, "y": 12.0, "radio": 12.0}}
+    PASARELA = {"nombre": "pasarela", "altura": 180.0, "radio": 90.0, "grosor": 3.0, "abertura": {"x": 28.0, "y": 12.0, "radio": 16.0}}
     # cuatro pilares en el borde de la pasarela (fuera del cuadrado de salida de ±50 m); chocar con ellos también es colisión
     PILARES = tuple(
         {"nombre": f"pilar {k + 1}", "x": round(float(np.cos(np.radians(az))) * 90.0, 2), "y": round(float(np.sin(np.radians(az))) * 90.0, 2), "radio": 2.5, "altura": 180.0}
@@ -36,6 +37,11 @@ class RocketLandingPasarelaEnv(RocketLanding3DEnv):
     )
     MARGEN_PASARELA = 20.0  # m por encima de la pasarela en los que el potencial castiga estar fuera de la abertura
     PESO_PASARELA = 8.0
+    # Transferencia desde un modelo del nivel 1 (entrenar_ppo.transferir_desde): la entrada nueva 16 (objetivo_x − x)
+    # hereda los pesos de la entrada 0 (x, posición respecto a la plataforma) con signo cambiado, y la 17 los de la 1;
+    # las entradas 0 y 1 se anulan. Así la política de partida vuela hacia el objetivo de la fase en vez de hacia la
+    # plataforma desde el primer paso, y solo tiene que aprender a cruzar frenando.
+    TRANSFERENCIA_ENTRADAS = {16: (0, -1.0), 17: (1, -1.0)}
 
     REWARDS = {**RocketLanding3DEnv.REWARDS, "colisión": -100.0}
     OUTCOMES = list(REWARDS)
@@ -98,9 +104,15 @@ class RocketLandingPasarelaEnv(RocketLanding3DEnv):
                 castigo = 1.0 - altura / self.MARGEN_PASARELA
         return -objetivo / 5.0 - horizontal_speed - descent_error - self.position[2] / 10.0 - self.PESO_PASARELA * castigo
 
+    def objetivo(self):
+        """Punto de paso de la fase: el centro de la abertura por encima de la pasarela, la plataforma por debajo."""
+        a = self.PASARELA["abertura"]
+        return (a["x"], a["y"]) if self.sobre_pasarela() else (0.0, 0.0)
+
     def _get_obs(self):
         p, a = self.PASARELA, self.PASARELA["abertura"]
-        extra = [a["x"] - self.position[0], a["y"] - self.position[1], p["altura"] - self.position[2], a["radio"] - self.distancia_abertura()]
+        ox, oy = self.objetivo()
+        extra = [ox - self.position[0], oy - self.position[1], p["altura"] - self.position[2], a["radio"] - self.distancia_abertura()]
         return np.concatenate([super()._get_obs(), np.asarray(extra, dtype=np.float32)]).astype(np.float32)
 
     def _get_info(self):

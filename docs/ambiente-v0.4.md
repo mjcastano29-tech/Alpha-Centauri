@@ -14,10 +14,10 @@ Esta ficha describe lo que cambia respecto al nivel 1 ([ambiente-v0.1.md](ambien
 |---|---|---|
 | Plataforma, zona de vuelo, salida | como en v0.1 | radio 10 m; cilindro de 300 × 1200 m; salida a 600 m sobre x, y ∈ [−50, 50] m |
 | Pasarela | disco horizontal centrado en la plataforma, a 180 m de altura | radio 90 m, grosor 3 m |
-| Abertura | círculo en la pasarela, centrado en (28, 12) m (a 30,5 m del centro) | radio 12 m; con el fuselaje de 3 m, 9 m de margen |
+| Abertura | círculo en la pasarela, centrado en (28, 12) m (a 30,5 m del centro) | radio 16 m; con el fuselaje de 3 m, 13 m de margen |
 | Pilares | cuatro, en el borde de la pasarela, azimuts 45°, 135°, 225°, 315° | radio 2,5 m, altura 180 m |
 
-La pasarela tiene 90 m de radio para cubrir todo el cuadrado de salida (su diagonal llega a 70,7 m del centro): **no se puede rodear**, la única vía es la abertura. La abertura no cae sobre la plataforma (su borde más cercano queda a 18,5 m del centro), así que después de cruzarla hay que trasladarse 30 m en horizontal mientras se baja de 180 m a 0 frenando. Los pilares están fuera del cuadrado de salida; solo molestan a quien se desvíe mucho.
+La pasarela tiene 90 m de radio para cubrir todo el cuadrado de salida (su diagonal llega a 70,7 m del centro): **no se puede rodear**, la única vía es la abertura. La abertura no cae sobre la plataforma (su borde más cercano queda a 14,5 m del centro), así que después de cruzarla hay que trasladarse 30 m en horizontal mientras se baja de 180 m a 0 frenando. Los pilares están fuera del cuadrado de salida; solo molestan a quien se desvíe mucho.
 
 **Por qué este diseño.** La guía pide para el nivel 2 "más decisiones (rutas, obstáculos…)". Con las torres de 0.2 la ruta recta solo cruzaba una torre en el 30 % de las salidas; con la pasarela, la ruta recta choca siempre salvo que la salida caiga sobre la abertura (menos del 5 % del cuadrado). La decisión es inevitable y se ve en el replay: el cohete tiene que irse hacia la abertura y volver.
 
@@ -27,7 +27,8 @@ Todo lo de v0.1, más:
 
 | Variable | Significado | Unidad | Rango | Visible para el agente |
 |---|---|---|---|---|
-| (a_x, a_y, r_a) | centro y radio de la abertura; fijos | m | tabla anterior | sí, como posición relativa y margen (ver observación) |
+| (a_x, a_y, r_a) | centro y radio de la abertura; fijos | m | tabla anterior | sí, como margen r_a − d_a; su posición, a través del objetivo de la fase |
+| (o_x, o_y) | objetivo de la fase: la abertura por encima de la pasarela, la plataforma (0, 0) por debajo | m | — | sí, como posición relativa o − p |
 | H, R, g | altura, radio y grosor de la pasarela; fijos | m | 180, 90, 3 | H sí, como altura restante hasta la pasarela |
 | d_a | distancia horizontal del eje del cohete al centro de la abertura | m | ≥ 0 | sí, como margen r_a − d_a (positivo dentro de la abertura) |
 | sobre_pasarela | el cohete está por encima de la pasarela (z > H + g/2) | 0/1 | — | se deduce del signo de H − z; está en `info["sobre_pasarela"]` |
@@ -36,7 +37,7 @@ Constante nueva: radio del fuselaje 3 m (solo para la colisión; la física sigu
 
 ## Observaciones y acciones
 
-**Observación**: 20 valores. Los 16 primeros son exactamente los del nivel 1; después: `a_x − x`, `a_y − y`, `H − z` (altura que queda hasta la pasarela; negativa una vez debajo) y `r_a − d_a` (margen hasta el borde de la abertura; positivo si el eje está dentro). Es una **familia nueva de modelos**: una red del nivel 1 espera 16 entradas y una del nivel 2 con torres, 25. `AdaptadorN1` recorta la observación a los 16 valores del nivel 1 para evaluar un modelo del nivel 1 a ciegas.
+**Observación**: 20 valores. Los 16 primeros son exactamente los del nivel 1; después: `o_x − x`, `o_y − y` (posición relativa del **objetivo de la fase**: el centro de la abertura mientras el cohete está por encima de la pasarela y la plataforma una vez debajo, como un sistema de navegación que da el siguiente punto de paso), `H − z` (altura que queda hasta la pasarela; negativa una vez debajo) y `r_a − d_a` (margen hasta el borde de la abertura; positivo si el eje está dentro). El objetivo de la fase es la misma referencia que usa el potencial de la recompensa. Es una **familia nueva de modelos**: una red del nivel 1 espera 16 entradas y una del nivel 2 con torres, 25. `AdaptadorN1` recorta la observación a los 16 valores del nivel 1 para evaluar un modelo del nivel 1 a ciegas.
 
 **Acción**: la misma del nivel 1. Los agentes PPO usan la acción relativa v2.
 
@@ -72,10 +73,10 @@ Las tres métricas de v0.1 en la misma suite v1 (200 épocas, semillas desde 10 
 
 | Controlador (nivel 1) | En el nivel 1 | Bajo la pasarela, a ciegas | Colisiones |
 |---|---|---|---|
-| `ppo-v2-v0.1-s1`, recomendado del nivel 1 | 198/200 (99 %) | 8/200 (4 %) | 192 |
-| mismo modelo, con viento de 15 m/s | 144/200 (72 %) | 6/200 (3 %) | 191 |
+| `ppo-v2-v0.1-s1`, recomendado del nivel 1 | 198/200 (99 %) | 10/200 (5 %) | 190 |
+| mismo modelo, con viento de 15 m/s | 144/200 (72 %) | 7/200 (3,5 %) | 189 |
 
-Los 8 aterrizajes a ciegas son salidas que caen sobre la abertura por casualidad. Con las torres de 0.2, el mismo modelo conservaba el 72 %: la pasarela es un nivel mucho más exigente.
+Los 10 aterrizajes a ciegas son salidas que caen sobre la abertura por casualidad. Con las torres de 0.2, el mismo modelo conservaba el 72 %: la pasarela es un nivel mucho más exigente.
 
 **Incidente / perturbación:** el mismo viento de 15 m/s de v0.1; el nivel 3 (v1) lo convierte en operación normal ([ambiente-v0.5.md](ambiente-v0.5.md)).
 
@@ -94,7 +95,9 @@ Pendientes del primer modelo aceptado del nivel 2 v1 (`python cli.py transicione
 
 ## Experimentos del nivel 2 (v1)
 
-Se documentan en `configs/<run_id>.json` y se resumen aquí al cerrar cada uno (experimento 5 de MLflow, `experimento-5-pasarela`). En curso: `ppo-pasarela-transfer-1m5-v0.4-s0` (transferencia desde `ppo-v2-v0.1-s1`, 1,5 M de pasos) a través del pipeline.
+Se documentan en `configs/<run_id>.json` y se resumen aquí al cerrar cada uno (experimento 5 de MLflow, `experimento-5-pasarela`).
+
+**Intento abortado (6 de noviembre, sin run_id).** Primera versión de la observación, con la posición relativa de la abertura fija en las entradas 16 y 17, y transferencia simple desde `ppo-v2-v0.1-s1` (entradas nuevas en cero). A los 320 000 pasos de 1,5 M la evaluación sin ruido seguía en 2 % y la tasa de entrenamiento en 1 %: la política heredada volaba hacia la plataforma y chocaba con la pasarela antes de aprender a usar las entradas nuevas. Se detuvo y se cambió el diseño a la observación "objetivo de la fase" con herencia de pesos (`TRANSFERENCIA_ENTRADAS`), que hace que la política de partida vuele hacia la abertura desde el primer paso.
 
 ## Anexo: cómo reproducir
 

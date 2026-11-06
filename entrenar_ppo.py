@@ -54,7 +54,7 @@ DEFAULTS = {
 }
 
 
-def transferir_desde(model, venv, run_id):
+def transferir_desde(model, venv, run_id, ambiente=None):
     """Inicializa la red y la normalización con las de otra ejecución PPO (p. ej. un modelo del nivel 1 para arrancar el nivel 2).
 
     Los pesos de la misma forma se copian tal cual. En la primera capa, si la observación nueva es más larga, se copian
@@ -73,11 +73,24 @@ def transferir_desde(model, venv, run_id):
             dst[name].copy_(w); copiados.append(name)
         elif w.dim() == 2 and dst[name].dim() == 2 and dst[name].shape[0] == w.shape[0] and dst[name].shape[1] > w.shape[1]:
             dst[name].zero_(); dst[name][:, : w.shape[1]].copy_(w); ampliados.append(name)
-    model.policy.load_state_dict(dst)
     n = origen.normalizer.obs_rms.mean.shape[0]
     venv.obs_rms.mean[:n] = origen.normalizer.obs_rms.mean; venv.obs_rms.var[:n] = origen.normalizer.obs_rms.var
     venv.obs_rms.count = origen.normalizer.obs_rms.count
-    return {"desde": run_id, "parametros_copiados": len(copiados), "parametros_ampliados": ampliados, "observaciones_normalizadas_copiadas": int(n)}
+    # entradas nuevas que heredan los pesos de una entrada antigua (p. ej. "objetivo − x" hereda los de "x" con signo
+    # cambiado): lo declara el ambiente en TRANSFERENCIA_ENTRADAS = {entrada_nueva: (entrada_antigua, factor)}
+    mapa = getattr(rocket_env.clase_ambiente(ambiente), "TRANSFERENCIA_ENTRADAS", {}) if ambiente else {}
+    heredadas = []
+    for nueva, (vieja, factor) in mapa.items():
+        if vieja >= n or nueva >= venv.obs_rms.mean.shape[0]:
+            continue
+        for name in ampliados:
+            dst[name][:, nueva] = factor * dst[name][:, vieja]
+            dst[name][:, vieja] = 0.0
+        venv.obs_rms.mean[nueva] = factor * venv.obs_rms.mean[vieja]; venv.obs_rms.var[nueva] = venv.obs_rms.var[vieja]
+        heredadas.append(f"{nueva}←{factor:+g}×{vieja}")
+    model.policy.load_state_dict(dst)
+    return {"desde": run_id, "parametros_copiados": len(copiados), "parametros_ampliados": ampliados, "observaciones_normalizadas_copiadas": int(n),
+            "entradas_heredadas": heredadas}
 
 
 def make_env(seed, accion="relativa", ambiente=RocketLanding3DEnv.ID):
@@ -183,10 +196,11 @@ def main(argv=None):
         clip_range=config["clip_range"], ent_coef=config["ent_coef"],
         policy_kwargs={"net_arch": list(config["net_arch"]), "log_std_init": config["log_std_init"]},
     )
-    transferencia = transferir_desde(model, venv, config["desde"]) if config["desde"] else None
+    transferencia = transferir_desde(model, venv, config["desde"], config["ambiente"]) if config["desde"] else None
     if transferencia:
         print(f"Transferencia desde {config['desde']}: {transferencia['parametros_copiados']} tensores copiados, "
-              f"ampliados {transferencia['parametros_ampliados']}, normalización de {transferencia['observaciones_normalizadas_copiadas']} observaciones")
+              f"ampliados {transferencia['parametros_ampliados']}, normalización de {transferencia['observaciones_normalizadas_copiadas']} observaciones"
+              f"{', entradas heredadas ' + ', '.join(transferencia['entradas_heredadas']) if transferencia['entradas_heredadas'] else ''}")
     run_id = args.run_id or f"{time.strftime('%Y%m%d-%H%M%S')}-ppo-s{config['seed']}"
     print(f"Experimento 2 · PPO · {config['ambiente']} · acción {config['accion']} · red {config['net_arch']} · {config['total_timesteps']} pasos en {config['n_envs']} entornos "
           f"· evaluación cada {config['eval_every']} pasos · ejecución {run_id}\n")

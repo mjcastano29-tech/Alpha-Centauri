@@ -41,7 +41,8 @@ def test_familia_nueva_con_las_reglas_de_vuelo_del_nivel_1(env):
     assert P.OUTCOMES[:5] == N1.OUTCOMES and P.OUTCOMES[5] == "colisión"
     o1, _ = gym.make(N1.ID).reset(seed=1)
     assert np.allclose(obs[:16], o1)  # los 16 primeros valores son los del nivel 1
-    assert obs[16] == pytest.approx(A["x"] - obs[0]) and obs[18] == pytest.approx(H - obs[2])
+    assert obs[16] == pytest.approx(A["x"] - obs[0]) and obs[18] == pytest.approx(H - obs[2])  # en la salida el objetivo es la abertura
+    assert P.TRANSFERENCIA_ENTRADAS == {16: (0, -1.0), 17: (1, -1.0)}
     assert PV.VIENTO_MAX == 15.0 and PV.RAFAGAS == 3.0 and P.VIENTO_MAX == 10.0
 
 
@@ -64,8 +65,9 @@ def test_bajar_sobre_la_plataforma_choca_con_la_pasarela(env):
 def test_la_abertura_deja_pasar_y_debajo_se_puede_aterrizar(env):
     env.reset(seed=5, options={"viento": 0.0})
     colocar(env, A["x"], A["y"], H + 4.0, vz=-10.0)
-    _, _, terminated, _, info = env.step(CAER)
+    obs, _, terminated, _, info = env.step(CAER)
     assert not terminated and info["outcome"] is None and not info["sobre_pasarela"]
+    assert obs[16] == pytest.approx(-obs[0]) and obs[17] == pytest.approx(-obs[1])  # debajo, el objetivo pasa a ser la plataforma
     env.reset(seed=5, options={"viento": 0.0})
     colocar(env, 0.0, 0.0, 1.0, vz=-1.0)  # ya bajo la pasarela, sobre la plataforma
     _, _, terminated, _, info = env.step(CAER)
