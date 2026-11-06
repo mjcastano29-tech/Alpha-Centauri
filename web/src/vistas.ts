@@ -64,7 +64,8 @@ export async function vistaIncidente(el: HTMLElement) {
 export async function vistaInicio(el: HTMLElement, expId?: string, runId?: string): Promise<() => void> {
   const c = await cargarCatalogo()
   const experimentos = c.experimentos ?? []
-  const actual = experimentos.find((e) => e.id === expId) ?? experimentos[experimentos.length - 1]
+  // sin experimento elegido, el último que ya tenga ejecuciones (los recién creados empiezan vacíos)
+  const actual = experimentos.find((e) => e.id === expId) ?? [...experimentos].reverse().find((e) => c.ejecuciones.some((r) => r.experimento === e.id)) ?? experimentos[experimentos.length - 1]
   const runs = c.ejecuciones.filter((r) => r.experimento === actual?.id)
   const run = runs.find((r) => r.run_id === runId) ?? runs.find((r) => r.estado === 'recomendado') ?? runs.find((r) => r.diseno?.estado === 'seleccionado') ?? runs[runs.length - 1]
   if (!run) { el.innerHTML = '<p class="error">No hay ejecuciones en el catálogo.</p>'; return () => {} }
