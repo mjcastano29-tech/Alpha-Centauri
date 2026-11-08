@@ -1,24 +1,18 @@
 // Vistas de la aplicación: catálogo, detalle de una ejecución (con evaluación en vivo), comparación y replay 3D.
 import * as api from './api'
-import type { Ambiente, Catalogo, Detalle, Obstaculo, Resumen, ResultadoEvaluacion, Vuelo } from './api'
-import { Reproductor, type Cohete, type ModoCamara } from './escena/index'
-import { barraResultados, COLOR_RESULTADO, corto, entero, esc, ICONO_RESULTADO, lineaSvg, num, pct, pillDiseno, pillEstado, tabla } from './ui'
+import type { Ambiente, Detalle, Resumen } from './api'
+import { vistaReplay } from './consola/replay'
+import { cargarCatalogo, sesion } from './estado'
+import { barraResultados, corto, entero, esc, ICONO_RESULTADO, lineaSvg, num, pct, pillDiseno, pillEstado, tabla } from './ui'
 
 const COLORES = ['var(--series-1)', 'var(--series-2)', 'var(--series-3)', 'var(--series-4)']
-/** Última evaluación ejecutada en vivo, para poder reproducir sus vuelos. */
-let ultimaEvaluacion: ResultadoEvaluacion | null = null
-let catalogoCache: Catalogo | null = null
+export { vistaReplay }
 const ETIQUETA_PRESUPUESTO: Record<string, (v: string | number) => string> = {
   epocas: (v) => `${entero(+v)} épocas`, pasos_agente: (v) => `${entero(+v)} pasos del agente`, tiempo_s: (v) => `${num(+v / 60, 1)} min`, maquina: (v) => String(v),
 }
 function presupuesto(p: Record<string, string | number> | null | undefined) {
   if (!p) return '—'
   return esc(Object.entries(p).map(([k, v]) => (ETIQUETA_PRESUPUESTO[k] ?? ((x: string | number) => `${k}: ${x}`))(v)).join(' · '))
-}
-
-async function cargarCatalogo() {
-  catalogoCache ??= await api.catalogo()
-  return catalogoCache
 }
 
 // ---------- incidente controlado ----------
@@ -68,13 +62,22 @@ export async function vistaInicio(el: HTMLElement, expId?: string, runId?: strin
   const actual = experimentos.find((e) => e.id === expId) ?? [...experimentos].reverse().find((e) => c.ejecuciones.some((r) => r.experimento === e.id)) ?? experimentos[experimentos.length - 1]
   const runs = c.ejecuciones.filter((r) => r.experimento === actual?.id)
   const run = runs.find((r) => r.run_id === runId) ?? runs.find((r) => r.estado === 'recomendado') ?? runs.find((r) => r.diseno?.estado === 'seleccionado') ?? runs[runs.length - 1]
-  if (!run) { el.innerHTML = '<p class="error">No hay ejecuciones en el catálogo.</p>'; return () => {} }
+  if (!run) { // experimento recién creado: se mantienen las pestañas para poder volver a otro
+    el.innerHTML = `<section class="selector-mision" aria-label="elegir misión"><span class="kicker">Experimento</span>
+      <nav class="tabs" aria-label="experimentos">${experimentos.map((e) => `<a href="#/inicio/${esc(e.id)}" class="tab${e.id === actual?.id ? ' activa' : ''}">${e.numero} · ${esc(e.titulo)}<br><span class="muted">${esc(e.nivel)} · ${c.ejecuciones.filter((r) => r.experimento === e.id).length} ejecuciones</span></a>`).join('')}</nav></section>
+      <section class="card"><h2>${actual ? `${actual.numero} · ${esc(actual.titulo)}` : 'Sin experimentos'}</h2><p class="muted">Este experimento todavía no tiene ejecuciones en el catálogo: no hay vuelos que reproducir.</p>${actual ? `<p><a class="btn" href="#/experimentos/${esc(actual.id)}">Ver el experimento ${actual.numero}</a></p>` : ''}</section>`
+    return () => {}
+  }
   const amb = c.ambientes.find((a) => a.id === run.ambiente_id)
   el.innerHTML = `
+    <section class="selector-mision" aria-label="elegir misión">
+    <span class="kicker">Experimento</span>
     <nav class="tabs" aria-label="experimentos">${experimentos.map((e) => `<a href="#/inicio/${esc(e.id)}" class="tab${e.id === actual.id ? ' activa' : ''}">${e.numero} · ${esc(e.titulo)}<br><span class="muted">${esc(e.nivel)} · ${c.ejecuciones.filter((r) => r.experimento === e.id).length} ejecuciones</span></a>`).join('')}</nav>
+    <span class="kicker">Modelo</span>
     <div class="chips" aria-label="modelos del experimento">${runs.map((r) => `<a href="#/inicio/${esc(actual.id)}/${esc(r.run_id)}" class="chip${r.run_id === run.run_id ? ' activa' : ''}">${esc(r.run_id)} <b>${pct(r.evaluacion.aterrizajes)}</b> ${r.estado === 'recomendado' ? pillEstado(r.estado) : pillDiseno(r.diseno?.estado)}</a>`).join('')}</div>
+    </section>
     <div id="visor-inicio"></div>
-    <section class="card">
+    <section class="card ficha-mision">
       <h2>${esc(run.run_id)} · ${esc(run.nivel)} · ${esc(run.ambiente)}</h2>
       ${amb ? `<p><b>Nivel.</b> ${esc(amb.resumen ?? '')} <span class="muted">${esc(amb.novedad ?? '')}</span></p>` : ''}
       ${run.diseno ? `<p><b>Hipótesis.</b> ${esc(run.diseno.hipotesis ?? '—')}</p><p><b>Cambio.</b> ${esc(run.diseno.cambio ?? '—')}</p><p><b>Decisión.</b> ${esc(run.diseno.decision ?? '—')}</p>` : ''}
@@ -282,7 +285,7 @@ export async function vistaEjecucion(el: HTMLElement, id: string) {
     boton.disabled = true; salida.innerHTML = `<p class="estado">Evaluando ${episodios} épocas en la API…</p>`
     try {
       const r = await api.evaluar(suite ? { run_id: d.run_id, episodios, grabar: 3, suite, condicion, ambiente } : { run_id: d.run_id, episodios, semilla_base: semilla, viento, grabar: 3, ambiente })
-      ultimaEvaluacion = r
+      sesion.ultimaEvaluacion = r
       salida.innerHTML = `
         <p class="modo modo-eval">Modo: evaluación en vivo${r.suite.id ? ` · ${esc(r.suite.id)} / ${esc(r.suite.condicion ?? '')}` : ''} · modelo ${esc(r.modelo.run_id)} (${r.modelo.mlflow ? esc(r.modelo.mlflow.modelo) + ' v' + r.modelo.mlflow.version : 'sin MLflow'}) · ambiente ${esc(r.ambiente.id)} v${esc(r.ambiente.version)} (${esc(r.ambiente.nivel)})${r.ambiente.adaptador ? ' · <b>modelo del nivel 1 con adaptador: no ve los obstáculos</b>' : r.ambiente.misma_familia ? ` · <b>modelo de ${esc(r.ambiente.nivel_entrenado ?? '')} jugando en las condiciones de ${esc(r.ambiente.nivel)}</b>` : r.ambiente.compatible ? '' : ' · <b>ambiente no compatible</b>'} · servido por commit <code>${corto(r.servido_por.commit)}</code> · ${r.latencia.total_ms} ms (${r.latencia.por_paso_ms} ms por paso)</p>
         <p><b>${pct(r.resumen.aterrizajes)}</b> aterrizajes en ${r.resumen.episodios} épocas ${barraResultados(r.resumen.resultados, c.outcomes)} · contacto ${num(r.resumen.velocidad_contacto, 2)} m/s · error ${num(r.resumen.error_posicion)} m · ${num(r.resumen.combustible, 0)} kg</p>
@@ -322,200 +325,4 @@ export async function vistaComparar(el: HTMLElement, ids: string[]) {
       ['MLflow', ...col((r) => (r.mlflow ? `${esc(r.mlflow.modelo)} v${r.mlflow.version}` : '—'))],
       ['decisión', ...col((r) => `${pillDiseno(r.diseno?.estado)}<br>${esc(r.diseno?.decision ?? '—')}`)],
     ], 'comparar')}`
-}
-
-// ---------- replay 3D ----------
-// criterios de aterrizaje del ambiente (MAX_LANDING_* en rocket_env/rocket_landing.py); el radio de la plataforma viene de la API
-const CRITERIO = { vertical: 3, horizontal: 2, inclinacion: 10 }
-const MOTOR_T_MAX = 900 // K: el motor se apaga al superarla (MAX_ENGINE_TEMP)
-/** Si el usuario activó el sonido, sigue activo al cambiar de vuelo o de modelo (la página ya recibió un clic). */
-let sonidoActivo = false
-const ICONO = {
-  play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>',
-  pausa: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/></svg>',
-  reiniciar: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5"/></svg>',
-  altavoz: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>',
-  mudo: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m16 9 5 6M21 9l-5 6"/></svg>',
-  flecha: '<svg class="flecha" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg>',
-}
-
-export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados' | 'evaluacion'): Promise<() => void> {
-  let vuelos: Vuelo[], modo: string, nota: string
-  if (fuente === 'evaluacion') {
-    if (!ultimaEvaluacion || ultimaEvaluacion.modelo.run_id !== id) {
-      el.innerHTML = `<p><a href="#/ejecucion/${esc(id)}">← ejecución</a></p><p class="error">No hay una evaluación en vivo de ${esc(id)} en esta sesión. Lánzala desde la página de la ejecución.</p>`
-      return () => {}
-    }
-    vuelos = ultimaEvaluacion.vuelos
-    modo = 'Evaluación en vivo'
-    nota = `ejecutada por la API hace un momento · ${ultimaEvaluacion.suite.episodios} épocas, semilla inicial ${ultimaEvaluacion.suite.semilla_base}${ultimaEvaluacion.suite.viento !== null ? `, viento ${ultimaEvaluacion.suite.viento} m/s` : ''}`
-  } else {
-    vuelos = (await api.vuelos(id)).episodes
-    modo = 'Replay'
-    nota = 'vuelos grabados durante el entrenamiento (con exploración) y del modelo final (sin ruido)'
-  }
-  const c = await cargarCatalogo(), r = c.ejecuciones.find((e) => e.run_id === id)
-  const obstaculos: Obstaculo[] = fuente === 'evaluacion' ? ultimaEvaluacion!.ambiente.obstaculos : r?.obstaculos ?? []
-  const nivelVisto = fuente === 'evaluacion' ? ultimaEvaluacion!.ambiente.nivel : r?.nivel ?? 'N1'
-  const finales = vuelos.filter((v) => !v.epoch && !v.epoca_evaluacion)
-  const etiqueta = (v: Vuelo, _k: number) => v.epoch ? `Época ${entero(v.epoch)} · entrenamiento` : v.epoca_evaluacion ? `Evaluación · época ${v.epoca_evaluacion}` : `Modelo final · vuelo ${finales.indexOf(v) + 1} de ${finales.length}`
-  const amb = c.ambientes.find((a) => a.id === (fuente === 'evaluacion' ? ultimaEvaluacion!.ambiente.id : r?.ambiente_id))
-  const radio = amb?.radio_plataforma ?? 10, salida = amb?.altitud_salida ?? 600, pasos = amb?.pasos ?? 50
-  const etiquetas = [
-    `<span class="etiqueta destacada">${esc(nivelVisto)}${nivelVisto !== r?.nivel ? ` · jugando fuera de ${esc(r?.nivel ?? '')}${r?.nivel === 'N1' ? ' con adaptador' : ''}` : ''}</span>`,
-    r?.ambiente ? `<span class="etiqueta">${esc(r.ambiente)}</span>` : '',
-    r?.agente.nombre ? `<span class="etiqueta">${esc(r.agente.nombre)}</span>` : '',
-    obstaculos.length ? `<span class="etiqueta">${obstaculos.some((o) => o.tipo === 'pasarela') ? `pasarela y ${obstaculos.filter((o) => o.tipo !== 'pasarela').length} pilares` : `${obstaculos.length} torres`}</span>` : '',
-    r?.mlflow ? `<span class="etiqueta">${esc(r.mlflow.modelo)} v${r.mlflow.version}</span>` : '',
-    r?.git.commit ? `<span class="etiqueta">commit ${corto(r.git.commit)}</span>` : '',
-  ].join('')
-  const criterio = (id: string, nombre: string, limite: string) => `<li id="${id}"><span class="cr-k">${nombre}</span><span class="cr-lim">${limite}</span><span class="cr-v">—</span></li>`
-  const instrumento = (id: string, nombre: string, medidor = '', ancho = false) => `<div class="inst${ancho ? ' ancho' : ''}"><span class="inst-k">${nombre}</span><span class="inst-v" id="${id}">—</span>${medidor}</div>`
-  el.innerHTML = `
-    <section class="consola">
-      <header class="consola-cab">
-        <div class="consola-titulo">
-          <span class="modo ${fuente === 'evaluacion' ? 'modo-eval' : 'modo-replay'}">${esc(modo)}</span>
-          <h2>${esc(id)}</h2>${r?.estado === 'recomendado' ? pillEstado(r.estado) : ''}
-        </div>
-        <a class="btn-consola" href="#/ejecucion/${esc(id)}">Ficha y evaluación en vivo →</a>
-        <div class="consola-pie"><p class="consola-nota">${esc(nota)}</p><div class="etiquetas">${etiquetas}</div></div>
-      </header>
-      <div class="replay">
-        <div class="visor">
-          <div class="escena"><div id="visor3d"></div>
-            <div class="hud-panel hud-vuelo" aria-hidden="true">
-              <div><span class="hud-k">Altitud</span><span class="hud-v grande" id="hud-alt">—</span></div>
-              <div><span class="hud-k">Vel. vertical</span><span class="hud-v" id="hud-vz">—</span></div>
-              <div><span class="hud-k">Vel. horizontal</span><span class="hud-v" id="hud-vh">—</span></div>
-            </div>
-            <div class="hud-panel hud-estado"><span id="hud-ep"></span></div>
-            <div class="hud-panel hud-cinta" aria-hidden="true"><span>${salida} m</span><span class="cinta-barra"><i id="hud-cinta"></i></span><span>0 m</span></div>
-            <div class="hud-panel hud-pasos" aria-hidden="true">
-              <div class="pasos-txt"><b id="hud-paso"></b><span id="hud-accion"></span></div>
-              <span class="pasos-barra"><i id="hud-pasos"></i></span>
-            </div>
-          </div>
-          <div class="transporte">
-            <button type="button" class="btn-icono principal" id="rp-play" aria-label="Pausa">${ICONO.pausa}</button>
-            <button type="button" class="btn-icono" id="rp-reiniciar" aria-label="Reiniciar">${ICONO.reiniciar}</button>
-            <div class="linea-tiempo"><input type="range" id="rp-scrub" min="0" max="1" value="0" step="1" aria-label="tiempo"><div class="marcas" id="rp-marcas"></div></div>
-            <span id="rp-clock" class="mono reloj">0,0 s</span>
-            <div class="segmentos" role="group" aria-label="velocidad de reproducción">${[1, 2, 4, 8, 16, 32].map((v) => `<button type="button" data-v="${v}" aria-pressed="${v === 4}">${v}×</button>`).join('')}</div>
-            <span id="rp-eff" class="mono efectiva" title="velocidad efectiva (con la cámara lenta al aterrizar)"></span>
-            <button type="button" class="btn-sonido" id="rp-sonido" aria-pressed="false"></button>
-          </div>
-          <details class="opciones">
-            <summary>Cámara y efectos</summary>
-            <div class="opciones-cuerpo">
-              <select id="rp-camara" aria-label="cámara"><option value="seguir">Cámara: seguimiento</option><option value="torre">Cámara: torre con teleobjetivo</option><option value="abordo">Cámara: a bordo</option></select>
-              <select id="rp-cohete" aria-label="cohete"><option value="nave">Cohete: nave de acero</option><option value="propulsor">Cohete: propulsor</option></select>
-              <label class="interruptor"><input type="checkbox" id="rp-follow" checked> seguir al cohete</label>
-              <label class="interruptor"><input type="checkbox" id="rp-cine" checked> cámara cinematográfica</label>
-              <label class="interruptor"><input type="checkbox" id="rp-slowmo" checked> cámara lenta al aterrizar</label>
-              <label class="interruptor"><input type="checkbox" id="rp-fantasmas" checked> dejar fantasmas</label>
-              <label class="interruptor"><input type="checkbox" id="rp-guias" checked> guías (trayectoria, viento, zona)</label>
-              <label class="interruptor"><input type="checkbox" id="rp-hq" checked> calidad alta (sombras y brillo)</label>
-              <label class="interruptor"><input type="checkbox" id="rp-escudo"> escudo térmico de la nave</label>
-            </div>
-          </details>
-        </div>
-        <aside class="lateral">
-          <label class="campo">Vuelo <select id="rp-vuelo">${vuelos.map((v, k) => `<option value="${k}">${esc(etiqueta(v, k))} · ${esc(v.reason)} · ${v.steps} pasos</option>`).join('')}</select></label>
-          <div class="resultado" id="rp-resultado"><span class="resultado-principal" id="hud-res"></span><span class="mono" id="hud-rec"></span></div>
-          <div class="bloque">
-            <h3>Criterios de aterrizaje <span>se juzgan al tocar el suelo</span></h3>
-            <ul class="criterios">
-              ${criterio('cr-vz', 'Velocidad vertical', `≤ ${num(CRITERIO.vertical, 0)} m/s`)}
-              ${criterio('cr-vh', 'Velocidad horizontal', `≤ ${num(CRITERIO.horizontal, 0)} m/s`)}
-              ${criterio('cr-incl', 'Inclinación', `≤ ${num(CRITERIO.inclinacion, 0)}°`)}
-              ${criterio('cr-dist', 'Distancia al centro', `< ${num(radio, 0)} m`)}
-            </ul>
-          </div>
-          <div class="bloque">
-            <h3>Telemetría</h3>
-            <div class="instrumentos" id="rp-telemetria">
-              ${instrumento('tm-motor', 'Motor', '<span class="medidor acento"><i id="tm-motor-b"></i></span>')}
-              ${instrumento('tm-fuel', 'Combustible', '<span class="medidor"><i id="tm-fuel-b"></i></span>')}
-              ${instrumento('tm-temp', `Temperatura del motor · se apaga a ${MOTOR_T_MAX} K`, '<span class="medidor" id="tm-temp-m"><i id="tm-temp-b"></i></span>', true)}
-              ${instrumento('tm-viento', 'Viento')}
-              ${instrumento('tm-alt', 'Altitud')}
-              ${instrumento('tm-aire', 'Aire: temperatura y presión', '', true)}
-            </div>
-          </div>
-          <p class="muted" id="rp-fantasmas-n"></p>
-          <details class="ayuda"><summary>Cómo leer este replay</summary>
-            <p>La velocidad de reproducción no cambia las reglas ni el paso físico (0,1 s): solo cuánto tarda en verse. Entre dos muestras la posición se interpola con las velocidades grabadas.</p>
-            <p>Arrastra para girar la cámara, rueda para acercar, doble clic para recentrar. El cohete se dibuja a tamaño real (42 m); los fantasmas son las trayectorias de los vuelos anteriores, con el color de su resultado.</p>
-          </details>
-        </aside>
-      </div>
-    </section>`
-  const visor = el.querySelector<HTMLElement>('#visor3d')!
-  const rp = new Reproductor(visor, { padRadius: radio, startAltitude: salida })
-  rp.setObstaculos(obstaculos)
-  if (import.meta.env.DEV) (window as unknown as { __rp: Reproductor }).__rp = rp // solo en desarrollo: lo usan las pruebas con el navegador
-  const $ = (s: string) => el.querySelector<HTMLElement>(s)!
-  const sel = el.querySelector<HTMLSelectElement>('#rp-vuelo')!, play = el.querySelector<HTMLButtonElement>('#rp-play')!, scrub = el.querySelector<HTMLInputElement>('#rp-scrub')!
-  const hud = { alt: $('#hud-alt'), vz: $('#hud-vz'), vh: $('#hud-vh'), paso: $('#hud-paso'), accion: $('#hud-accion'), pasos: $('#hud-pasos'), cinta: $('#hud-cinta'), rec: $('#hud-rec'), reloj: $('#rp-clock'), eff: $('#rp-eff') }
-  const tm = { motor: $('#tm-motor'), motorB: $('#tm-motor-b'), fuel: $('#tm-fuel'), fuelB: $('#tm-fuel-b'), temp: $('#tm-temp'), tempB: $('#tm-temp-b'), tempM: $('#tm-temp-m'), viento: $('#tm-viento'), aire: $('#tm-aire'), alt: $('#tm-alt') }
-  const criterios = ['#cr-vz', '#cr-vh', '#cr-incl', '#cr-dist'].map((s) => ({ li: $(s), v: $(`${s} .cr-v`) }))
-  let actual = vuelos[0], reproduciendo: boolean | null = null
-  const cargar = (k: number) => {
-    actual = vuelos[k]; rp.cargar(actual)
-    $('#rp-fantasmas-n').textContent = rp.numeroFantasmas ? `Fantasmas en escena: ${rp.numeroFantasmas}` : ''
-    scrub.max = String(rp.total - 1)
-    $('#hud-ep').textContent = etiqueta(actual, k)
-    const color = COLOR_RESULTADO[actual.reason] ?? 'var(--neutral)', n = Math.max(1, rp.total - 1)
-    $('#rp-resultado').style.setProperty('--c-res', color)
-    $('#hud-res').innerHTML = `<span style="color: ${color}">${esc(ICONO_RESULTADO[actual.reason] ?? '')}</span> ${esc(actual.reason)} · recompensa ${num(actual.reward, 0)}`
-    $('#rp-marcas').innerHTML = actual.step_marks.map((m, j, todas) => `<i style="left: ${((m.i / n) * 100).toFixed(2)}%${j === todas.length - 1 ? `; background: ${color}` : ''}"${j === todas.length - 1 ? ' class="final"' : ''}></i>`).join('')
-  }
-  rp.onFrame = (s) => {
-    const f = actual.f, i = s.indice, fin = i >= rp.total - 1
-    const vz = f.vz[i], vh = Math.hypot(f.vx[i], f.vy[i]), dist = Math.hypot(f.x[i], f.y[i])
-    const incl = (Math.acos(Math.max(-1, Math.min(1, f.dz[i]))) * 180) / Math.PI
-    hud.alt.textContent = `${num(f.z[i])} m`; hud.vz.textContent = `${num(vz)} m/s`; hud.vh.textContent = `${num(vh)} m/s`
-    hud.paso.textContent = `Paso ${s.paso}/${pasos}`; hud.accion.textContent = s.etiqueta
-    hud.pasos.style.width = `${Math.min(100, (s.paso / pasos) * 100)}%`
-    hud.cinta.style.height = `${Math.min(100, Math.max(0, (f.z[i] / salida) * 100))}%`
-    hud.rec.textContent = `acumulado ${num(s.recompensaAcumulada)} · ${actual.steps} pasos`
-    scrub.value = String(i); hud.reloj.textContent = `${num(f.t[i])} / ${num(f.t[f.t.length - 1])} s`
-    hud.eff.textContent = `${num(s.velocidadEfectiva, 1)}×`
-    if (rp.playing !== reproduciendo) { reproduciendo = rp.playing; play.innerHTML = reproduciendo ? ICONO.pausa : ICONO.play; play.setAttribute('aria-label', reproduciendo ? 'Pausa' : 'Reproducir') }
-    // al tocar el suelo (último fotograma) un criterio incumplido se marca como fallo; durante el vuelo solo se indica si ya se cumple
-    ;[[`${num(Math.abs(vz))} m/s`, Math.abs(vz) <= CRITERIO.vertical], [`${num(vh)} m/s`, vh <= CRITERIO.horizontal], [`${num(incl)}°`, incl <= CRITERIO.inclinacion], [`${num(dist)} m`, dist < radio]].forEach(([texto, ok], k) => {
-      criterios[k].v.textContent = texto as string; criterios[k].li.classList.toggle('cumple', ok as boolean); criterios[k].li.classList.toggle('falla', fin && !ok)
-    })
-    tm.motor.textContent = f.on[i] ? `ON · ${Math.round(f.thr[i] * 100)} %` : 'OFF'; tm.motorB.style.width = `${f.on[i] ? f.thr[i] * 100 : 0}%`
-    tm.fuel.textContent = `${num(f.fuel[i], 0)} kg`; tm.fuelB.style.width = `${(f.fuel[i] / Math.max(1, f.fuel[0])) * 100}%`
-    tm.temp.textContent = `${num(f.eng_t[i], 0)} K`; tm.tempB.style.width = `${Math.min(100, (f.eng_t[i] / MOTOR_T_MAX) * 100)}%`; tm.tempM.classList.toggle('alerta', f.eng_t[i] > MOTOR_T_MAX * 0.85)
-    tm.viento.innerHTML = `${ICONO.flecha.replace('<svg', `<svg style="transform: rotate(${(-Math.atan2(f.wy[i], f.wx[i]) * 180) / Math.PI}deg)"`)}${num(f.wh[i])} m/s`
-    tm.aire.textContent = `${num(f.air_t[i])} °C · ${num(f.p[i])} kPa`
-    tm.alt.textContent = `${num(f.z[i])} m`
-  }
-  rp.onEnd = () => { if (fuente === 'grabados' && sel.selectedIndex < vuelos.length - 1) setTimeout(() => { sel.selectedIndex += 1; cargar(sel.selectedIndex) }, 900) }
-  sel.addEventListener('change', () => cargar(sel.selectedIndex))
-  play.addEventListener('click', () => { if (!rp.playing && rp.indice >= rp.total - 1) rp.reiniciar(); else rp.playing = !rp.playing })
-  $('#rp-reiniciar').addEventListener('click', () => rp.reiniciar())
-  const botonSonido = $('#rp-sonido')
-  const pintarSonido = (on: boolean) => { botonSonido.setAttribute('aria-pressed', String(on)); botonSonido.innerHTML = on ? `${ICONO.altavoz}<span>Silenciar</span>` : `${ICONO.mudo}<span>Activar sonido</span>` }
-  botonSonido.addEventListener('click', () => { sonidoActivo = rp.sonido.alternar(); pintarSonido(sonidoActivo) })
-  if (sonidoActivo) rp.sonido.alternar()
-  pintarSonido(sonidoActivo)
-  scrub.addEventListener('input', () => rp.ir(+scrub.value))
-  const segmentos = [...el.querySelectorAll<HTMLButtonElement>('.segmentos button')]
-  segmentos.forEach((b) => b.addEventListener('click', () => { rp.speed = +b.dataset.v!; segmentos.forEach((o) => o.setAttribute('aria-pressed', String(o === b))) }))
-  const casilla = (id: string, f: (on: boolean) => void) => el.querySelector<HTMLInputElement>(id)!.addEventListener('change', (e) => f((e.target as HTMLInputElement).checked))
-  casilla('#rp-follow', (on) => { rp.follow = on })
-  casilla('#rp-cine', (on) => { rp.cine = on })
-  casilla('#rp-slowmo', (on) => { rp.slowmo = on })
-  casilla('#rp-fantasmas', (on) => { rp.fantasmas = on; if (!on) { rp.limpiarFantasmas(); $('#rp-fantasmas-n').textContent = '' } })
-  casilla('#rp-guias', (on) => rp.setGuias(on))
-  casilla('#rp-hq', (on) => rp.setCalidad(on ? 'alta' : 'baja'))
-  casilla('#rp-escudo', (on) => rp.setEscudo(on))
-  el.querySelector<HTMLSelectElement>('#rp-camara')!.addEventListener('change', (e) => rp.setCamara((e.target as HTMLSelectElement).value as ModoCamara))
-  el.querySelector<HTMLSelectElement>('#rp-cohete')!.addEventListener('change', (e) => rp.setCohete((e.target as HTMLSelectElement).value as Cohete))
-  cargar(0)
-  return () => rp.destruir()
 }

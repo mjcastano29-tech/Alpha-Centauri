@@ -1,27 +1,47 @@
-// Aplicación web de Alpha Centauri: catálogo de experimentos, modelos históricos, evaluación en vivo y replay 3D.
+// PROJECT ELYNDRA (Alpha Centauri · Rocket Landing): catálogo de experimentos, modelos históricos, evaluación en vivo y replay 3D.
 // Rutas por hash: #/ (cohete) · #/inicio/<experimento>[/<run>] · #/catalogo · #/experimentos[/<id>] · #/ejecucion/<id> · #/comparar/<a,b> · #/replay/<id> · #/replay/<id>/evaluacion · #/incidente
+import '@fontsource-variable/inter'
+import '@fontsource-variable/space-grotesk'
+import '@fontsource-variable/jetbrains-mono'
 import './estilos.css'
 import * as api from './api'
 import { corto, esc } from './ui'
 import { vistaCatalogo, vistaComparar, vistaEjecucion, vistaExperimentos, vistaIncidente, vistaInicio, vistaReplay } from './vistas'
 
 const app = document.querySelector<HTMLElement>('#app')!
-const cabecera = document.querySelector<HTMLElement>('#estado-api')!
+const estadoApiEl = document.querySelector<HTMLDetailsElement>('#estado-api')!
 let limpiar: (() => void) | null = null
 
+/** Indicador de conexión de la cabecera; al desplegarlo muestra commit, catálogo, recomendado y ambientes que sirve la API. */
 async function estadoApi() {
+  const resumen = estadoApiEl.querySelector('summary span')!, cuerpo = estadoApiEl.querySelector<HTMLElement>('.estado-api-cuerpo')!
   try {
     const v = await api.version()
-    cabecera.innerHTML = `<span class="ok">API conectada</span> · commit <code>${corto(v.commit)}</code> · catálogo v${v.catalogo.version} · recomendado <b>${esc(v.catalogo.recomendado ?? '—')}</b> · ambientes ${v.ambientes.map((a) => `${esc(a.nivel)} ${esc(a.id)} v${esc(a.version)}`).join(' · ')} · <a href="${esc(api.API)}/docs" target="_blank" rel="noopener">docs de la API</a>`
+    estadoApiEl.classList.add('ok')
+    resumen.textContent = `API conectada · catálogo v${v.catalogo.version}`
+    cuerpo.innerHTML = `<dl>
+        <dt>Estado</dt><dd><span class="ok">API conectada</span></dd>
+        <dt>Commit</dt><dd><code>${corto(v.commit)}</code></dd>
+        <dt>Catálogo</dt><dd>v${v.catalogo.version}</dd>
+        <dt>Recomendado</dt><dd><b>${esc(v.catalogo.recomendado ?? '—')}</b></dd>
+        <dt>Ambientes</dt><dd>${v.ambientes.map((a) => `${esc(a.nivel)} ${esc(a.id)} v${esc(a.version)}`).join('<br>')}</dd>
+      </dl>
+      <p><a href="${esc(api.API)}/docs" target="_blank" rel="noopener">Documentación de la API →</a></p>`
   } catch (e) {
-    cabecera.innerHTML = `<span class="error">Sin conexión con la API en <code>${esc(api.API)}</code></span> · ${esc((e as Error).message)} · configura <code>VITE_API_BASE_URL</code>`
+    estadoApiEl.classList.add('error')
+    resumen.textContent = 'Sin conexión con la API'
+    cuerpo.innerHTML = `<p class="error">Sin conexión con la API en <code>${esc(api.API)}</code></p><p>${esc((e as Error).message)} · configura <code>VITE_API_BASE_URL</code></p>`
   }
 }
+document.addEventListener('click', (e) => { if (estadoApiEl.open && !estadoApiEl.contains(e.target as Node)) estadoApiEl.open = false })
 
 async function enrutar() {
   limpiar?.(); limpiar = null
+  estadoApiEl.open = false
   const ruta = location.hash.replace(/^#\/?/, '')
   const partes = ruta.split('/').map(decodeURIComponent)
+  const seccion = !ruta || ['inicio', 'replay'].includes(partes[0]) ? '#/' : ['ejecucion', 'comparar'].includes(partes[0]) ? '#/catalogo' : `#/${partes[0]}`
+  document.querySelectorAll<HTMLAnchorElement>('.nav a').forEach((a) => { if (a.getAttribute('href') === seccion) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current') })
   app.innerHTML = '<p class="estado">Cargando…</p>'
   try {
     if (!ruta) limpiar = await vistaInicio(app)

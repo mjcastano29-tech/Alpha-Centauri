@@ -264,7 +264,7 @@ export class Reproductor {
     this.torres.clear()
     const r = construirObstaculos(this.T, lista, this.torres)
     this.torreBeacons = r.balizas; this.pasarela = r.pasarela
-    this.obstaculos = lista.filter((o) => o.tipo !== 'pasarela').map((o) => ({ x: o.x, z: -o.y, r: o.radio + 4, top: terrainHeight(o.x, -o.y) + o.altura + 12 }))
+    this.obstaculos = lista.filter((o) => o.tipo !== 'pasarela').map((o) => ({ x: o.x, z: -o.y, r: o.radio + 14, top: terrainHeight(o.x, -o.y) + o.altura + 12 })) // margen amplio: que la torre tampoco llene el encuadre
   }
   /** Escudo térmico de la nave (losetas negras en la mitad −z). */
   setEscudo(on: boolean) { this.ships.nave.heatShield?.(on) }
@@ -451,9 +451,10 @@ export class Reproductor {
       if (this.giro.plano !== plano) { this.giro.plano = plano; this.giro.angulo = 0 }
       const ox = d.x - p.x, oz = d.z - p.z, cand = this.tmp4
       const rotar = (a: number) => cand.set(p.x + ox * Math.cos(a) - oz * Math.sin(a), d.y, p.z + ox * Math.sin(a) + oz * Math.cos(a))
-      if (this.tapado(rotar(this.giro.angulo), look)) {
+      const ve = (cam: THREE.Vector3) => !this.tapado(cam, look) && !this.tapado(cam, p) // el centro y la base del cohete, despejados
+      if (!ve(rotar(this.giro.angulo))) {
         for (const a of [0.45, -0.45, 0.9, -0.9, 1.35, -1.35, 1.8, -1.8, Math.PI]) {
-          if (this.tapado(rotar(this.giro.angulo + a), look)) continue
+          if (!ve(rotar(this.giro.angulo + a))) continue
           this.giro.angulo += a
           if (!cambio && !this.snap) { this.dir.delta.copy(this.camera.position).sub(cand); this.dir.mezcla = 0 }
           break
