@@ -1,7 +1,7 @@
 // Vistas de la aplicación: catálogo, detalle de una ejecución (con evaluación en vivo), comparación y replay 3D.
 import * as api from './api'
 import type { Ambiente, Catalogo, Detalle, Obstaculo, Resumen, ResultadoEvaluacion, Vuelo } from './api'
-import { Reproductor, type Cohete, type ModoCamara } from './escena'
+import { Reproductor, type Cohete, type ModoCamara } from './escena/index'
 import { barraResultados, COLOR_RESULTADO, corto, entero, esc, ICONO_RESULTADO, lineaSvg, num, pct, pillDiseno, pillEstado, tabla } from './ui'
 
 const COLORES = ['var(--series-1)', 'var(--series-2)', 'var(--series-3)', 'var(--series-4)']
@@ -454,6 +454,7 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
   const visor = el.querySelector<HTMLElement>('#visor3d')!
   const rp = new Reproductor(visor, { padRadius: radio, startAltitude: salida })
   rp.setObstaculos(obstaculos)
+  if (import.meta.env.DEV) (window as unknown as { __rp: Reproductor }).__rp = rp // solo en desarrollo: lo usan las pruebas con el navegador
   const $ = (s: string) => el.querySelector<HTMLElement>(s)!
   const sel = el.querySelector<HTMLSelectElement>('#rp-vuelo')!, play = el.querySelector<HTMLButtonElement>('#rp-play')!, scrub = el.querySelector<HTMLInputElement>('#rp-scrub')!
   const hud = { alt: $('#hud-alt'), vz: $('#hud-vz'), vh: $('#hud-vh'), paso: $('#hud-paso'), accion: $('#hud-accion'), pasos: $('#hud-pasos'), cinta: $('#hud-cinta'), rec: $('#hud-rec'), reloj: $('#rp-clock'), eff: $('#rp-eff') }
@@ -511,7 +512,7 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
   casilla('#rp-slowmo', (on) => { rp.slowmo = on })
   casilla('#rp-fantasmas', (on) => { rp.fantasmas = on; if (!on) { rp.limpiarFantasmas(); $('#rp-fantasmas-n').textContent = '' } })
   casilla('#rp-guias', (on) => rp.setGuias(on))
-  casilla('#rp-hq', (on) => rp.setCalidad(on))
+  casilla('#rp-hq', (on) => rp.setCalidad(on ? 'alta' : 'baja'))
   casilla('#rp-escudo', (on) => rp.setEscudo(on))
   el.querySelector<HTMLSelectElement>('#rp-camara')!.addEventListener('change', (e) => rp.setCamara((e.target as HTMLSelectElement).value as ModoCamara))
   el.querySelector<HTMLSelectElement>('#rp-cohete')!.addEventListener('change', (e) => rp.setCohete((e.target as HTMLSelectElement).value as Cohete))
