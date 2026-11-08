@@ -88,7 +88,7 @@ Lectura:
 
 ## Rollback demostrado en producción
 
-La guía define rollback como restaurar una versión anterior identificada y comprobar su funcionamiento. Se hizo en el nivel 3 contra la API pública, con `python catalogo.py` para cambiar el catálogo y `python comprobar_api.py` para comprobar lo servido. Cada paso fue un PR revisado y fusionado en `main`:
+La guía define rollback como restaurar una versión anterior identificada y comprobar su funcionamiento. Se hizo el 5 de noviembre en este nivel 3 (torres, 0.3), antes de que el equipo lo sustituyera por la pasarela (0.5); el procedimiento es el mismo para cualquier nivel. Se hizo contra la API pública, con `python catalogo.py` para cambiar el catálogo y `python comprobar_api.py` para comprobar lo servido. Cada paso fue un PR revisado y fusionado en `main`:
 
 | Paso | PR | Commit servido | Catálogo | Recomendado de N3 servido | Evaluación en vivo (20 épocas de la suite v1) | Evidencia |
 |---|---|---|---|---|---|---|

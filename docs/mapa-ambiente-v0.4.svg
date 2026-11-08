@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 500" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13">
+  <title>Mapa del ambiente v0.4 (nivel 2 v1): pasarela con abertura desplazada</title>
+  <defs>
+    <marker id="f" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1d2126"/></marker>
+  </defs>
+  <rect width="980" height="500" fill="#fdfdfb"/>
+
+  <!-- vista cenital, escala 2 px = 1 m, centro (245, 255); el eje y del ambiente apunta hacia arriba en el mapa -->
+  <g transform="translate(245,255)">
+    <text x="-225" y="-225" font-weight="600" font-size="15" fill="#1d2126">Vista cenital (escala 2 px = 1 m)</text>
+    <circle r="180" fill="#8a8f99" fill-opacity="0.28" stroke="#5c6069" stroke-width="2"/>
+    <text x="-60" y="-190" fill="#5c6069" font-size="11">pasarela: radio 90 m, a 180 m de altura</text>
+    <rect x="-100" y="-100" width="200" height="200" fill="none" stroke="#9aa3ad" stroke-dasharray="6 4"/>
+    <text x="-96" y="-106" fill="#5d6572" font-size="11">cuadrado de salida ±50 m (queda bajo la pasarela)</text>
+    <circle r="20" fill="#e4efeb" stroke="#1f6f5c" stroke-width="2"/>
+    <text x="0" y="4" text-anchor="middle" fill="#1f6f5c" font-weight="600" font-size="10">plataforma</text>
+    <!-- abertura en (28, 12): x → +56 px, y → −24 px -->
+    <circle cx="56" cy="-24" r="32" fill="#fdfdfb" stroke="#b8372a" stroke-width="2.5"/>
+    <text x="84" y="-30" fill="#b8372a" font-weight="600">abertura: radio 16 m</text>
+    <text x="84" y="-15" fill="#b8372a" font-size="11">centro en (28, 12) m, a 30,5 m de la plataforma</text>
+    <line x1="0" y1="0" x2="56" y2="-24" stroke="#1d2126" stroke-width="1.2" stroke-dasharray="3 3"/>
+    <!-- pilares en el borde, azimuts 45°, 135°, 225°, 315° -->
+    <g fill="#4e2a1f"><circle cx="127.3" cy="-127.3" r="5"/><circle cx="-127.3" cy="-127.3" r="5"/><circle cx="-127.3" cy="127.3" r="5"/><circle cx="127.3" cy="127.3" r="5"/></g>
+    <text x="134" y="-134" fill="#4e2a1f" font-size="11">pilar (r 2,5 m)</text>
+    <line x1="-200" y1="200" x2="-160" y2="200" stroke="#1d2126" marker-end="url(#f)"/><text x="-155" y="204" fill="#1d2126">x</text>
+    <line x1="-200" y1="200" x2="-200" y2="160" stroke="#1d2126" marker-end="url(#f)"/><text x="-208" y="156" fill="#1d2126">y</text>
+  </g>
+
+  <!-- vista lateral, 1 px = 2 m; suelo en y = 420; 600 m = 300 px -->
+  <g transform="translate(540,0)">
+    <text x="0" y="30" font-weight="600" font-size="15" fill="#1d2126">Vista lateral (escala 1 px = 2 m)</text>
+    <line x1="0" y1="420" x2="430" y2="420" stroke="#4e2a1f" stroke-width="2"/>
+    <text x="4" y="436" fill="#5d6572" font-size="11">suelo z = 0</text>
+    <line x1="80" y1="120" x2="350" y2="120" stroke="#9aa3ad" stroke-dasharray="6 4"/>
+    <text x="84" y="114" fill="#5d6572">salida: z = 600 m</text>
+    <rect x="200" y="416" width="30" height="4" fill="#1f6f5c"/>
+    <text x="215" y="450" text-anchor="middle" fill="#1f6f5c" font-size="11">plataforma</text>
+    <!-- pasarela a 180 m → y = 420 − 90 = 330; radio 90 m → 45 px a cada lado del centro (x = 215) -->
+    <rect x="170" y="328" width="52" height="4" fill="#8a8f99"/><rect x="266" y="328" width="39" height="4" fill="#8a8f99"/>
+    <rect x="130" y="328" width="40" height="4" fill="#8a8f99"/>
+    <rect x="130" y="332" width="3" height="88" fill="#4e2a1f"/><rect x="302" y="332" width="3" height="88" fill="#4e2a1f"/>
+    <text x="310" y="333" fill="#5c6069" font-size="11">pasarela a 180 m (grosor 3 m)</text>
+    <text x="232" y="322" fill="#b8372a" font-size="11">abertura (32 m de ancho)</text>
+    <!-- ruta: desde la salida hacia la abertura, cruce y traslado hacia la plataforma -->
+    <path d="M 150 120 C 200 180, 240 250, 244 326 C 246 350, 236 380, 218 416" fill="none" stroke="#1f6f5c" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#f)"/>
+    <text x="4" y="200" fill="#1f6f5c" font-size="11">1. alinearse con la abertura antes de llegar</text>
+    <text x="4" y="214" fill="#1f6f5c" font-size="11">2. cruzar frenando</text>
+    <text x="4" y="228" fill="#1f6f5c" font-size="11">3. trasladarse 30 m hasta la plataforma</text>
+    <rect x="130" y="290" width="175" height="38" fill="#ffb347" opacity="0.25"/>
+    <text x="4" y="476" fill="#5d6572" font-size="11">franja naranja: en los 20 m sobre la pasarela, fuera de la abertura, el potencial baja hasta 8 puntos; el objetivo horizontal</text>
+    <text x="4" y="490" fill="#5d6572" font-size="11">del potencial es la abertura por encima de la pasarela y la plataforma por debajo</text>
+  </g>
+</svg>

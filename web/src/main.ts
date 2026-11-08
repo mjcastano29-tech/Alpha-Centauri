@@ -1,9 +1,9 @@
 // Aplicación web de Alpha Centauri: catálogo de experimentos, modelos históricos, evaluación en vivo y replay 3D.
-// Rutas por hash: #/ · #/ejecucion/<id> · #/comparar/<a,b> · #/replay/<id> · #/replay/<id>/evaluacion · #/incidente
+// Rutas por hash: #/ (cohete) · #/inicio/<experimento>[/<run>] · #/catalogo · #/experimentos[/<id>] · #/ejecucion/<id> · #/comparar/<a,b> · #/replay/<id> · #/replay/<id>/evaluacion · #/incidente
 import './estilos.css'
 import * as api from './api'
 import { corto, esc } from './ui'
-import { vistaCatalogo, vistaComparar, vistaEjecucion, vistaIncidente, vistaReplay } from './vistas'
+import { vistaCatalogo, vistaComparar, vistaEjecucion, vistaExperimentos, vistaIncidente, vistaInicio, vistaReplay } from './vistas'
 
 const app = document.querySelector<HTMLElement>('#app')!
 const cabecera = document.querySelector<HTMLElement>('#estado-api')!
@@ -24,16 +24,19 @@ async function enrutar() {
   const partes = ruta.split('/').map(decodeURIComponent)
   app.innerHTML = '<p class="estado">Cargando…</p>'
   try {
-    if (!ruta) await vistaCatalogo(app)
+    if (!ruta) limpiar = await vistaInicio(app)
+    else if (partes[0] === 'inicio') limpiar = await vistaInicio(app, partes[1], partes[2])
+    else if (partes[0] === 'catalogo') await vistaCatalogo(app)
     else if (partes[0] === 'ejecucion' && partes[1]) await vistaEjecucion(app, partes[1])
     else if (partes[0] === 'comparar' && partes[1]) await vistaComparar(app, partes[1].split(','))
+    else if (partes[0] === 'experimentos') await vistaExperimentos(app, partes[1])
     else if (partes[0] === 'incidente') await vistaIncidente(app)
     else if (partes[0] === 'replay' && partes[1]) limpiar = await vistaReplay(app, partes[1], partes[2] === 'evaluacion' ? 'evaluacion' : 'grabados')
-    else app.innerHTML = `<p class="error">Ruta desconocida: ${esc(ruta)}</p><p><a href="#/">Ir al catálogo</a></p>`
+    else app.innerHTML = `<p class="error">Ruta desconocida: ${esc(ruta)}</p><p><a href="#/">Ir al inicio</a></p>`
   } catch (e) {
     const err = e as api.ErrorApi
     const quien = !ruta ? 'No se pudo cargar el catálogo desde la API (revisa VITE_API_BASE_URL).' : err.status === 404 ? 'No existe.' : 'Error de la API.'
-    app.innerHTML = `<p class="error">${quien} ${esc(err.message)}</p><p><a href="#/">Volver al catálogo</a></p>`
+    app.innerHTML = `<p class="error">${quien} ${esc(err.message)}</p><p><a href="#/">Volver al inicio</a></p>`
   }
   window.scrollTo(0, 0)
 }

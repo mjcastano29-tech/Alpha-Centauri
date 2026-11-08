@@ -41,7 +41,107 @@
 <body><main>
 <h1>Diagnóstico frente al enunciado del proyecto final</h1>
 <p><strong>Equipo Alpha Centauri · Rocket Landing · 2 de noviembre de 2026 · rama <code>fase-3d</code> (commit <code>c0058c4</code>) + rama <code>isaias/arreglos-rapidos</code> sin fusionar</strong></p>
+<p>Las secciones 1 a 6 son el diagnóstico inicial del 2 de noviembre; lo hecho desde entonces está en las actualizaciones, de la más reciente a la más antigua.</p>
 <p>Contraste entre lo que pide el enunciado del proyecto final de MLOps (30 de octubre de 2026) y lo que hay en el repositorio hoy. Cada afirmación remite a un archivo o a un comando; lo que no se ha podido comprobar se dice.</p>
+<h2>Diagnóstico · 6 de noviembre de 2026: estado frente al enunciado tras el nivel 3</h2>
+<p>Revisión hecha sobre <code>main</code> en el commit <code>d19acd0</code> (PR #4 a #8 de jhrojas02 fusionados el 5 de noviembre), comprobada desde fuera: 79 pruebas pasan, <code>python cli.py verificar</code> da OK en las 15 ejecuciones, la API pública sirve ese commit con el catálogo v10 y los tres ambientes, la web muestra la vista de incidente y el catálogo por nivel.</p>
+<h3>Resumen por hito</h3>
+<table>
+<thead>
+<tr>
+<th>Hito del enunciado</th>
+<th>Resultado verificable que pide</th>
+<th>Estado hoy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1 · Reproducir</td>
+<td>contrato, baseline, primer run y despliegue inicial</td>
+<td><strong>Completo</strong> desde el 3 de noviembre (release <code>v0.2.0</code>, web en Vercel, API y MLflow en Render).</td>
+</tr>
+<tr>
+<td>2 · Experimentar</td>
+<td>niveles, hipótesis, catálogo y modelos históricos</td>
+<td><strong>Completo</strong>: tres niveles con ficha y mapa (0.1.1, 0.2, 0.3), 15 configuraciones con hipótesis, cambio, presupuesto y decisión (<code>configs/</code>, etiquetas en MLflow, manifiestos de la sección 11), catálogo por nivel con recomendado y anterior (v10), modelos históricos cargables y evaluables desde la web. Tres semillas del finalista en N1 (97, 99 y 97,5 %) y en N3 (89,3 ± 4,2 %); y en N2 (86.0, 93.5, 85.5 %: 88.3 ± 4.5 %; la tercera, rechazada por el pipeline frente a la semilla 1).</td>
+</tr>
+<tr>
+<td>3 · Operar</td>
+<td>pipeline, comparaciones y detección de degradación</td>
+<td><strong>Completo</strong>: pipeline Prefect de ocho etapas con criterio de aceptación y evidencia por ejecución (11 ejecuciones del pipeline en <code>pipelines/ejecuciones/</code>), comparación en la web, degradación medida con viento (suite v1) y con el cambio de nivel (<code>incidente.py</code>, <code>GET /incidentes</code>, vista <code>#/incidente</code>). Falta una <strong>vista de monitoreo</strong> de la operación (salud y latencia de la API, historial de decisiones) distinta de la del incidente.</td>
+</tr>
+<tr>
+<td>4 · Recuperar y defender</td>
+<td>intervención, rollback, release e informe</td>
+<td><strong>A medias</strong>: intervención hecha y decidida con evidencia (tres reentrenamientos en N3, el seleccionado 92 % frente a 82,5 % del modelo de N2 sin reentrenar); rollback demostrado en producción con evidencia (<code>catalogo.py restaurar</code>, catálogo v9, API comprobada a los 84 s y 164 s, vuelta al recomendado en v10), pero no desde la web. Faltan la release final (tag), el informe y el ensayo de la defensa.</td>
+</tr>
+</tbody>
+</table>
+<h3>Cobertura estimada de la rúbrica</h3>
+<table>
+<thead>
+<tr>
+<th>Criterio (peso)</th>
+<th>Estimación</th>
+<th>Qué la sostiene</th>
+<th>Qué falta</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Versionamiento y recuperación (30 %)</td>
+<td>≈ 90 %</td>
+<td>manifiestos con commit completo, SHA-256 del modelo y la configuración, <code>model_uri</code>, registro de MLflow con 6 versiones por familia, catálogo versionado con historial, rollback demostrado y comprobado en la API</td>
+<td>7 de las 15 ejecuciones se entrenaron con cambios sin commit (marcadas con <code>*</code> en el catálogo; el código que faltaba por confirmar era el del propio nivel o el pipeline); la suite reservada no se ha aplicado todavía a los finalistas</td>
+</tr>
+<tr>
+<td>Diseño experimental y análisis (25 %)</td>
+<td>≈ 85 %</td>
+<td>cadena de hipótesis con rechazos conservados en los tres niveles, dificultad medida con el adaptador, variabilidad entre semillas, transferencia como hipótesis explícita</td>
+<td>la ficha de N3 no tiene las secciones "Cinco transiciones" ni "Posibles trampas" de la plantilla; el informe final que une los tres niveles</td>
+</tr>
+<tr>
+<td>Pipeline, despliegue, monitoreo y rollback (20 %)</td>
+<td>≈ 80 %</td>
+<td>ocho etapas con evidencia, despliegue automático al hacer push, comprobación de la versión servida, rollback con evidencia</td>
+<td>vista de monitoreo; rollback accionable desde la web (hoy es un commit del catálogo); el pipeline hace push directo a <code>main</code> sin PR</td>
+</tr>
+<tr>
+<td>Contrato y funcionamiento del ambiente (10 %)</td>
+<td>≈ 95 %</td>
+<td>tres ambientes con pruebas de contrato (<code>check_env</code>, <code>terminated</code>/<code>truncated</code>, colisión, viento), fichas y mapas</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Defensa (15 %)</td>
+<td>pendiente</td>
+<td>la web pública permite demostrar en vivo catálogo, replay 3D, evaluación por nivel, incidente y rollback</td>
+<td>guion de la defensa y ensayo</td>
+</tr>
+</tbody>
+</table>
+<h3>Lo que queda, en orden</h3>
+<ol>
+<li><strong>Monitoreo</strong>: vista en la web (y ruta en la API) con salud de la API, latencia de las evaluaciones, versión y catálogo servidos, e historial de decisiones del pipeline y del catálogo. Es la pieza que falta del criterio de 20 %.</li>
+<li><strong>Release final e informe</strong>: tag <code>v1.0.0</code> sobre el estado defendido; informe que recorra los tres niveles, la cadena de hipótesis, el incidente, la intervención y el rollback con sus evidencias (el diagnóstico y las fichas ya contienen el material).</li>
+<li><strong>Suite reservada</strong>: aplicarla una sola vez a los tres finalistas y publicar el resultado en el informe.</li>
+<li><strong>Rollback desde la web</strong> (opcional): un botón que genere el commit del catálogo exige credenciales de git en el servidor; alternativa honesta: la web muestra el procedimiento y la evidencia del rollback hecho.</li>
+<li><strong>Higiene</strong>: completar la ficha de N3 con la plantilla; cerrar la tercera semilla de N2; evitar entrenar con cambios sin commit (el pipeline ya avisa en la etapa 1).</li>
+</ol>
+<h3>Riesgos nuevos</h3>
+<ul>
+<li>Dos personas ejecutando el pipeline a la vez producen commits que compiten en <code>main</code> y <code>mlflow.db</code> es un binario que git no fusiona: hay que turnarse o pasar el registro de MLflow a un servidor compartido.</li>
+<li>El plan gratuito de Render duerme la API y MLflow tras 15 minutos: en la defensa, despertarlos antes.</li>
+</ul>
+<h2>Actualización · 5 de noviembre de 2026 (cierre): nivel 3, incidente e intervención</h2>
+<ul>
+<li><strong>Nivel 3</strong> (<code>RocketLanding3D-N3-v0</code>, ambiente 0.3): el mundo del nivel 2 con viento de 0–15 m/s y ráfagas el doble de fuertes. Misma observación que N2: misma familia, un modelo de N2 juega en N3 sin adaptador. Ficha <a href="ambiente-v0.3.md">ambiente-v0.3.md</a>; pruebas en <code>tests/test_ambiente_n3.py</code>.</li>
+<li><strong>Incidente controlado medido</strong> (<code>python incidente.py</code>, <code>resultados/incidentes/</code>, <code>GET /incidentes</code>, vista web <code>#/incidente</code>): el recomendado de N2 baja de 93,5 % a 82,5 % en N3 (choques contra el suelo 0 → 15); el de N1 con adaptador, de 99 % a 61 %.</li>
+<li><strong>Intervención</strong> (reentrenar en N3 con transferencia de pesos), cinco ejecuciones del pipeline, todas conservadas: 600 000 pasos rechazada (más colisiones), 1,5 M seleccionada y después sustituida, 1,5 M desde N2-s1 <strong>seleccionada: 92,0 %, 15 colisiones, 79 % con viento</strong> (catálogo v8). Tres semillas del finalista: 89,3 ± 4,2 %.</li>
+<li>El pipeline decide en un nivel nuevo comparando con el modelo anterior jugando en ese nivel (<code>--baseline</code>), y la etapa 8 admite un nivel sin recomendado.</li>
+<li><code>terminated</code>/<code>truncated</code> (brecha 10) estaba resuelto desde el ambiente 0.1.1.</li>
+<li>Pendiente: rollback demostrado en producción, monitoreo, release final, informe y defensa.</li>
+</ul>
 <h2>Actualización · 5 de noviembre de 2026 (noche): pipeline orquestado con Prefect</h2>
 <ul>
 <li><strong>Pipeline de ocho etapas</strong> en <a href="../pipelines/entrenar_publicar.py">pipelines/entrenar_publicar.py</a> (Prefect 3): validar el ambiente, probar el contrato, entrenar, evaluar en la suite v1 (normal y con viento), registrar (configs, manifiesto de la sección 11, MLflow, huellas), decidir con criterio de aceptación frente al recomendado del nivel (+2 puntos de tasa, no perder más de 5 con viento, sin más colisiones en el nivel 2), publicar el catálogo con commit y push, y comprobar que la API pública sirve el commit y el catálogo esperados con una evaluación corta. Evidencia versionada en <code>pipelines/ejecuciones/</code>. Prefect vive en su propio entorno (<code>requirements-pipeline.txt</code>) porque no convive con la versión de FastAPI de la API.</li>

@@ -66,12 +66,13 @@ env = gym.make("RocketLanding3D-v0")
 | Nivel | Ambiente | Qué cambia | Ficha |
 |---|---|---|---|
 | N1 · misión base | `RocketLanding3D-v0` (0.1.1) | plataforma, viento, temperatura, presión y combustible limitado | [docs/ambiente-v0.1.md](docs/ambiente-v0.1.md) |
-| N2 · obstáculos | `RocketLanding3D-N2-v0` (0.2) | tres torres de 300–420 m alrededor de la plataforma: hay que elegir por qué hueco entrar; chocar es "colisión" (−100); observación de 25 valores (familia nueva de modelos) | [docs/ambiente-v0.2.md](docs/ambiente-v0.2.md) |
-| N3 · operación exigente | `RocketLanding3D-N3-v0` (0.3) | el mundo del nivel 2 con viento de 0–15 m/s y ráfagas el doble de fuertes; misma observación que N2 (misma familia: un modelo de N2 juega en N3 tal cual). Incidente medido con `python incidente.py`, visible en la web (`#/incidente`) y en `GET /incidentes` | [docs/ambiente-v0.3.md](docs/ambiente-v0.3.md) |
+| N2 · obstáculo | `RocketLanding3D-N2-v1` (0.4) | una pasarela a 180 m cubre la plataforma y el cuadrado de salida; la única abertura (16 m de radio) está desplazada 30 m del centro: hay que entrar por ella y trasladarse por debajo; chocar con la pasarela o sus pilares es "colisión" (−100); observación de 20 valores (familia nueva) | [docs/ambiente-v0.4.md](docs/ambiente-v0.4.md) |
+| N3 · operación exigente | `RocketLanding3D-N3-v1` (0.5) | la pasarela con viento de 0–15 m/s y ráfagas el doble de fuertes; misma observación que N2 (misma familia). Incidente medido con `python incidente.py`, visible en la web (`#/incidente`) y en `GET /incidentes` | [docs/ambiente-v0.5.md](docs/ambiente-v0.5.md) |
+| retirados (históricos) | `RocketLanding3D-N2-v0` (0.2) y `RocketLanding3D-N3-v0` (0.3) | tres torres de 300–420 m alrededor de la plataforma, y lo mismo con viento fuerte; el equipo las sustituyó por la pasarela el 6 de noviembre; sus modelos siguen siendo reproducibles y evaluables | [docs/ambiente-v0.2.md](docs/ambiente-v0.2.md), [docs/ambiente-v0.3.md](docs/ambiente-v0.3.md) |
 
-Cada modelo se entrena y evalúa en el ambiente de su manifest (`ambiente.id`). `python cli.py entrenar-ppo --ambiente RocketLanding3D-N2-v0`
-entrena en el nivel 2; `python cli.py evaluar --run ppo-v2-v0.1-s0 --ambiente RocketLanding3D-N2-v0` hace jugar a un modelo del
-nivel 1 en el nivel 2 a través de `AdaptadorN1` (no ve las torres): así se mide cuánto cuesta el nivel. El catálogo lleva un
+Cada modelo se entrena y evalúa en el ambiente de su manifest (`ambiente.id`). `python cli.py entrenar-ppo --ambiente RocketLanding3D-N2-v1`
+entrena en el nivel 2; `python cli.py evaluar --run ppo-v2-v0.1-s1 --ambiente RocketLanding3D-N2-v1` hace jugar a un modelo del
+nivel 1 en el nivel 2 a través de `AdaptadorN1` (no ve los obstáculos): así se mide cuánto cuesta el nivel. El catálogo lleva un
 recomendado y un anterior por nivel (`python catalogo.py recomendar <run>`, `python catalogo.py restaurar --nivel N2`).
 
 ## Ficha del ambiente (entrega del curso)
@@ -97,6 +98,8 @@ python visualizar_experimento1.py    # genera experimento1.html con esas épocas
 
 Los experimentos 1 y 2 comparten ambiente (0.1) y son comparables entre sí; el 3 es otra familia de modelos (observación de 25 valores)
 y se compara con el modelo del nivel 1 jugando a ciegas en el nivel 2 (72 %).
+
+[EXPERIMENTOS.md](EXPERIMENTOS.md) reúne, ejecución por ejecución, dónde está guardado cada modelo (archivo, SHA-256, commit, versión en MLflow), sus variables, el cambio frente a su baseline, el resultado y la decisión. Se regenera con `python experimentos_md.py`.
 
 ### Diseño experimental: hipótesis, presupuesto y decisión
 
@@ -182,8 +185,8 @@ El orquestador tiene su propio entorno (`requirements-pipeline.txt`, carpeta `.v
   uvicorn api.main:app --reload --port 8000
   python -m pytest tests/test_api.py
   ```
-- **Catálogo y rollback** ([catalogo.py](catalogo.py), [catalogo.json](catalogo.json)): `python catalogo.py recomendar <run_id> --motivo "…"` promueve un modelo; `python catalogo.py restaurar --motivo "…"` es el rollback al anterior. Rollback demostrado en producción en el nivel 3, con la evidencia de `python comprobar_api.py` (ver [docs/ambiente-v0.3.md](docs/ambiente-v0.3.md#rollback-demostrado-en-producción)). Ambos se versionan con un commit y `GET /version` confirma qué catálogo y qué commit se sirven.
-- **Web** ([web/](web/)): catálogo con estado de cada modelo (recomendado, anterior, histórico), detalle con identidad (commit, huellas, versión en MLflow), comparación, evaluación en vivo contra la API y replay 3D con la etiqueta de modo (replay de vuelos grabados o evaluación en vivo). El visor 3D ([web/src/escena.ts](web/src/escena.ts)) es la misma escena cinematográfica de la fase 3D: cielo de Alfa Centauri, terreno de regolito, losa de aterrizaje, dos cohetes (nave de acero y propulsor), penacho con diamantes de choque, polvo, bola de fuego al chocar, tres cámaras (seguimiento, torre, a bordo), fantasmas de los vuelos anteriores y posproceso; interpola entre muestras con las velocidades grabadas.
+- **Catálogo y rollback** ([catalogo.py](catalogo.py), [catalogo.json](catalogo.json)): `python catalogo.py recomendar <run_id> --motivo "…"` promueve un modelo; `python catalogo.py restaurar --motivo "…"` es el rollback al anterior. Rollback demostrado en producción con el nivel 3 de torres (0.3), con la evidencia de `python comprobar_api.py` (ver [docs/ambiente-v0.3.md](docs/ambiente-v0.3.md#rollback-demostrado-en-producción)). Ambos se versionan con un commit y `GET /version` confirma qué catálogo y qué commit se sirven.
+- **Web** ([web/](web/)): vista **Experimentos** (`#/experimentos`) con la progresión de complejidad entre niveles, un selector para pasar de un experimento a otro y, por experimento, sus configuraciones, las variables que cambian y las decisiones; catálogo con estado de cada modelo (recomendado, anterior, histórico), detalle con identidad (commit, huellas, versión en MLflow), comparación, evaluación en vivo contra la API y replay 3D con la etiqueta de modo (replay de vuelos grabados o evaluación en vivo). El visor 3D ([web/src/escena.ts](web/src/escena.ts)) es la misma escena cinematográfica de la fase 3D: cielo de Alfa Centauri, terreno de regolito, losa de aterrizaje, dos cohetes (nave de acero y propulsor), penacho con diamantes de choque, polvo, bola de fuego al chocar, tres cámaras (seguimiento, torre, a bordo), fantasmas de los vuelos anteriores y posproceso; interpola entre muestras con las velocidades grabadas.
   ```bash
   cd web && npm ci && npm run dev        # http://localhost:5173, usa VITE_API_BASE_URL de .env.development
   npm run build && npm run preview       # compila a dist/
