@@ -3,7 +3,8 @@
     "prefect_flow_run_id": "6fdece2e-0bd0-4d9a-83d4-57c235aec296",
     "nombre": "sarcastic-buzzard",
     "inicio": "2026-11-08T19:22:16",
-    "duracion_s": 1074
+    "duracion_s": 1076,
+    "estado": "completado"
   },
   "parametros": {
     "ambiente": "RocketLanding3D-N2-v1",
@@ -73,6 +74,18 @@
         "margen_mejora": 0.02,
         "tolerancia_viento": 0.05
       }
+    },
+    "7 publicar": {
+      "commit": "f18f31efff16353d9dd08df3f993702369f7f248",
+      "push": false
+    },
+    "8 comprobar": {
+      "commit": "f18f31efff16353d9dd08df3f993702369f7f248",
+      "catalogo": 13,
+      "recomendado": "ppo-pasarela-transfer-1m5-v0.4-s1",
+      "evaluacion": 1.0,
+      "compatible": true,
+      "modo": "local (sin push)"
     }
   }
 }
