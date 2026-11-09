@@ -1,6 +1,6 @@
 {
-  "version": 12,
-  "actualizado": "2026-11-08T19:22:11",
+  "version": 13,
+  "actualizado": "2026-11-08T19:40:11",
   "recomendado": "ppo-v2-v0.1-s1",
   "anterior": "ppo-v2-v0.1-s0",
   "historial": [
@@ -109,6 +109,15 @@
       "run_id": "ppo-pasarela-viento-transfer-1m5-v0.5-s0",
       "motivo": "pipeline: Seleccionado por el pipeline: 94.5% de aterrizajes en la suite v1 (6 colisiones), 65.5% con viento de 15 m/s; supera al recomendado ppo-pasarela-transfer-1m5-v0.4-s0 con el criterio de aceptación (+2% de tasa, viento −5% como mucho, no más colisiones).",
       "commit_base": "507dedc0da1dce8b8e797c1d1211c46c920da88d"
+    },
+    {
+      "version": 13,
+      "fecha": "2026-11-08T19:40:11",
+      "accion": "recomendar",
+      "nivel": "N2",
+      "run_id": "ppo-pasarela-transfer-1m5-v0.4-s1",
+      "motivo": "pipeline: Seleccionado por el pipeline: 97.5% de aterrizajes en la suite v1 (4 colisiones), 52.0% con viento de 15 m/s; supera al recomendado ppo-pasarela-transfer-1m5-v0.4-s0 con el criterio de aceptación (+2% de tasa, viento −5% como mucho, no más colisiones).",
+      "commit_base": "1aa584fdd8c90a8624d05bd39b61f6afde235504"
     }
   ],
   "niveles": {
@@ -117,8 +126,8 @@
       "anterior": "ppo-v2-v0.1-s0"
     },
     "N2": {
-      "recomendado": "ppo-pasarela-transfer-1m5-v0.4-s0",
-      "anterior": "ppo-n2-transfer-1m5-v0.2-s1"
+      "recomendado": "ppo-pasarela-transfer-1m5-v0.4-s1",
+      "anterior": "ppo-pasarela-transfer-1m5-v0.4-s0"
     },
     "N3": {
       "recomendado": "ppo-pasarela-viento-transfer-1m5-v0.5-s0",
