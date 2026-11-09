@@ -1,6 +1,6 @@
 {
   "formato": 1,
-  "ultimo": "ppo-n2-transfer-1m5-v0.2-s2",
+  "ultimo": "ppo-pasarela-transfer-1m5-v0.4-s0",
   "ejecuciones": [
     {
       "run_id": "base-v0.1-s0",
@@ -237,6 +237,21 @@
       "velocidad_contacto": 1.5097675796945615,
       "error_posicion": 6.359242956668411,
       "primer_aterrizaje": 3
+    },
+    {
+      "run_id": "ppo-pasarela-transfer-1m5-v0.4-s0",
+      "experimento": "experimento-5-pasarela",
+      "agente": "PPO (red neuronal)",
+      "fecha": "2026-11-08T19:00:00",
+      "commit": "464cbd1fdb716d478ed51579cd1fbfab6cf4dcb0",
+      "ambiente": "0.4",
+      "nivel": "N2",
+      "epochs": 35334,
+      "seed": 0,
+      "aterrizajes": 0.915,
+      "velocidad_contacto": 1.5783829960452942,
+      "error_posicion": 4.845375232233022,
+      "primer_aterrizaje": 13
     }
   ]
 }
