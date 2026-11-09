@@ -3,7 +3,8 @@
     "prefect_flow_run_id": "d3f39a9a-9997-4635-b776-7dd2d10f00b0",
     "nombre": "luminous-chamois",
     "inicio": "2026-11-08T19:03:05",
-    "duracion_s": 1145
+    "duracion_s": 1147,
+    "estado": "completado"
   },
   "parametros": {
     "ambiente": "RocketLanding3D-N3-v1",
@@ -73,6 +74,18 @@
         "margen_mejora": 0.02,
         "tolerancia_viento": 0.05
       }
+    },
+    "7 publicar": {
+      "commit": "7b836d37db564c874f341429f49c646c7f420c89",
+      "push": false
+    },
+    "8 comprobar": {
+      "commit": "7b836d37db564c874f341429f49c646c7f420c89",
+      "catalogo": 12,
+      "recomendado": "ppo-pasarela-viento-transfer-1m5-v0.5-s0",
+      "evaluacion": 1.0,
+      "compatible": true,
+      "modo": "local (sin push)"
     }
   }
 }
