@@ -99,6 +99,21 @@ Se documentan en `configs/<run_id>.json` y se resumen aquí al cerrar cada uno (
 
 **Intento abortado (6 de noviembre, sin run_id).** Primera versión de la observación, con la posición relativa de la abertura fija en las entradas 16 y 17, y transferencia simple desde `ppo-v2-v0.1-s1` (entradas nuevas en cero). A los 320 000 pasos de 1,5 M la evaluación sin ruido seguía en 2 % y la tasa de entrenamiento en 1 %: la política heredada volaba hacia la plataforma y chocaba con la pasarela antes de aprender a usar las entradas nuevas. Se detuvo y se cambió el diseño a la observación "objetivo de la fase" con herencia de pesos (`TRANSFERENCIA_ENTRADAS`), que hace que la política de partida vuele hacia la abertura desde el primer paso.
 
+**Configuración seleccionada (8 de noviembre): transferencia desde `ppo-v2-v0.1-s1` y 1,5 M de pasos, tres semillas.** Con la observación "objetivo de la fase" el diseño funciona: el primer aterrizaje llega en la época 13. Las tres semillas se entrenaron y decidieron con el pipeline. La referencia es el recomendado del nivel 1 jugando a ciegas (5 %), porque el recomendado de N2 era entonces un modelo de torres, de otro ambiente, y el pipeline no lo usa como referencia.
+
+| Ejecución | Aterrizajes (suite v1) | Colisiones | Choques | Con viento fijo de 15 m/s | Decisión del pipeline |
+|---|---|---|---|---|---|
+| `ppo-pasarela-transfer-1m5-v0.4-s0` | 91,5 % | 14 | 3 | 30,0 % | seleccionada (frente al 5 % a ciegas): catálogo v11 |
+| `ppo-pasarela-transfer-1m5-v0.4-s1` | 97,5 % | 4 | 0 | 52,0 % | seleccionada: mejora a s0 en 6 puntos |
+| `ppo-pasarela-transfer-1m5-v0.4-s2` | **100 %** | **0** | 0 | 68,0 % | **seleccionada: recomendado de N2**; s1 queda como anterior |
+| **media ± desviación típica** | **96,3 ± 4,4 %** | 6,0 ± 7,2 | | 50,0 ± 19,1 % | |
+
+Lectura:
+- La pasarela se aprende: de 5 % a ciegas a 96 % de media. La herencia de los pesos de posición es lo que lo hizo posible (el intento sin ella seguía en 2 %).
+- La variabilidad entre semillas es grande, sobre todo con viento (30 % a 68 %). Las semillas se entrenaron como réplicas, pero el pipeline las compara con el recomendado vigente y promueve a la que mejora en 2 puntos, así que el recomendado es la mejor de tres (100 %). Lo esperable de la receta es ~96 %.
+- La fragilidad con viento fijo de 15 m/s (50 % de media, con la colisión con la pasarela como fallo principal) es el incidente que el nivel 3 v1 convierte en operación normal ([ambiente-v0.5.md](ambiente-v0.5.md)).
+- Cada cambio de recomendado queda en el historial de `catalogo.json`. El anterior de N2 es ahora s1; el modelo de torres (`ppo-n2-transfer-1m5-v0.2-s1`) salió del catálogo al promover s1, aunque sigue reproducible como histórico.
+
 ## Anexo: cómo reproducir
 
 ```bash

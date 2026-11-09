@@ -124,6 +124,11 @@ el **presupuesto** (épocas, pasos del agente, tiempo, máquina), la **suite** c
 | `ppo-n3-transfer-1m5-desde-s1-v0.3-s0` | partir del nuevo recomendado de N2 (s1) mejora al recomendado de N3 sin más colisiones | modelo de partida N2-s1 en vez de N2-s0 | seleccionado N3 (92,0 %, 15 colisiones, 79,0 % con viento) |
 | `ppo-n3-transfer-1m5-desde-s1-v0.3-s1` | con otra semilla, la configuración seleccionada en N3 queda a menos de 5 puntos del 92 % | solo la semilla (1); pipeline | rechazado (91,5 %, 16 colisiones, 87,5 % con viento): se cumple la hipótesis, no mejora al recomendado |
 | `ppo-n3-transfer-1m5-desde-s1-v0.3-s2` | ídem con la semilla 2 | solo la semilla (2); pipeline | rechazado (84,5 %, 18 colisiones): no se cumple la hipótesis. Las tres semillas: 89,3 ± 4,2 % |
+| `ppo-pasarela-transfer-1m5-v0.4-s0` | partir del recomendado de N1 con los pesos de posición heredados aprende la pasarela (N1 a ciegas: 5 %) | ambiente N2 v1 (pasarela) y transferencia desde `ppo-v2-v0.1-s1`; 1,5 M de pasos | seleccionado N2 (91,5 %, 14 colisiones) |
+| `ppo-pasarela-transfer-1m5-v0.4-s1` / `-s2` | con otra semilla queda a menos de 5 puntos del 91,5 % | solo la semilla | seleccionados al mejorar en 2 puntos: s2 recomendado de N2 (100 %, 0 colisiones). Tres semillas: 96,3 ± 4,4 % |
+| `ppo-pasarela-viento-transfer-1m5-v0.5-s0` | reentrenar el recomendado de N2 v1 en N3 v1 lo mejora en 2 puntos sin más colisiones | ambiente N3 v1 y transferencia desde N2-s0; 1,5 M de pasos | seleccionado N3 (94,5 % frente a 64,5 %) |
+| `ppo-pasarela-viento-transfer-1m5-v0.5-s1` / `-s2` | con otra semilla queda a menos de 5 puntos | solo la semilla | rechazados (94,0 % y 92,5 %). Tres semillas: 93,7 ± 1,0 % |
+| `ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0` | partir del nuevo recomendado de N2 (s2) mejora al recomendado de N3 | modelo de partida N2-s2 | seleccionado N3 (97,5 %, 3 colisiones, 85,5 % con viento) |
 
 Suites: [configs/suites/suite-v1.json](configs/suites/suite-v1.json) (200 épocas, semillas desde 10 000 000, condiciones
 `normal` y `viento-15`) y `suite-reservada` (misma estructura, semilla fuera del repo, solo para los finalistas).
