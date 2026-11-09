@@ -3,7 +3,8 @@
     "prefect_flow_run_id": "79b91fa1-a13e-42f1-b961-2217b24d9ffa",
     "nombre": "married-degu",
     "inicio": "2026-11-08T19:59:12",
-    "duracion_s": 1143
+    "duracion_s": 1144,
+    "estado": "completado"
   },
   "parametros": {
     "ambiente": "RocketLanding3D-N3-v1",
@@ -73,6 +74,18 @@
         "margen_mejora": 0.02,
         "tolerancia_viento": 0.05
       }
+    },
+    "7 publicar": {
+      "commit": "c4ab8281b0f0e3e77a266aab39b1b74dd5371f88",
+      "push": false
+    },
+    "8 comprobar": {
+      "commit": "c4ab8281b0f0e3e77a266aab39b1b74dd5371f88",
+      "catalogo": 14,
+      "recomendado": "ppo-pasarela-viento-transfer-1m5-v0.5-s0",
+      "evaluacion": 1.0,
+      "compatible": true,
+      "modo": "local (sin push)"
     }
   }
 }
