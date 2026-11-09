@@ -3,7 +3,8 @@
     "prefect_flow_run_id": "83406ec5-80ad-4938-888c-0fceb8b22af1",
     "nombre": "fast-mastodon",
     "inicio": "2026-11-08T19:40:16",
-    "duracion_s": 1128
+    "duracion_s": 1130,
+    "estado": "completado"
   },
   "parametros": {
     "ambiente": "RocketLanding3D-N2-v1",
@@ -73,6 +74,18 @@
         "margen_mejora": 0.02,
         "tolerancia_viento": 0.05
       }
+    },
+    "7 publicar": {
+      "commit": "9c86bc01ddb086b4e3bb53ec56164d6eecfa97d6",
+      "push": false
+    },
+    "8 comprobar": {
+      "commit": "9c86bc01ddb086b4e3bb53ec56164d6eecfa97d6",
+      "catalogo": 14,
+      "recomendado": "ppo-pasarela-transfer-1m5-v0.4-s2",
+      "evaluacion": 1.0,
+      "compatible": true,
+      "modo": "local (sin push)"
     }
   }
 }
