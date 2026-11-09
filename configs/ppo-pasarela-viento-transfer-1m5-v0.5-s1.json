@@ -1,0 +1,20 @@
+{
+  "run_id": "ppo-pasarela-viento-transfer-1m5-v0.5-s1",
+  "experimento": "experimento-6-pasarela-viento",
+  "nivel": "N3",
+  "ambiente": "RocketLanding3D-N3-v1@0.5",
+  "hipotesis": "Semilla 1 de la intervención en N3 v1: queda a menos de 5 puntos de la semilla 0",
+  "cambio": "Solo la semilla de entrenamiento: 1. Misma transferencia desde ppo-pasarela-transfer-1m5-v0.4-s0, ambiente y presupuesto",
+  "baseline": "ppo-pasarela-viento-transfer-1m5-v0.5-s0",
+  "comparacion_principal": "ppo-pasarela-viento-transfer-1m5-v0.5-s0",
+  "presupuesto": {
+    "pasos_agente": 1500000,
+    "epocas": 36535,
+    "maquina": "pipeline Prefect en CPU de portátil (WSL2)"
+  },
+  "suite": "suite-v1",
+  "estado": "rechazado",
+  "decision": "Rechazado por el pipeline: 94.0% de aterrizajes en la suite v1 (8 colisiones), 66.0% con viento de 15 m/s. no mejora a ppo-pasarela-viento-transfer-1m5-v0.5-s0 en al menos 2% (94.0% frente a 94.5%); más colisiones que ppo-pasarela-viento-transfer-1m5-v0.5-s0 (8 frente a 6).",
+  "fecha_decision": "2026-11-08",
+  "pipeline": true
+}

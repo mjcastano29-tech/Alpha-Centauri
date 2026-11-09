@@ -1,0 +1,78 @@
+{
+  "flujo": {
+    "prefect_flow_run_id": "79b91fa1-a13e-42f1-b961-2217b24d9ffa",
+    "nombre": "married-degu",
+    "inicio": "2026-11-08T19:59:12",
+    "duracion_s": 1143
+  },
+  "parametros": {
+    "ambiente": "RocketLanding3D-N3-v1",
+    "seed": 1,
+    "run_id": "ppo-pasarela-viento-transfer-1m5-v0.5-s1",
+    "run_existente": null,
+    "desde": "ppo-pasarela-transfer-1m5-v0.4-s0",
+    "total_timesteps": 1500000,
+    "hipotesis": "Semilla 1 de la intervención en N3 v1: queda a menos de 5 puntos de la semilla 0",
+    "cambio": "Solo la semilla de entrenamiento: 1. Misma transferencia desde ppo-pasarela-transfer-1m5-v0.4-s0, ambiente y presupuesto",
+    "baseline": "ppo-pasarela-viento-transfer-1m5-v0.5-s0",
+    "push": false,
+    "sin_commit": false,
+    "api": "https://alpha-centauri-api.onrender.com",
+    "espera_api": 900
+  },
+  "etapas": {
+    "1 validar": {
+      "id": "RocketLanding3D-N3-v1",
+      "version": "0.5",
+      "nivel": "N3",
+      "observacion": 20,
+      "accion": 5,
+      "obstaculos": 5,
+      "suite": "suite-v1",
+      "git_limpio": true
+    },
+    "2 probar": "using dumb terminal settings.",
+    "3 entrenar": {
+      "run_id": "ppo-pasarela-viento-transfer-1m5-v0.5-s1",
+      "reutilizada": false
+    },
+    "4 evaluar": {
+      "episodios": 200,
+      "viento": 15.0,
+      "aterrizajes": 0.94,
+      "colisiones": 8,
+      "velocidad_contacto": 1.69171875,
+      "error_posicion": 4.015,
+      "resultados": {
+        "aterrizaje": 188,
+        "fuera de plataforma": 0,
+        "choque": 4,
+        "sin pasos": 0,
+        "fuera de zona": 0,
+        "colisión": 8
+      },
+      "aterrizajes_viento": 0.66,
+      "colisiones_viento": 58
+    },
+    "5 registrar": {
+      "config": "configs/ppo-pasarela-viento-transfer-1m5-v0.5-s1.json",
+      "manifest": "manifests/ppo-pasarela-viento-transfer-1m5-v0.5-s1.json",
+      "sha256": "OK"
+    },
+    "6 decidir": {
+      "aceptado": false,
+      "estado": "rechazado",
+      "decision": "Rechazado por el pipeline: 94.0% de aterrizajes en la suite v1 (8 colisiones), 66.0% con viento de 15 m/s. no mejora a ppo-pasarela-viento-transfer-1m5-v0.5-s0 en al menos 2% (94.0% frente a 94.5%); más colisiones que ppo-pasarela-viento-transfer-1m5-v0.5-s0 (8 frente a 6).",
+      "comparacion": {
+        "recomendado": "ppo-pasarela-viento-transfer-1m5-v0.5-s0",
+        "aterrizajes": 0.945,
+        "aterrizajes_viento": 0.655,
+        "colisiones": 6
+      },
+      "criterio": {
+        "margen_mejora": 0.02,
+        "tolerancia_viento": 0.05
+      }
+    }
+  }
+}
