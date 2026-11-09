@@ -1,6 +1,6 @@
 {
   "formato": 1,
-  "ultimo": "ppo-pasarela-transfer-1m5-v0.4-s0",
+  "ultimo": "ppo-pasarela-viento-transfer-1m5-v0.5-s0",
   "ejecuciones": [
     {
       "run_id": "base-v0.1-s0",
@@ -252,6 +252,21 @@
       "velocidad_contacto": 1.5783829960452942,
       "error_posicion": 4.845375232233022,
       "primer_aterrizaje": 13
+    },
+    {
+      "run_id": "ppo-pasarela-viento-transfer-1m5-v0.5-s0",
+      "experimento": "experimento-6-pasarela-viento",
+      "agente": "PPO (red neuronal)",
+      "fecha": "2026-11-08T19:21:49",
+      "commit": "507dedc0da1dce8b8e797c1d1211c46c920da88d",
+      "ambiente": "0.5",
+      "nivel": "N3",
+      "epochs": 37679,
+      "seed": 0,
+      "aterrizajes": 0.945,
+      "velocidad_contacto": 1.6008508842638343,
+      "error_posicion": 5.4233236562018075,
+      "primer_aterrizaje": 9
     }
   ]
 }

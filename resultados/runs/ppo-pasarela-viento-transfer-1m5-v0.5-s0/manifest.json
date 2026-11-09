@@ -1,0 +1,169 @@
+{
+  "run_id": "ppo-pasarela-viento-transfer-1m5-v0.5-s0",
+  "experimento": "experimento-6-pasarela-viento",
+  "nivel": "N3",
+  "fecha": "2026-11-08T19:21:49",
+  "formato": 1,
+  "git": {
+    "commit": "507dedc0da1dce8b8e797c1d1211c46c920da88d",
+    "branch": "pasarela",
+    "cambios_sin_commit": false
+  },
+  "ambiente": {
+    "id": "RocketLanding3D-N3-v1",
+    "version": "0.5",
+    "nivel": "N3",
+    "obstaculos": [
+      {
+        "tipo": "pasarela",
+        "nombre": "pasarela",
+        "x": 28.0,
+        "y": 12.0,
+        "radio_abertura": 16.0,
+        "altura": 180.0,
+        "radio": 90.0,
+        "grosor": 3.0
+      },
+      {
+        "tipo": "torre",
+        "nombre": "pilar 1",
+        "x": 63.64,
+        "y": 63.64,
+        "radio": 2.5,
+        "altura": 180.0
+      },
+      {
+        "tipo": "torre",
+        "nombre": "pilar 2",
+        "x": -63.64,
+        "y": 63.64,
+        "radio": 2.5,
+        "altura": 180.0
+      },
+      {
+        "tipo": "torre",
+        "nombre": "pilar 3",
+        "x": -63.64,
+        "y": -63.64,
+        "radio": 2.5,
+        "altura": 180.0
+      },
+      {
+        "tipo": "torre",
+        "nombre": "pilar 4",
+        "x": 63.64,
+        "y": -63.64,
+        "radio": 2.5,
+        "altura": 180.0
+      }
+    ],
+    "step_altitude": 20.0,
+    "step_time_limit": 2.0,
+    "max_steps": 50,
+    "start_altitude": 600.0,
+    "pad_radius": 10.0,
+    "max_landing_vertical_speed": 3.0,
+    "max_landing_horizontal_speed": 2.0,
+    "max_landing_tilt": 10.0,
+    "rewards": {
+      "aterrizaje": 100.0,
+      "fuera de plataforma": -50.0,
+      "choque": -100.0,
+      "sin pasos": -100.0,
+      "fuera de zona": -100.0,
+      "colisión": -100.0
+    }
+  },
+  "agente": {
+    "clase": "ppo",
+    "nombre": "PPO (red neuronal)",
+    "tipo": "PPO (Stable-Baselines3): red neuronal MLP sobre la acción continua del entorno",
+    "red": "[128, 128]",
+    "accion": "relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12",
+    "hiperparametros": {
+      "total_timesteps": 1500000,
+      "n_envs": 8,
+      "n_steps": 256,
+      "batch_size": 256,
+      "n_epochs": 10,
+      "learning_rate": 0.0003,
+      "gamma": 0.99,
+      "gae_lambda": 0.95,
+      "clip_range": 0.2,
+      "ent_coef": 0.005,
+      "log_std_init": -0.5,
+      "eval_every": 20000
+    }
+  },
+  "config": {
+    "total_timesteps": 1500000,
+    "n_envs": 8,
+    "n_steps": 256,
+    "batch_size": 256,
+    "n_epochs": 10,
+    "learning_rate": 0.0003,
+    "gamma": 0.99,
+    "gae_lambda": 0.95,
+    "clip_range": 0.2,
+    "ent_coef": 0.005,
+    "net_arch": [
+      128,
+      128
+    ],
+    "log_std_init": -0.5,
+    "eval_every": 20000,
+    "seed": 0,
+    "accion": "relativa",
+    "ambiente": "RocketLanding3D-N3-v1",
+    "desde": "ppo-pasarela-transfer-1m5-v0.4-s0"
+  },
+  "software": {
+    "python": "3.10.12",
+    "gymnasium": "1.4.0",
+    "numpy": "2.2.6",
+    "torch": "2.14.1+cpu",
+    "stable_baselines3": "2.9.2",
+    "hilos_cpu": 14,
+    "maquina": "x86_64"
+  },
+  "resultado": {
+    "primer_aterrizaje": 9,
+    "mejor_epoca": 36122,
+    "evaluacion": {
+      "episodes": 200,
+      "outcomes": {
+        "aterrizaje": 189,
+        "fuera de plataforma": 0,
+        "choque": 5,
+        "sin pasos": 0,
+        "fuera de zona": 0,
+        "colisión": 6
+      },
+      "landing_rate": 0.945,
+      "contact_speed": 1.6008508842638343,
+      "position_error": 5.4233236562018075,
+      "fuel_used": 300.94881455848883
+    },
+    "epocas_grabadas": 75
+  },
+  "archivos": {
+    "modelo": [
+      "modelo.zip",
+      "modelo_normalizador.pkl"
+    ],
+    "entrenamiento": "entrenamiento.json",
+    "episodios": "episodios.csv",
+    "vuelos": "vuelos.json.gz"
+  },
+  "sha256": {
+    "algoritmo": "sha256",
+    "config": "56c666aa0b2f229836ce2b85461d8c86b3ebbd60492e4ed23aca4e51e471dfbd",
+    "archivos": {
+      "modelo.zip": "974450458b402b3a02735a568a5c73edc2010765d56f91faf14b3e3f0e69b597",
+      "modelo_normalizador.pkl": "0c90f04519a58efc4b978b3140836462c7f12d61acccd594a8259bd4f54d69c4",
+      "entrenamiento.json": "07146e934cbad9446947e9d27fed7134fb4589efd0882a4654109335dc011e81",
+      "episodios.csv": "52281422df3bfee69cc835eb475a1eba0dc4b8b2f719e5fc9cd34e6adc2984e4",
+      "vuelos.json.gz": "eb0120cd7c9ed4c42f9ed075fedffe590118c311a873f0f4ebe40af5b1705a58"
+    }
+  }
+}
