@@ -3,7 +3,8 @@
     "prefect_flow_run_id": "18916280-5f67-4b73-bb2c-e57806f82906",
     "nombre": "rapid-bird",
     "inicio": "2026-11-08T20:18:21",
-    "duracion_s": 1157
+    "duracion_s": 1159,
+    "estado": "completado"
   },
   "parametros": {
     "ambiente": "RocketLanding3D-N3-v1",
@@ -73,6 +74,18 @@
         "margen_mejora": 0.02,
         "tolerancia_viento": 0.05
       }
+    },
+    "7 publicar": {
+      "commit": "c1e5b5987183afab0deab8b9cf6105027d8cfadc",
+      "push": false
+    },
+    "8 comprobar": {
+      "commit": "c1e5b5987183afab0deab8b9cf6105027d8cfadc",
+      "catalogo": 14,
+      "recomendado": "ppo-pasarela-viento-transfer-1m5-v0.5-s0",
+      "evaluacion": 1.0,
+      "compatible": true,
+      "modo": "local (sin push)"
     }
   }
 }
