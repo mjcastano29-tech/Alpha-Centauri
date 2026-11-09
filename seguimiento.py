@@ -17,6 +17,7 @@ Interfaz: `mlflow ui --backend-store-uri sqlite:///mlflow.db` y abrir http://127
 import json
 import os
 import shutil
+import sqlite3
 import tempfile
 from contextlib import nullcontext
 from pathlib import Path
@@ -28,13 +29,21 @@ import pandas as pd
 ROOT = Path(__file__).parent
 MLRUNS = ROOT / "mlruns"  # artefactos
 DB = ROOT / "mlflow.db"  # experimentos, runs, métricas, registro de modelos
+LOCAL = not os.environ.get("MLFLOW_TRACKING_URI")  # antes de set_tracking_uri, que también fija la variable
 mlflow.set_tracking_uri(os.environ.get("MLFLOW_TRACKING_URI") or f"sqlite:///{DB}")
 
 
 def experimento(nombre):
     """Activa el experimento (lo crea si no existe, con los artefactos dentro de mlruns/)."""
-    if mlflow.get_experiment_by_name(nombre) is None:
-        mlflow.create_experiment(nombre, artifact_location=(MLRUNS / nombre).as_uri())
+    local = (MLRUNS.resolve() / nombre).as_uri()
+    exp = mlflow.get_experiment_by_name(nombre)
+    if exp is None:
+        mlflow.create_experiment(nombre, artifact_location=local)
+    elif exp.artifact_location != local and LOCAL:
+        # mlflow.db guarda la ruta absoluta de la máquina que creó el experimento (/home/<otro>/…/mlruns/<nombre>):
+        # en el mlflow.db local del repo se reapunta al mlruns/ de esta copia para poder registrar desde cualquier máquina
+        with sqlite3.connect(DB) as con:
+            con.execute("update experiments set artifact_location = ? where experiment_id = ?", (local, exp.experiment_id))
     mlflow.set_experiment(nombre)
 
 PUNTOS_CURVA = 200  # puntos de la curva de entrenamiento que se suben a MLflow
