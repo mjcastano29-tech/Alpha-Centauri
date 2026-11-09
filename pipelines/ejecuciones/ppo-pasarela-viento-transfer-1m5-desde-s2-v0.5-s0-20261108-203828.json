@@ -3,7 +3,8 @@
     "prefect_flow_run_id": "2ed89f6d-6214-4a6c-87b9-dc78384e2933",
     "nombre": "tireless-crocodile",
     "inicio": "2026-11-08T20:38:28",
-    "duracion_s": 1103
+    "duracion_s": 1104,
+    "estado": "completado"
   },
   "parametros": {
     "ambiente": "RocketLanding3D-N3-v1",
@@ -73,6 +74,18 @@
         "margen_mejora": 0.02,
         "tolerancia_viento": 0.05
       }
+    },
+    "7 publicar": {
+      "commit": "f4687b7571210ad42ebb3f59bddc31863dafd296",
+      "push": false
+    },
+    "8 comprobar": {
+      "commit": "f4687b7571210ad42ebb3f59bddc31863dafd296",
+      "catalogo": 15,
+      "recomendado": "ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0",
+      "evaluacion": 1.0,
+      "compatible": true,
+      "modo": "local (sin push)"
     }
   }
 }
