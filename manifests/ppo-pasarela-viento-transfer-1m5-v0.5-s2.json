@@ -1,0 +1,62 @@
+{
+  "run_id": "ppo-pasarela-viento-transfer-1m5-v0.5-s2",
+  "level_id": "N3",
+  "environment_version": "RocketLanding3D-N3-v1@0.5",
+  "git_commit": "72ad242c551acc79c7988b49e84f9552c7d67098",
+  "git_branch": "pasarela",
+  "config_sha256": "8353d775d3bd41cb8610397de1892a368ed36649b3729a3c451e3864781e4d1d",
+  "model_uri": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/72ad242c551acc79c7988b49e84f9552c7d67098/resultados/runs/ppo-pasarela-viento-transfer-1m5-v0.5-s2/modelo.zip",
+  "model_sha256": "cdbe65a0d9a154cdc191d4f166763bfd7b7a1aeb27eb49375f11a59aa05ba213",
+  "normalization_uri": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/72ad242c551acc79c7988b49e84f9552c7d67098/resultados/runs/ppo-pasarela-viento-transfer-1m5-v0.5-s2/modelo_normalizador.pkl",
+  "normalization_sha256": "eb97da3ff9a904307f5a6668436e1459df131856a0aa602c496b0cd5add11252",
+  "model_registry": null,
+  "runtime_ref": {
+    "python": "3.10.12",
+    "requirements": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/72ad242c551acc79c7988b49e84f9552c7d67098/requirements.txt",
+    "docker": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/72ad242c551acc79c7988b49e84f9552c7d67098/Dockerfile",
+    "paquetes": {
+      "gymnasium": "1.4.0",
+      "numpy": "2.2.6",
+      "torch": "2.14.1+cpu",
+      "stable_baselines3": "2.9.2"
+    }
+  },
+  "evaluation_suite_id": "suite-v1",
+  "seed": 2,
+  "parent_run_id": "ppo-pasarela-transfer-1m5-v0.4-s0",
+  "experiment_id": "experimento-6-pasarela-viento",
+  "agent": {
+    "class": "ppo",
+    "name": "PPO (red neuronal)",
+    "action": "relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12"
+  },
+  "hypothesis": "Semilla 2 de la intervención en N3 v1: queda a menos de 5 puntos de la semilla 0",
+  "change": "Solo la semilla de entrenamiento: 2. Misma transferencia desde ppo-pasarela-transfer-1m5-v0.4-s0, ambiente y presupuesto",
+  "baseline_run_id": "ppo-pasarela-viento-transfer-1m5-v0.5-s0",
+  "budget": {
+    "pasos_agente": 1500000,
+    "epocas": 35910,
+    "maquina": "pipeline Prefect en CPU de portátil (WSL2)"
+  },
+  "status": "rechazado",
+  "decision": "Rechazado por el pipeline: 92.5% de aterrizajes en la suite v1 (10 colisiones), 74.5% con viento de 15 m/s. no mejora a ppo-pasarela-viento-transfer-1m5-v0.5-s0 en al menos 2% (92.5% frente a 94.5%); más colisiones que ppo-pasarela-viento-transfer-1m5-v0.5-s0 (10 frente a 6).",
+  "evaluation": {
+    "suite": "suite-v1",
+    "episodes": 200,
+    "landing_rate": 0.925,
+    "contact_speed": 1.6735292229341507,
+    "position_error": 4.6529469563918475,
+    "fuel_used": 332.7205916744105,
+    "outcomes": {
+      "aterrizaje": 185,
+      "fuera de plataforma": 0,
+      "choque": 3,
+      "sin pasos": 2,
+      "fuera de zona": 0,
+      "colisión": 10
+    },
+    "per_case": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/72ad242c551acc79c7988b49e84f9552c7d67098/resultados/runs/ppo-pasarela-viento-transfer-1m5-v0.5-s2/evaluacion.json"
+  },
+  "trained_at": "2026-11-08T20:37:23",
+  "generated_at": "2026-11-08T20:37:36"
+}
