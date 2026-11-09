@@ -3,7 +3,8 @@
     "prefect_flow_run_id": "8964abf8-6ca1-4ad4-9cc7-ea985fbcf6c4",
     "nombre": "maize-rat",
     "inicio": "2026-11-08T19:02:07",
-    "duracion_s": 11
+    "duracion_s": 13,
+    "estado": "completado"
   },
   "parametros": {
     "ambiente": "RocketLanding3D-N2-v1",
@@ -73,6 +74,18 @@
         "margen_mejora": 0.02,
         "tolerancia_viento": 0.05
       }
+    },
+    "7 publicar": {
+      "commit": "6b5b4314af7bfe97a7257804726aab001af7bb6b",
+      "push": false
+    },
+    "8 comprobar": {
+      "commit": "6b5b4314af7bfe97a7257804726aab001af7bb6b",
+      "catalogo": 11,
+      "recomendado": "ppo-pasarela-transfer-1m5-v0.4-s0",
+      "evaluacion": 1.0,
+      "compatible": true,
+      "modo": "local (sin push)"
     }
   }
 }
