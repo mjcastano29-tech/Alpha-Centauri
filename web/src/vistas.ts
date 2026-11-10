@@ -21,6 +21,89 @@ async function cargarCatalogo() {
   return catalogoCache
 }
 
+// ---------- monitoreo de la operación ----------
+const segundos = (s: number) => (s < 90 ? `${Math.round(s)} s` : s < 5400 ? `${Math.round(s / 60)} min` : `${(s / 3600).toFixed(1)} h`)
+
+export async function vistaMonitoreo(el: HTMLElement): Promise<() => void> {
+  let temporizador = 0
+  const pintar = async () => {
+    const m = await api.monitoreo()
+    const c = await cargarCatalogo()
+    const s = m.servicio
+    const alertas = m.alertas.length
+      ? `<ul class="alertas">${m.alertas.map((a) => `<li class="alerta alerta-${esc(a.tipo)}"><b>${esc(a.nivel ?? 'API')}</b> · ${esc(a.texto)}</li>`).join('')}</ul>`
+      : '<p class="ok">Sin alertas: los recomendados juegan en los ambientes vigentes, aguantan el viento y el pipeline terminó bien.</p>'
+    const niveles = tabla(['nivel', 'recomendado (lo que se sirve)', 'ambiente', 'suite v1', 'con viento 15 m/s', 'colisiones', 'anterior (rollback)', 'modelo'], m.niveles.map((n) => [
+      `<b>${esc(n.nivel)}</b>`,
+      n.recomendado ? `<a href="#/ejecucion/${esc(n.recomendado)}">${esc(n.recomendado)}</a>${n.cambios_sin_commit ? ' <span class="muted" title="entrenado con cambios sin commit">*</span>' : ''}<br><span class="muted">${esc(n.fecha ?? '')}</span>` : '—',
+      `${esc(n.ambiente_modelo ?? '—')}${n.ambiente_modelo && n.ambiente_modelo !== n.ambiente_vigente ? ' <b class="error">no vigente</b>' : ''}`,
+      n.aterrizajes !== undefined ? `<b>${pct(n.aterrizajes)}</b>` : '—',
+      n.aterrizajes_viento !== undefined && n.aterrizajes_viento !== null ? `${pct(n.aterrizajes_viento)}${n.aterrizajes_viento < 0.6 ? ' <b class="error">frágil</b>' : ''}` : '—',
+      n.colisiones ?? '—',
+      esc(n.anterior ?? '—'),
+      `${n.mlflow ? (n.mlflow.url ? `<a href="${esc(n.mlflow.url)}" target="_blank" rel="noopener">${esc(n.mlflow.modelo)} v${n.mlflow.version}</a>` : `${esc(n.mlflow.modelo)} v${n.mlflow.version}`) : '—'}<br><span class="muted">${n.modelo_cargado ? 'cargado en memoria' : 'se carga al evaluar'}</span>`,
+    ]))
+    const pipeline = tabla(['cuándo', 'ejecución', 'ambiente', 'resultado', 'decisión', 'duración', 'comprobación', 'commit'], m.pipeline.map((p) => p.tipo === 'pipeline' ? [
+      esc(p.inicio ?? ''), p.run_id ? `<a href="#/ejecucion/${esc(p.run_id)}">${esc(p.run_id)}</a>` : '—', esc(p.ambiente ?? '—'),
+      p.aterrizajes !== undefined && p.aterrizajes !== null ? pct(p.aterrizajes) : '—',
+      `${p.decision ? pillDiseno(p.decision) : '—'}${p.estado && String(p.estado).startsWith('fallido') ? `<br><span class="error">${esc(p.estado)}</span>` : ''}`,
+      p.duracion_s ? segundos(p.duracion_s) : '—', esc(p.comprobacion ?? '—'), `<code>${corto(p.commit)}</code>`,
+    ] : [esc(p.fecha ?? ''), `<b>${esc(p.tipo)}</b> ${esc(p.recomendado ?? '')}`, esc(p.nivel ?? '—'), p.ok ? 'API comprobada' : '—', '—', '—', esc(p.archivo), `<code>${corto(p.commit)}</code>`]))
+    const evaluaciones = m.evaluaciones.length
+      ? tabla(['hora', 'modelo', 'ambiente', 'épocas', 'aterrizajes', 'latencia', 'por paso'], m.evaluaciones.slice().reverse().map((e) => [
+        esc(e.fecha.slice(11)), `<a href="#/ejecucion/${esc(e.run_id)}">${esc(e.run_id)}</a>${e.adaptador ? ' <span class="muted">(adaptador)</span>' : ''}`, `${esc(e.nivel)} · ${esc(e.ambiente)}`,
+        e.episodios, pct(e.aterrizajes), `${entero(e.total_ms)} ms`, `${num(e.por_paso_ms, 1)} ms`]))
+      : '<p class="muted">Este proceso de la API todavía no ha servido evaluaciones (el registro vive en memoria y se vacía cuando Render la duerme).</p>'
+    el.innerHTML = `
+      <h1>Monitoreo</h1>
+      <p>Lo que un operador mira: qué código y qué catálogo se están sirviendo, qué modelo atiende cada nivel y cómo se comporta, qué decidió el pipeline en sus últimas ejecuciones y cuánto tardan las evaluaciones. Se actualiza cada 30 s.</p>
+      <div class="dos">
+        <section class="card">
+          <h2>Servicio</h2>
+          <dl class="kv">
+            <dt>API</dt><dd>v${esc(s.api)} · commit <code>${esc(s.commit ?? '—')}</code> · Python ${esc(s.python)}</dd>
+            <dt>arrancó</dt><dd>${esc(s.arranque)} (hace ${segundos(s.uptime_s)})</dd>
+            <dt>catálogo</dt><dd>v${m.catalogo.version} (${esc(m.catalogo.actualizado ?? '—')})</dd>
+            <dt>ambientes vigentes</dt><dd>${Object.entries(s.ambientes_vigentes).map(([n, a]) => `${esc(n)}: ${esc(a)}`).join(' · ')}</dd>
+            <dt>modelos en memoria</dt><dd>${s.modelos_cargados.length ? s.modelos_cargados.map(esc).join(', ') : 'ninguno todavía'}</dd>
+            <dt>evaluaciones servidas</dt><dd>${s.evaluaciones_servidas} desde el arranque · máximo ${s.max_episodios} épocas por petición</dd>
+            <dt>registro</dt><dd>${m.resumen.ejecuciones} ejecuciones · ${s.versiones_mlflow} versiones en MLflow${s.mlflow_ui ? ` (<a href="${esc(s.mlflow_ui)}" target="_blank" rel="noopener">abrir</a>)` : ''} · ${m.resumen.evidencias_pipeline} evidencias del pipeline · ${m.resumen.incidentes} incidentes medidos</dd>
+            <dt>trazabilidad</dt><dd>${m.resumen.con_cambios_sin_commit.length} ejecuciones entrenadas con cambios sin commit${m.resumen.con_cambios_sin_commit.length ? `: ${m.resumen.con_cambios_sin_commit.map(esc).join(', ')}` : ''}</dd>
+          </dl>
+          <p><button class="btn primario" id="mon-medir">Medir latencia ahora</button> <span class="muted">evalúa 3 épocas de la suite v1 con el recomendado de cada nivel</span> <span id="mon-estado" class="muted"></span></p>
+        </section>
+        <section class="card">
+          <h2>Alertas</h2>
+          ${alertas}
+          <h2>Últimos cambios del catálogo</h2>
+          ${tabla(['v', 'fecha', 'acción', 'nivel', 'ejecución'], m.catalogo.historial.slice().reverse().map((h) => [h.version, esc(h.fecha), esc(h.accion), esc(h.nivel ?? 'N1'), esc(h.run_id)]))}
+        </section>
+      </div>
+      <h2>Qué se sirve en cada nivel</h2>
+      ${niveles}
+      <h2>Últimas ejecuciones del pipeline y rollbacks</h2>
+      ${pipeline}
+      <h2>Evaluaciones servidas por esta instancia</h2>
+      ${evaluaciones}
+      <p class="muted">Ambientes: ${c.ambientes.filter((a) => a.vigente !== false).map((a) => `${esc(a.nivel)} ${esc(a.id)} v${esc(a.version)}`).join(' · ')}.</p>`
+    el.querySelector<HTMLButtonElement>('#mon-medir')!.addEventListener('click', async (ev) => {
+      const boton = ev.currentTarget as HTMLButtonElement, estado = el.querySelector<HTMLElement>('#mon-estado')!
+      boton.disabled = true
+      try {
+        for (const n of m.niveles.filter((x) => x.recomendado)) {
+          estado.textContent = `evaluando ${n.recomendado}…`
+          await api.evaluar({ run_id: n.recomendado!, episodios: 3, grabar: 0, suite: 'suite-v1', condicion: 'normal' })
+        }
+        estado.textContent = ''
+        await pintar()
+      } catch (e) { estado.textContent = `error: ${(e as Error).message}`; boton.disabled = false }
+    })
+  }
+  await pintar()
+  temporizador = window.setInterval(() => { pintar().catch(() => {}) }, 30000)
+  return () => window.clearInterval(temporizador)
+}
+
 // ---------- incidente controlado ----------
 export async function vistaIncidente(el: HTMLElement) {
   const d = await api.incidentes()

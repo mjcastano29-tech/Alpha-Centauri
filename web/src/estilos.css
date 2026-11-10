@@ -182,6 +182,10 @@ p.modo { text-transform: none; letter-spacing: 0; font-weight: 500; font-family:
 .tab { flex: 1 1 220px; display: block; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--ink); text-decoration: none; font-weight: 600; line-height: 1.3; }
 .tab .muted { font-weight: 400; font-size: 12px; }
 .tab.activa { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.alertas { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.alerta { padding: 8px 10px; border-radius: 6px; border-left: 4px solid var(--warning); background: color-mix(in srgb, var(--warning) 12%, var(--surface)); font-size: 13px; }
+.alerta-viento, .alerta-ambiente, .alerta-pipeline, .alerta-catalogo { border-left-color: var(--critical); background: color-mix(in srgb, var(--critical) 10%, var(--surface)); }
+.alerta-arranque { border-left-color: var(--series-1); background: color-mix(in srgb, var(--series-1) 10%, var(--surface)); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
 .chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--ink); text-decoration: none; font-size: 12px; }
 .chip.activa { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
