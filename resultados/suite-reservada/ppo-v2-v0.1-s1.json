@@ -1,0 +1,45 @@
+{
+  "run_id": "ppo-v2-v0.1-s1",
+  "fecha": "2026-11-10T15:47:09",
+  "suite": "suite-reservada",
+  "episodios": 200,
+  "ambiente": "RocketLanding3D-v0",
+  "nivel": "N1",
+  "semilla_sha256": "d44c44c35a7954cd006d02b0e662798f85c551df9b7760f1a2a7c022c646fe97",
+  "normal": {
+    "episodes": 200,
+    "outcomes": {
+      "aterrizaje": 195,
+      "fuera de plataforma": 0,
+      "choque": 0,
+      "sin pasos": 5,
+      "fuera de zona": 0,
+      "colisión": 0
+    },
+    "landing_rate": 0.975,
+    "contact_speed": 1.2529125883873689,
+    "position_error": 2.882290657673076,
+    "fuel_used": 330.2784612600629
+  },
+  "viento_15": {
+    "episodes": 200,
+    "outcomes": {
+      "aterrizaje": 145,
+      "fuera de plataforma": 2,
+      "choque": 6,
+      "sin pasos": 47,
+      "fuera de zona": 0,
+      "colisión": 0
+    },
+    "landing_rate": 0.725,
+    "contact_speed": 1.7400285108195659,
+    "position_error": 7.009260644040423,
+    "fuel_used": 335.06212257194625
+  },
+  "suite_v1": {
+    "aterrizajes": 0.99,
+    "velocidad_contacto": 1.2496149397210743,
+    "error_posicion": 3.1458073482533937
+  },
+  "diferencia_con_suite_v1": -0.015
+}

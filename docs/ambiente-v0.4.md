@@ -82,7 +82,21 @@ Los 10 aterrizajes a ciegas son salidas que caen sobre la abertura por casualida
 
 ## Cinco transiciones
 
-Pendientes del primer modelo aceptado del nivel 2 v1 (`python cli.py transiciones --run <id>`); se añaden al cerrar el experimento 5.
+Cinco pasos consecutivos del recomendado del nivel 2 v1 (`ppo-pasarela-transfer-1m5-v0.4-s2`) en la época de evaluación con semilla 10 000 000 (`python cli.py transiciones --run ppo-pasarela-transfer-1m5-v0.4-s2`). La columna "obstáculos" son las cuatro entradas nuevas: `o_x − x`, `o_y − y` (objetivo de la fase: aquí la abertura), `H − z` (altura hasta la pasarela, negativa por encima) y `r_a − d_a` (margen hasta el borde de la abertura, positivo dentro). La salida de esta época cae casi sobre la abertura (a 4 m), así que la primera fase es mantenerse en ella mientras baja 420 m.
+
+| # | Observación (resumen) | Obstáculos | Acción | Recompensa | Fin |
+|---|---|---|---|---|---|
+| 1 | pos (31,7, 10,1, 600,0) m · vel (1,4, 1,1, −19,6) m/s · viento (−6,3, 12,9) m/s | (−4, +2, −420, +12) | motor apagado | +10,28 | no |
+| 2 | pos (32,9, 11,2, 578,2) · vel (1,2, 1,4, −27,9) | (−5, +1, −398, +11) | motor apagado | −0,09 | no |
+| 3 | pos (33,7, 12,3, 556,1) · vel (1,1, 1,6, −34,1) | (−6, 0, −376, +10) | empuje ×0,30 · 7° hacia −y | −1,31 | no |
+| 4 | pos (34,3, 13,2, 534,5) · vel (0,9, 1,6, −37,5) · incl. 7,3° | (−6, −1, −354, +10) | empuje ×0,70 · 8° hacia −y | +1,45 | no |
+| 5 | pos (34,7, 14,1, 511,7) · vel (0,4, 1,4, −38,3) · incl. 8,0° | (−7, −2, −332, +9) | empuje ×0,75 · 8° hacia −y | +1,73 | no |
+
+Lectura: deja caer el cohete dos pasos y después enciende el motor inclinado hacia −y para frenar la deriva que lo aleja de la abertura (el margen baja de 12 a 9 m); el viento sopla hacia +y a 12 m/s. La época termina en aterrizaje. Comparadas con las mismas transiciones del modelo del nivel 1 en la ficha 0.1, la diferencia es el objetivo: aquí corrige respecto a la abertura, no respecto a la plataforma.
+
+### Test final reservado
+
+El 10 de noviembre se aplicó una sola vez la suite reservada (`python suite_reservada.py`: misma estructura que la v1, semilla guardada por el equipo fuera del repo, resultado en `resultados/suite-reservada/`): el recomendado de N2 v1 aterriza el 99,0 % (198/200, 2 choques) frente al 100 % de la suite v1, y el 58,5 % con viento fijo de 15 m/s (68 % en la v1). La diferencia de 1 punto indica que la selección entre semillas no sobreajustó a la suite v1.
 
 ## Posibles trampas y decisiones pendientes
 

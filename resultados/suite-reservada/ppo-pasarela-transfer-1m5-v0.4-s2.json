@@ -1,0 +1,45 @@
+{
+  "run_id": "ppo-pasarela-transfer-1m5-v0.4-s2",
+  "fecha": "2026-11-10T15:47:25",
+  "suite": "suite-reservada",
+  "episodios": 200,
+  "ambiente": "RocketLanding3D-N2-v1",
+  "nivel": "N2",
+  "semilla_sha256": "d44c44c35a7954cd006d02b0e662798f85c551df9b7760f1a2a7c022c646fe97",
+  "normal": {
+    "episodes": 200,
+    "outcomes": {
+      "aterrizaje": 198,
+      "fuera de plataforma": 0,
+      "choque": 2,
+      "sin pasos": 0,
+      "fuera de zona": 0,
+      "colisión": 0
+    },
+    "landing_rate": 0.99,
+    "contact_speed": 1.2901514088333534,
+    "position_error": 2.648899699036909,
+    "fuel_used": 260.516285728866
+  },
+  "viento_15": {
+    "episodes": 200,
+    "outcomes": {
+      "aterrizaje": 117,
+      "fuera de plataforma": 7,
+      "choque": 33,
+      "sin pasos": 0,
+      "fuera de zona": 0,
+      "colisión": 43
+    },
+    "landing_rate": 0.585,
+    "contact_speed": 2.3678803850517176,
+    "position_error": 11.452837155551522,
+    "fuel_used": 218.64586006970546
+  },
+  "suite_v1": {
+    "aterrizajes": 1.0,
+    "velocidad_contacto": 1.2536331354011234,
+    "error_posicion": 2.8919139797139883
+  },
+  "diferencia_con_suite_v1": -0.01
+}

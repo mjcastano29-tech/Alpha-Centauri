@@ -243,8 +243,8 @@ def cmd_transiciones(args):
         texto = (f"pos=({o[0]:.1f}, {o[1]:.1f}, {o[2]:.1f}) m  vel=({o[3]:.1f}, {o[4]:.1f}, {o[5]:.1f}) m/s  "
                  f"viento=({o[6]:.1f}, {o[7]:.1f}) m/s  aire={o[9] - 273.15:.1f} °C {o[10]:.1f} kPa  "
                  f"motor={o[11]:.0f} K  comb={o[12]:.2f}  incl={o[15]:.1f}°  pasos rest.={o[14]:.2f}")
-        torres = [f"({o[k]:.0f}, {o[k + 1]:.0f}, {o[k + 2]:+.0f})" for k in range(16, len(o), 3)]  # nivel 2: dx, dy, altura restante por torre
-        return texto + (f"  torres={' '.join(torres)} m" if torres else "")
+        extra = ", ".join(f"{v:+.0f}" for v in o[16:])  # niveles 2 y 3: entradas de los obstáculos (ver la ficha del ambiente)
+        return texto + (f"  obstáculos=[{extra}]" if extra else "")
 
     for k in range(1, args.n + 1):
         action, label = policy(env, obs)

@@ -198,6 +198,13 @@ El orquestador tiene su propio entorno (`requirements-pipeline.txt`, carpeta `.v
   ```
 - **Despliegue**: Vercel con Root Directory `web`, Build Command `npm run build`, Output Directory `dist` y la variable `VITE_API_BASE_URL` apuntando a la API HTTPS. La API se sirve como contenedor ([Dockerfile](Dockerfile)) o como servicio Python: [render.yaml](render.yaml) la despliega en Render (plan gratuito, 512 MB; por eso la API no importa MLflow y lee `mlflow.db` con sqlite3). `python desplegar_hf.py` haría lo mismo en un Space de Hugging Face, pero los Spaces con Docker exigen suscripción PRO. Variables en [.env.example](.env.example). Versiones verificadas: Node 24, npm 11, Vite 8, three 0.187, FastAPI 0.162, Uvicorn 0.54.
 
+## Informe, defensa y test reservado
+
+- [docs/informe-final.md](docs/informe-final.md): qué construimos, los niveles y su complejidad, la cadena de hipótesis, pipeline, incidente, intervención, rollback, límites y contribuciones.
+- [docs/guion-defensa.md](docs/guion-defensa.md): guion de 15 minutos sobre la web pública, con preguntas probables.
+- [docs/diagnostico-proyecto-final.md](docs/diagnostico-proyecto-final.md): diagnóstico frente al enunciado, actualizado en cada hito.
+- `python suite_reservada.py`: test final reservado (misma estructura que la suite v1, semilla guardada por el equipo fuera del repo en `.suite_reservada` o `SUITE_RESERVADA_SEMILLA`); resultados sin la semilla en `resultados/suite-reservada/`.
+
 ## Versionado
 
 Todo se versiona en git: código, fichas, modelos, datos de entrenamiento y el registro de MLflow.
