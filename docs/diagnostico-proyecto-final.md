@@ -37,7 +37,16 @@ Revisión sobre `main` en el commit `7bc672e` (PR #9 a #12 de jhrojas02 e Isaía
 | Contrato y funcionamiento del ambiente (10 %) | ≈ 95 % | la ficha de 0.4 tiene pendientes las "Cinco transiciones" del modelo aceptado |
 | Defensa (15 %) | pendiente | guion y ensayo; la landing y la consola de misión ya son el soporte visual |
 
-### Siguientes pasos, en orden
+### Hecho el mismo día (10 de noviembre, tarde)
+
+- **Monitoreo**: `GET /monitoreo` y vista `#/monitoreo` (servicio, recomendado de cada nivel y su comportamiento, decisiones del pipeline y rollbacks, latencia de las evaluaciones servidas, alertas). Comprobado en la web pública.
+- **Test reservado** aplicado una vez a los tres recomendados con una semilla guardada fuera del repo (`suite_reservada.py`): N1 97,5 %, N2 v1 99,0 %, N3 v1 97,0 % (frente a 99, 100 y 97,5 % en la suite v1): sin sobreajuste a la suite.
+- **Informe final** ([informe-final.md](informe-final.md)), **guion de la defensa** ([guion-defensa.md](guion-defensa.md)) y **release `v1.0.0`** sobre `main`.
+- Cinco transiciones del recomendado de N2 v1 en la ficha 0.4; `EXPERIMENTOS.md` regenerado con las 23 ejecuciones.
+
+Queda por hacer el ensayo de la defensa con la web pública (despertar la API y MLflow diez minutos antes) y, si el equipo quiere, el rollback en vivo sobre el catálogo actual.
+
+### Siguientes pasos, en orden (tal como estaban al mediodía)
 
 1. **Monitoreo** (hoy): ruta `GET /monitoreo` en la API y vista `#/monitoreo` en la web con salud y commit servidos, catálogo por nivel, últimas decisiones del pipeline, latencia de las evaluaciones y alertas (recomendado frágil con viento, ejecuciones con cambios sin commit, API dormida).
 2. **Release `v1.0.0` e informe final** (`docs/informe-final.md`): decisiones, resultados por nivel con media de semillas, incidente, intervención, rollback, límites y contribuciones de cada integrante; guion de la defensa de 15 minutos con la web pública.
