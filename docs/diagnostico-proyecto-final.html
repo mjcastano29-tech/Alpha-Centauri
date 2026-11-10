@@ -81,7 +81,7 @@
 <tr>
 <td>4 · Recuperar y defender</td>
 <td>intervención, rollback, release e informe</td>
-<td><strong>A medias</strong>: intervención hecha y decidida dos veces (N3 con torres y N3 con pasarela), rollback demostrado en producción con evidencia (catálogos v8 a v10). Faltan la release final, el informe, la suite reservada y el guion de la defensa.</td>
+<td><strong>A medias</strong>: intervención hecha y decidida dos veces (N3 con torres y N3 con pasarela), rollback demostrado en producción con evidencia (catálogos v8 a v10). Faltan la release final, el informe, la suite reservada y el preparación de la defensa.</td>
 </tr>
 </tbody>
 </table>
@@ -118,14 +118,22 @@
 <tr>
 <td>Defensa (15 %)</td>
 <td>pendiente</td>
-<td>guion y ensayo; la landing y la consola de misión ya son el soporte visual</td>
+<td>preparación y ensayo; la landing y la consola de misión ya son el soporte visual</td>
 </tr>
 </tbody>
 </table>
-<h3>Siguientes pasos, en orden</h3>
+<h3>Hecho el mismo día (10 de noviembre, tarde)</h3>
+<ul>
+<li><strong>Monitoreo</strong>: <code>GET /monitoreo</code> y vista <code>#/monitoreo</code> (servicio, recomendado de cada nivel y su comportamiento, decisiones del pipeline y rollbacks, latencia de las evaluaciones servidas, alertas). Comprobado en la web pública.</li>
+<li><strong>Test reservado</strong> aplicado una vez a los tres recomendados con una semilla guardada fuera del repo (<code>suite_reservada.py</code>): N1 97,5 %, N2 v1 99,0 %, N3 v1 97,0 % (frente a 99, 100 y 97,5 % en la suite v1): sin sobreajuste a la suite.</li>
+<li><strong>Informe final</strong> (<a href="informe-final.md">informe-final.md</a>), <strong>preparación de la defensa</strong> (<a href="preparación-defensa.md">preparación-defensa.md</a>) y <strong>release <code>v1.0.0</code></strong> sobre <code>main</code>.</li>
+<li>Cinco transiciones del recomendado de N2 v1 en la ficha 0.4; <code>EXPERIMENTOS.md</code> regenerado con las 23 ejecuciones.</li>
+</ul>
+<p>Queda por hacer el ensayo de la defensa con la web pública (despertar la API y MLflow diez minutos antes) y, si el equipo quiere, el rollback en vivo sobre el catálogo actual.</p>
+<h3>Siguientes pasos, en orden (tal como estaban al mediodía)</h3>
 <ol>
 <li><strong>Monitoreo</strong> (hoy): ruta <code>GET /monitoreo</code> en la API y vista <code>#/monitoreo</code> en la web con salud y commit servidos, catálogo por nivel, últimas decisiones del pipeline, latencia de las evaluaciones y alertas (recomendado frágil con viento, ejecuciones con cambios sin commit, API dormida).</li>
-<li><strong>Release <code>v1.0.0</code> e informe final</strong> (<code>docs/informe-final.md</code>): decisiones, resultados por nivel con media de semillas, incidente, intervención, rollback, límites y contribuciones de cada integrante; guion de la defensa de 15 minutos con la web pública.</li>
+<li><strong>Release <code>v1.0.0</code> e informe final</strong> (<code>docs/informe-final.md</code>): decisiones, resultados por nivel con media de semillas, incidente, intervención, rollback, límites y contribuciones de cada integrante; preparación de la defensa de 15 minutos con la web pública.</li>
 <li><strong>Suite reservada</strong> sobre los tres recomendados, una sola vez, y su resultado en el informe.</li>
 <li><strong>Cinco transiciones</strong> del recomendado de N2 v1 en la ficha 0.4; texto de la vista de experimentos ("seis experimentos").</li>
 <li><strong>Coordinación</strong>: pipeline desde una sola máquina a la vez; <code>git pull</code> antes de cada ejecución.</li>
@@ -203,7 +211,7 @@
 <td>Defensa (15 %)</td>
 <td>pendiente</td>
 <td>la web pública permite demostrar en vivo catálogo, replay 3D, evaluación por nivel, incidente y rollback</td>
-<td>guion de la defensa y ensayo</td>
+<td>preparación de la defensa y ensayo</td>
 </tr>
 </tbody>
 </table>
@@ -500,7 +508,7 @@
 <tr>
 <td>16</td>
 <td><strong>Informe breve y presentación</strong></td>
-<td>Decisiones, resultados, límites y contribuciones; guion de defensa</td>
+<td>Decisiones, resultados, límites y contribuciones; preparación de defensa</td>
 <td><code>docs/experimento-2.md</code> cubre parte; no hay informe ni presentación</td>
 <td>Hito 4</td>
 <td>Medio</td>

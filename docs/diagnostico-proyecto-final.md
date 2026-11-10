@@ -25,7 +25,7 @@ Revisión sobre `main` en el commit `7bc672e` (PR #9 a #12 de jhrojas02 e Isaía
 | 1 · Reproducir | contrato, baseline, primer run y despliegue inicial | **Completo** (release `v0.2.0`, web en Vercel, API y MLflow en Render). |
 | 2 · Experimentar | niveles, hipótesis, catálogo y modelos históricos | **Completo**: tres niveles vigentes con ficha y mapa (0.1.1, 0.4, 0.5) y dos retirados (0.2, 0.3) que siguen siendo reproducibles; 23 configuraciones con hipótesis, cambio, presupuesto y decisión; seis experimentos; catálogo por nivel (v15) con historial; tres semillas por finalista en los tres niveles (N1 97,8 ± 1,0 %, N2 v1 96,3 ± 4,4 %, N3 v1 93,7 ± 1,0 % de la receta). |
 | 3 · Operar | pipeline, comparaciones y detección de degradación | **Completo salvo el monitoreo**: 21 ejecuciones del pipeline con evidencia, comparación y vista de experimentos con la progresión de complejidad, degradación medida por viento y por cambio de nivel (9 incidentes). Falta la vista de monitoreo de la operación. |
-| 4 · Recuperar y defender | intervención, rollback, release e informe | **A medias**: intervención hecha y decidida dos veces (N3 con torres y N3 con pasarela), rollback demostrado en producción con evidencia (catálogos v8 a v10). Faltan la release final, el informe, la suite reservada y el guion de la defensa. |
+| 4 · Recuperar y defender | intervención, rollback, release e informe | **A medias**: intervención hecha y decidida dos veces (N3 con torres y N3 con pasarela), rollback demostrado en producción con evidencia (catálogos v8 a v10). Faltan la release final, el informe, la suite reservada y el preparación de la defensa. |
 
 ### Cobertura estimada de la rúbrica
 
@@ -35,12 +35,21 @@ Revisión sobre `main` en el commit `7bc672e` (PR #9 a #12 de jhrojas02 e Isaía
 | Diseño experimental y análisis (25 %) | ≈ 90 % | el informe que una los seis experimentos; decir explícitamente que el recomendado de cada nivel es la mejor de tres semillas y que la media es la cifra honesta |
 | Pipeline, despliegue, monitoreo y rollback (20 %) | ≈ 80 % | vista de monitoreo; rollback reciente sobre el catálogo actual (el demostrado fue con las torres; sigue valiendo como evidencia, pero conviene repetirlo en la defensa) |
 | Contrato y funcionamiento del ambiente (10 %) | ≈ 95 % | la ficha de 0.4 tiene pendientes las "Cinco transiciones" del modelo aceptado |
-| Defensa (15 %) | pendiente | guion y ensayo; la landing y la consola de misión ya son el soporte visual |
+| Defensa (15 %) | pendiente | preparación y ensayo; la landing y la consola de misión ya son el soporte visual |
 
-### Siguientes pasos, en orden
+### Hecho el mismo día (10 de noviembre, tarde)
+
+- **Monitoreo**: `GET /monitoreo` y vista `#/monitoreo` (servicio, recomendado de cada nivel y su comportamiento, decisiones del pipeline y rollbacks, latencia de las evaluaciones servidas, alertas). Comprobado en la web pública.
+- **Test reservado** aplicado una vez a los tres recomendados con una semilla guardada fuera del repo (`suite_reservada.py`): N1 97,5 %, N2 v1 99,0 %, N3 v1 97,0 % (frente a 99, 100 y 97,5 % en la suite v1): sin sobreajuste a la suite.
+- **Informe final** ([informe-final.md](informe-final.md)), **preparación de la defensa** ([preparación-defensa.md](preparación-defensa.md)) y **release `v1.0.0`** sobre `main`.
+- Cinco transiciones del recomendado de N2 v1 en la ficha 0.4; `EXPERIMENTOS.md` regenerado con las 23 ejecuciones.
+
+Queda por hacer el ensayo de la defensa con la web pública (despertar la API y MLflow diez minutos antes) y, si el equipo quiere, el rollback en vivo sobre el catálogo actual.
+
+### Siguientes pasos, en orden (tal como estaban al mediodía)
 
 1. **Monitoreo** (hoy): ruta `GET /monitoreo` en la API y vista `#/monitoreo` en la web con salud y commit servidos, catálogo por nivel, últimas decisiones del pipeline, latencia de las evaluaciones y alertas (recomendado frágil con viento, ejecuciones con cambios sin commit, API dormida).
-2. **Release `v1.0.0` e informe final** (`docs/informe-final.md`): decisiones, resultados por nivel con media de semillas, incidente, intervención, rollback, límites y contribuciones de cada integrante; guion de la defensa de 15 minutos con la web pública.
+2. **Release `v1.0.0` e informe final** (`docs/informe-final.md`): decisiones, resultados por nivel con media de semillas, incidente, intervención, rollback, límites y contribuciones de cada integrante; preparación de la defensa de 15 minutos con la web pública.
 3. **Suite reservada** sobre los tres recomendados, una sola vez, y su resultado en el informe.
 4. **Cinco transiciones** del recomendado de N2 v1 en la ficha 0.4; texto de la vista de experimentos ("seis experimentos").
 5. **Coordinación**: pipeline desde una sola máquina a la vez; `git pull` antes de cada ejecución.
@@ -66,7 +75,7 @@ Revisión hecha sobre `main` en el commit `d19acd0` (PR #4 a #8 de jhrojas02 fus
 | Diseño experimental y análisis (25 %) | ≈ 85 % | cadena de hipótesis con rechazos conservados en los tres niveles, dificultad medida con el adaptador, variabilidad entre semillas, transferencia como hipótesis explícita | la ficha de N3 no tiene las secciones "Cinco transiciones" ni "Posibles trampas" de la plantilla; el informe final que une los tres niveles |
 | Pipeline, despliegue, monitoreo y rollback (20 %) | ≈ 80 % | ocho etapas con evidencia, despliegue automático al hacer push, comprobación de la versión servida, rollback con evidencia | vista de monitoreo; rollback accionable desde la web (hoy es un commit del catálogo); el pipeline hace push directo a `main` sin PR |
 | Contrato y funcionamiento del ambiente (10 %) | ≈ 95 % | tres ambientes con pruebas de contrato (`check_env`, `terminated`/`truncated`, colisión, viento), fichas y mapas | — |
-| Defensa (15 %) | pendiente | la web pública permite demostrar en vivo catálogo, replay 3D, evaluación por nivel, incidente y rollback | guion de la defensa y ensayo |
+| Defensa (15 %) | pendiente | la web pública permite demostrar en vivo catálogo, replay 3D, evaluación por nivel, incidente y rollback | preparación de la defensa y ensayo |
 
 ### Lo que queda, en orden
 
@@ -174,7 +183,7 @@ Cobertura estimada por criterio de la rúbrica (peso entre paréntesis): version
 | 13 | **Estructura sugerida del repositorio** | `envs/ configs/ pipelines/ tests/ web/ manifests/ docs/` | Hoy: `rocket_env/`, scripts en la raíz, `visualizacion/`, `resultados/`, `docs/`; `tests/` llega con la rama de Isaías | No es obligatoria: documentar la correspondencia en el README y crear solo las que faltan (`configs/`, `pipelines/`, `web/`, `manifests/`) | Bajo |
 | 14 | **Python 3.12 de referencia; DVC para artefactos grandes** | 3.12 "probado en el piloto"; artefactos grandes recuperables (DVC o mecanismo acordado) | Python 3.10.12; artefactos de ~1,3 MB por ejecución en git (manejable); `mlruns/` también en git | Documentar 3.10 como versión verificada (o migrar a 3.12 y re-verificar las huellas); DVC solo si los artefactos crecen o el docente lo exige | Bajo |
 | 15 | **Modo visible en la interfaz** | La animación debe decir si es manual, aleatorio, referencia, evaluación o entrenamiento | La escena 3D muestra replays de épocas grabadas (entrenamiento con exploración y modelo final sin ruido) sin una etiqueta de modo explícita en pantalla | Etiqueta de modo en el HUD; en la web, modo "evaluación en vivo" cuando la API ejecute el modelo | Bajo |
-| 16 | **Informe breve y presentación** | Decisiones, resultados, límites y contribuciones; guion de defensa | `docs/experimento-2.md` cubre parte; no hay informe ni presentación | Hito 4 | Medio |
+| 16 | **Informe breve y presentación** | Decisiones, resultados, límites y contribuciones; preparación de defensa | `docs/experimento-2.md` cubre parte; no hay informe ni presentación | Hito 4 | Medio |
 
 ## 4. Plan propuesto
 
