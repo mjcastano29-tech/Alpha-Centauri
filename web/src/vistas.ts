@@ -134,7 +134,7 @@ export async function vistaExperimentos(el: HTMLElement, seleccionado?: string) 
   ]))
   el.innerHTML = `
     <h1>Experimentos</h1>
-    <p>Cuatro experimentos, uno por pregunta, sobre tres niveles de complejidad creciente. Elige uno para ver sus configuraciones, las variables que se movieron y lo que se decidió; la tabla de arriba muestra cómo crece la complejidad de un nivel al siguiente y cuánto pierde el modelo del nivel anterior cuando se le pone en el nuevo.</p>
+    <p>${experimentos.length} experimentos, uno por pregunta, sobre tres niveles de complejidad creciente. Elige uno para ver sus configuraciones, las variables que se movieron y lo que se decidió; la tabla de arriba muestra cómo crece la complejidad de un nivel al siguiente y cuánto pierde el modelo del nivel anterior cuando se le pone en el nuevo.</p>
     <h2>Cómo aumenta la complejidad</h2>
     ${complejidad}
     ${retirados.length ? `<p class="muted">Ambientes retirados (modelos históricos, siguen siendo reproducibles): ${retirados.map((a) => `${esc(a.nivel)} ${esc(a.id)} v${esc(a.version)} (${esc(a.familia ?? '')})`).join(' · ')}.</p>` : ''}
