@@ -1,6 +1,6 @@
 # Experimentos y modelos de Alpha Centauri
 
-Generado el 2026-11-06 14:52 con `python experimentos_md.py` a partir de los archivos versionados del repositorio. 16 ejecuciones en 4 experimentos.
+Generado el 2026-11-10 15:49 con `python experimentos_md.py` a partir de los archivos versionados del repositorio. 23 ejecuciones en 6 experimentos.
 
 ## Dónde se guarda cada cosa
 
@@ -27,16 +27,23 @@ Generado el 2026-11-06 14:52 con `python experimentos_md.py` a partir de los arc
 | `ppo-v2-v0.1-s0` | experimento-2-ppo | N1 · RocketLanding3D-v0 0.1 | PPO (red neuronal) | 0 | 600 000 pasos | **97.0 %** | 62.5 % | — | referencia | anterior (destino del rollback) | rocket-landing-ppo v3 |
 | `ppo-n2-v0.2-s0` | experimento-3-nivel2 | N2 · RocketLanding3D-N2-v0 0.2 | PPO (red neuronal) | 0 | 600 000 pasos | **8.0 %** | 1.5 % | 54 | rechazado | histórico | rocket-landing-ppo v4 |
 | `ppo-n2-transfer-v0.2-s0` | experimento-3-nivel2 | N2 · RocketLanding3D-N2-v0 0.2 | PPO (red neuronal) | 0 | 600 000 pasos | **76.5 %** | 42.0 % | 42 | referencia | histórico | rocket-landing-ppo v5 |
-| `ppo-n2-transfer-1m5-v0.2-s0` | experimento-3-nivel2 | N2 · RocketLanding3D-N2-v0 0.2 | PPO (red neuronal) | 0 | 1 500 000 pasos | **86.0 %** | 55.5 % | 27 | seleccionado | anterior (destino del rollback) | rocket-landing-ppo v6 |
+| `ppo-n2-transfer-1m5-v0.2-s0` | experimento-3-nivel2 | N2 · RocketLanding3D-N2-v0 0.2 | PPO (red neuronal) | 0 | 1 500 000 pasos | **86.0 %** | 55.5 % | 27 | seleccionado | histórico | rocket-landing-ppo v6 |
 | `ppo-v2-v0.1-s1` | experimento-2-ppo | N1 · RocketLanding3D-v0 0.1.1 | PPO (red neuronal) | 1 | 600 000 pasos | **99.0 %** | 72.0 % | — | seleccionado | recomendado (se sirve en la web) | rocket-landing-ppo v7 |
 | `ppo-v2-v0.1-s2` | experimento-2-ppo | N1 · RocketLanding3D-v0 0.1.1 | PPO (red neuronal) | 2 | 600 000 pasos | **97.5 %** | 71.5 % | — | rechazado | histórico | rocket-landing-ppo v8 |
 | `ppo-n3-transfer-v0.3-s0` | experimento-4-nivel3 | N3 · RocketLanding3D-N3-v0 0.3 | PPO (red neuronal) | 0 | 600 000 pasos | **81.5 %** | 74.5 % | 37 | rechazado | histórico | rocket-landing-ppo v10 |
-| `ppo-n2-transfer-1m5-v0.2-s1` | experimento-3-nivel2 | N2 · RocketLanding3D-N2-v0 0.2 | PPO (red neuronal) | 1 | 1 500 000 pasos | **93.5 %** | 63.0 % | 13 | seleccionado | recomendado (se sirve en la web) | rocket-landing-ppo v9 |
-| `ppo-n3-transfer-1m5-v0.3-s0` | experimento-4-nivel3 | N3 · RocketLanding3D-N3-v0 0.3 | PPO (red neuronal) | 0 | 1 500 000 pasos | **86.5 %** | 67.5 % | 24 | seleccionado | anterior (destino del rollback) | rocket-landing-ppo v11 |
-| `ppo-n3-transfer-1m5-desde-s1-v0.3-s0` | experimento-4-nivel3 | N3 · RocketLanding3D-N3-v0 0.3 | PPO (red neuronal) | 0 | 1 500 000 pasos | **92.0 %** | 79.0 % | 15 | seleccionado | recomendado (se sirve en la web) | rocket-landing-ppo v12 |
+| `ppo-n2-transfer-1m5-v0.2-s1` | experimento-3-nivel2 | N2 · RocketLanding3D-N2-v0 0.2 | PPO (red neuronal) | 1 | 1 500 000 pasos | **93.5 %** | 63.0 % | 13 | seleccionado | histórico | rocket-landing-ppo v9 |
+| `ppo-n3-transfer-1m5-v0.3-s0` | experimento-4-nivel3 | N3 · RocketLanding3D-N3-v0 0.3 | PPO (red neuronal) | 0 | 1 500 000 pasos | **86.5 %** | 67.5 % | 24 | seleccionado | histórico | rocket-landing-ppo v11 |
+| `ppo-n3-transfer-1m5-desde-s1-v0.3-s0` | experimento-4-nivel3 | N3 · RocketLanding3D-N3-v0 0.3 | PPO (red neuronal) | 0 | 1 500 000 pasos | **92.0 %** | 79.0 % | 15 | seleccionado | histórico | rocket-landing-ppo v12 |
 | `ppo-n3-transfer-1m5-desde-s1-v0.3-s1` | experimento-4-nivel3 | N3 · RocketLanding3D-N3-v0 0.3 | PPO (red neuronal) | 1 | 1 500 000 pasos | **91.5 %** | 87.5 % | 16 | rechazado | histórico | rocket-landing-ppo v13 |
 | `ppo-n3-transfer-1m5-desde-s1-v0.3-s2` | experimento-4-nivel3 | N3 · RocketLanding3D-N3-v0 0.3 | PPO (red neuronal) | 2 | 1 500 000 pasos | **84.5 %** | 76.5 % | 18 | rechazado | histórico | rocket-landing-ppo v14 |
 | `ppo-n2-transfer-1m5-v0.2-s2` | experimento-3-nivel2 | N2 · RocketLanding3D-N2-v0 0.2 | PPO (red neuronal) | 2 | 1 500 000 pasos | **85.5 %** | 56.5 % | 24 | rechazado | histórico | rocket-landing-ppo v15 |
+| `ppo-pasarela-transfer-1m5-v0.4-s0` | experimento-5-pasarela | N2 · RocketLanding3D-N2-v1 0.4 | PPO (red neuronal) | 0 | 1 500 000 pasos | **91.5 %** | 30.0 % | 14 | seleccionado | histórico | rocket-landing-ppo v16 |
+| `ppo-pasarela-viento-transfer-1m5-v0.5-s0` | experimento-6-pasarela-viento | N3 · RocketLanding3D-N3-v1 0.5 | PPO (red neuronal) | 0 | 1 500 000 pasos | **94.5 %** | 65.5 % | 6 | seleccionado | anterior (destino del rollback) | rocket-landing-ppo v17 |
+| `ppo-pasarela-transfer-1m5-v0.4-s1` | experimento-5-pasarela | N2 · RocketLanding3D-N2-v1 0.4 | PPO (red neuronal) | 1 | 1 500 000 pasos | **97.5 %** | 52.0 % | 4 | seleccionado | anterior (destino del rollback) | rocket-landing-ppo v18 |
+| `ppo-pasarela-transfer-1m5-v0.4-s2` | experimento-5-pasarela | N2 · RocketLanding3D-N2-v1 0.4 | PPO (red neuronal) | 2 | 1 500 000 pasos | **100.0 %** | 68.0 % | 0 | seleccionado | recomendado (se sirve en la web) | rocket-landing-ppo v19 |
+| `ppo-pasarela-viento-transfer-1m5-v0.5-s1` | experimento-6-pasarela-viento | N3 · RocketLanding3D-N3-v1 0.5 | PPO (red neuronal) | 1 | 1 500 000 pasos | **94.0 %** | 66.0 % | 8 | rechazado | histórico | rocket-landing-ppo v20 |
+| `ppo-pasarela-viento-transfer-1m5-v0.5-s2` | experimento-6-pasarela-viento | N3 · RocketLanding3D-N3-v1 0.5 | PPO (red neuronal) | 2 | 1 500 000 pasos | **92.5 %** | 74.5 % | 10 | rechazado | histórico | rocket-landing-ppo v21 |
+| `ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0` | experimento-6-pasarela-viento | N3 · RocketLanding3D-N3-v1 0.5 | PPO (red neuronal) | 0 | 1 500 000 pasos | **97.5 %** | 85.5 % | 3 | seleccionado | recomendado (se sirve en la web) | rocket-landing-ppo v22 |
 
 ## Experimento 1 · Q-learning en el nivel 1
 
@@ -891,4 +898,391 @@ Experimento de MLflow `experimento-4-nivel3` (5 ejecuciones). Las ejecuciones va
 | presupuesto | pasos_agente 1500000, epocas 45671, maquina pipeline Prefect en CPU de portátil (WSL2) | |
 
 **Decisión (2026-11-05).** Rechazado por el pipeline: 84.5% de aterrizajes en la suite v1 (18 colisiones), 76.5% con viento de 15 m/s. no mejora a ppo-n3-transfer-1m5-desde-s1-v0.3-s0 en al menos 2% (84.5% frente a 92.0%); más colisiones que ppo-n3-transfer-1m5-desde-s1-v0.3-s0 (18 frente a 15).
+
+## Experimento 5 · Nivel 2 (v1): pasarela con abertura desplazada
+
+Experimento de MLflow `experimento-5-pasarela` (3 ejecuciones). Las ejecuciones van en orden cronológico; cada una dice qué cambió frente a su baseline.
+
+**Pregunta.** Con el obstáculo nuevo acordado por el equipo (una pasarela que cubre la plataforma y una sola abertura desplazada), ¿aprende PPO a entrar por la abertura y volver al centro partiendo del modelo del nivel 1? Las torres (ambiente 0.2) quedan como histórico.
+
+**Variables que se mueven.** las del experimento 2 más el ambiente (observación de 20 valores), el modelo de partida (transferencia desde el nivel 1) y el presupuesto.
+
+### `ppo-pasarela-transfer-1m5-v0.4-s0` · seleccionado · 91.5 %
+
+**Hipótesis.** Partir del recomendado del nivel 1 (transferencia de pesos y normalización, con los pesos de posición heredados para el objetivo de la fase) y entrenar 1,5 M de pasos bajo la pasarela supera en al menos 2 puntos al modelo del nivel 1 jugando a ciegas (5 %)
+
+**Cambio frente a `ppo-v2-v0.1-s1`.** Ambiente N2 v1 (pasarela a 180 m con abertura desplazada 30 m; observación de 20 valores) y transferencia desde ppo-v2-v0.1-s1; 1 500 000 pasos
+
+**Dónde está el modelo.**
+
+- `resultados/runs/ppo-pasarela-transfer-1m5-v0.4-s0/modelo.zip` · SHA-256 `067a4280b6e65892bebc4b687a2bb7364c64feeac0984afa69c6bd92cc82c96a`
+- `resultados/runs/ppo-pasarela-transfer-1m5-v0.4-s0/modelo_normalizador.pkl` · SHA-256 `a6791d12ba59bfa559bb36917ab90276f7b91e03572956bf0a5b1f3ef15f45e4`
+- En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/464cbd1fdb716d478ed51579cd1fbfab6cf4dcb0/resultados/runs/ppo-pasarela-transfer-1m5-v0.4-s0/modelo.zip
+- MLflow: modelo `rocket-landing-ppo` versión 16, run `3b0589ed32b14f2a809a33f806856f65` (https://alpha-centauri-mlflow.onrender.com/#/experiments/5/runs/3b0589ed32b14f2a809a33f806856f65)
+- Commit de git: `464cbd1fdb716d478ed51579cd1fbfab6cf4dcb0` · manifiesto de la sección 11: `manifests/ppo-pasarela-transfer-1m5-v0.4-s0.json`
+- Parte de los pesos de `ppo-v2-v0.1-s1` (transferencia)
+
+**Variables.**
+
+| Variable | Valor |
+|---|---|
+| ambiente | RocketLanding3D-N2-v1 v0.4 (N2) |
+| agente | PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12 |
+| total_timesteps | 1500000 |
+| n_envs | 8 |
+| n_steps | 256 |
+| batch_size | 256 |
+| n_epochs | 10 |
+| learning_rate | 0.0003 |
+| gamma | 0.99 |
+| gae_lambda | 0.95 |
+| clip_range | 0.2 |
+| ent_coef | 0.005 |
+| net_arch | 128 × 128 |
+| log_std_init | -0.5 |
+| eval_every | 20000 |
+| seed | 0 |
+| accion | relativa |
+| desde | ppo-v2-v0.1-s1 |
+
+**Diferencias de variables con `ppo-v2-v0.1-s1`.** ambiente: RocketLanding3D-v0 v0.1.1 → RocketLanding3D-N2-v1 v0.4; total_timesteps: 600000 → 1500000; seed: 1 → 0; ambiente: RocketLanding3D-v0 → RocketLanding3D-N2-v1; desde: None → ppo-v2-v0.1-s1
+
+**Resultado.**
+
+| Métrica | Normal (suite v1) | Viento 15 m/s |
+|---|---|---|
+| aterrizajes seguros | 91.5 % | 30.0 % |
+| velocidad de contacto | 1.58 m/s | 1.73 m/s |
+| error de posición | 4.8 m | 21.7 m |
+| cómo terminan | aterrizaje 183, choque 3, colisión 14 | aterrizaje 60, fuera de plataforma 1, choque 6, sin pasos 30, colisión 103 |
+| primer aterrizaje / mejor época | 13 / 26522 | |
+| presupuesto | pasos_agente 1500000, epocas 35334, maquina pipeline Prefect en CPU de portátil (WSL2) | |
+
+**Decisión (2026-11-08).** Seleccionado por el pipeline: 91.5% de aterrizajes en la suite v1 (14 colisiones), 30.0% con viento de 15 m/s; supera al recomendado ppo-v2-v0.1-s1 con el criterio de aceptación (+2% de tasa, viento −5% como mucho, no más colisiones).
+
+### `ppo-pasarela-transfer-1m5-v0.4-s1` · seleccionado · 97.5 %
+
+**Hipótesis.** Semilla 1 de la configuración seleccionada bajo la pasarela: queda a menos de 5 puntos del 91,5 % de la semilla 0
+
+**Cambio frente a `ppo-pasarela-transfer-1m5-v0.4-s0`.** Solo la semilla de entrenamiento: 1. Misma transferencia desde ppo-v2-v0.1-s1, ambiente y presupuesto
+
+**Dónde está el modelo.**
+
+- `resultados/runs/ppo-pasarela-transfer-1m5-v0.4-s1/modelo.zip` · SHA-256 `19dee6c6bd0fa8f02261332f1a6bedfb1f63b0b563b579d543b7961054885957`
+- `resultados/runs/ppo-pasarela-transfer-1m5-v0.4-s1/modelo_normalizador.pkl` · SHA-256 `1a0cb2867a24da43ec1f1947ef3a9d295654cc7495e05ad62cec66d55219f777`
+- En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/1aa584fdd8c90a8624d05bd39b61f6afde235504/resultados/runs/ppo-pasarela-transfer-1m5-v0.4-s1/modelo.zip
+- MLflow: modelo `rocket-landing-ppo` versión 18, run `49f1e57a794c4661b1c321e0eb4773c4` (https://alpha-centauri-mlflow.onrender.com/#/experiments/5/runs/49f1e57a794c4661b1c321e0eb4773c4)
+- Commit de git: `1aa584fdd8c90a8624d05bd39b61f6afde235504` · manifiesto de la sección 11: `manifests/ppo-pasarela-transfer-1m5-v0.4-s1.json`
+- Parte de los pesos de `ppo-v2-v0.1-s1` (transferencia)
+
+**Variables.**
+
+| Variable | Valor |
+|---|---|
+| ambiente | RocketLanding3D-N2-v1 v0.4 (N2) |
+| agente | PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12 |
+| total_timesteps | 1500000 |
+| n_envs | 8 |
+| n_steps | 256 |
+| batch_size | 256 |
+| n_epochs | 10 |
+| learning_rate | 0.0003 |
+| gamma | 0.99 |
+| gae_lambda | 0.95 |
+| clip_range | 0.2 |
+| ent_coef | 0.005 |
+| net_arch | 128 × 128 |
+| log_std_init | -0.5 |
+| eval_every | 20000 |
+| seed | 1 |
+| accion | relativa |
+| desde | ppo-v2-v0.1-s1 |
+
+**Diferencias de variables con `ppo-pasarela-transfer-1m5-v0.4-s0`.** seed: 0 → 1
+
+**Resultado.**
+
+| Métrica | Normal (suite v1) | Viento 15 m/s |
+|---|---|---|
+| aterrizajes seguros | 97.5 % | 52.0 % |
+| velocidad de contacto | 1.41 m/s | 1.41 m/s |
+| error de posición | 5.1 m | 15.3 m |
+| cómo terminan | aterrizaje 195, sin pasos 1, colisión 4 | aterrizaje 104, fuera de plataforma 3, choque 2, sin pasos 3, colisión 88 |
+| primer aterrizaje / mejor época | 10 / 24685 | |
+| presupuesto | pasos_agente 1500000, epocas 41449, maquina pipeline Prefect en CPU de portátil (WSL2) | |
+
+**Decisión (2026-11-08).** Seleccionado por el pipeline: 97.5% de aterrizajes en la suite v1 (4 colisiones), 52.0% con viento de 15 m/s; supera al recomendado ppo-pasarela-transfer-1m5-v0.4-s0 con el criterio de aceptación (+2% de tasa, viento −5% como mucho, no más colisiones).
+
+### `ppo-pasarela-transfer-1m5-v0.4-s2` · seleccionado · 100.0 %
+
+**Hipótesis.** Semilla 2 de la configuración seleccionada bajo la pasarela: queda a menos de 5 puntos del 91,5 % de la semilla 0
+
+**Cambio frente a `ppo-pasarela-transfer-1m5-v0.4-s0`.** Solo la semilla de entrenamiento: 2. Misma transferencia desde ppo-v2-v0.1-s1, ambiente y presupuesto
+
+**Dónde está el modelo.**
+
+- `resultados/runs/ppo-pasarela-transfer-1m5-v0.4-s2/modelo.zip` · SHA-256 `911ce2ce73ae5aec34d42f8ecb86d2b799276df19e682540899105975c237311`
+- `resultados/runs/ppo-pasarela-transfer-1m5-v0.4-s2/modelo_normalizador.pkl` · SHA-256 `f7456f6b9aeb35326d747d8ce3f367b8ca061114290255746b6ed6b254fa53ef`
+- En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/e3db96f2ad14e2e322502e66426b687377e23f79/resultados/runs/ppo-pasarela-transfer-1m5-v0.4-s2/modelo.zip
+- MLflow: modelo `rocket-landing-ppo` versión 19, run `739ea30a9db64d16b7e0a654f0418f96` (https://alpha-centauri-mlflow.onrender.com/#/experiments/5/runs/739ea30a9db64d16b7e0a654f0418f96)
+- Commit de git: `e3db96f2ad14e2e322502e66426b687377e23f79` · manifiesto de la sección 11: `manifests/ppo-pasarela-transfer-1m5-v0.4-s2.json`
+- Parte de los pesos de `ppo-v2-v0.1-s1` (transferencia)
+
+**Variables.**
+
+| Variable | Valor |
+|---|---|
+| ambiente | RocketLanding3D-N2-v1 v0.4 (N2) |
+| agente | PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12 |
+| total_timesteps | 1500000 |
+| n_envs | 8 |
+| n_steps | 256 |
+| batch_size | 256 |
+| n_epochs | 10 |
+| learning_rate | 0.0003 |
+| gamma | 0.99 |
+| gae_lambda | 0.95 |
+| clip_range | 0.2 |
+| ent_coef | 0.005 |
+| net_arch | 128 × 128 |
+| log_std_init | -0.5 |
+| eval_every | 20000 |
+| seed | 2 |
+| accion | relativa |
+| desde | ppo-v2-v0.1-s1 |
+
+**Diferencias de variables con `ppo-pasarela-transfer-1m5-v0.4-s0`.** seed: 0 → 2
+
+**Resultado.**
+
+| Métrica | Normal (suite v1) | Viento 15 m/s |
+|---|---|---|
+| aterrizajes seguros | 100.0 % | 68.0 % |
+| velocidad de contacto | 1.25 m/s | 2.14 m/s |
+| error de posición | 2.9 m | 11.1 m |
+| cómo terminan | aterrizaje 200 | aterrizaje 136, fuera de plataforma 5, choque 15, colisión 44 |
+| primer aterrizaje / mejor época | 10 / 37760 | |
+| presupuesto | pasos_agente 1500000, epocas 37791, maquina pipeline Prefect en CPU de portátil (WSL2) | |
+
+**Decisión (2026-11-08).** Seleccionado por el pipeline: 100.0% de aterrizajes en la suite v1 (0 colisiones), 68.0% con viento de 15 m/s; supera al recomendado ppo-pasarela-transfer-1m5-v0.4-s1 con el criterio de aceptación (+2% de tasa, viento −5% como mucho, no más colisiones).
+
+## Experimento 6 · Nivel 3 (v1): pasarela con viento fuerte
+
+Experimento de MLflow `experimento-6-pasarela-viento` (4 ejecuciones). Las ejecuciones van en orden cronológico; cada una dice qué cambió frente a su baseline.
+
+**Pregunta.** Con viento de hasta 15 m/s y ráfagas dobles, ¿cuánto se degrada el modelo de la pasarela y lo recupera reentrenarlo en esas condiciones?
+
+**Variables que se mueven.** las del experimento 5 con el ambiente N3 v1; cambia el modelo de partida y el presupuesto.
+
+### `ppo-pasarela-viento-transfer-1m5-v0.5-s0` · seleccionado · 94.5 %
+
+**Hipótesis.** Intervención ante el viento bajo la pasarela: reentrenar el recomendado de N2 v1 en N3 v1 (viento 0–15 m/s, ráfagas ×2) mejora en al menos 2 puntos a ese mismo modelo jugando en N3 v1, sin más colisiones
+
+**Cambio frente a `ppo-pasarela-transfer-1m5-v0.4-s0`.** Ambiente N3 v1 (pasarela con viento 0–15 m/s y ráfagas 3 m/s) y transferencia desde ppo-pasarela-transfer-1m5-v0.4-s0; 1 500 000 pasos
+
+**Dónde está el modelo.**
+
+- `resultados/runs/ppo-pasarela-viento-transfer-1m5-v0.5-s0/modelo.zip` · SHA-256 `974450458b402b3a02735a568a5c73edc2010765d56f91faf14b3e3f0e69b597`
+- `resultados/runs/ppo-pasarela-viento-transfer-1m5-v0.5-s0/modelo_normalizador.pkl` · SHA-256 `0c90f04519a58efc4b978b3140836462c7f12d61acccd594a8259bd4f54d69c4`
+- En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/507dedc0da1dce8b8e797c1d1211c46c920da88d/resultados/runs/ppo-pasarela-viento-transfer-1m5-v0.5-s0/modelo.zip
+- MLflow: modelo `rocket-landing-ppo` versión 17, run `6abaeed5156e4e0a9ef54436a1660e86` (https://alpha-centauri-mlflow.onrender.com/#/experiments/6/runs/6abaeed5156e4e0a9ef54436a1660e86)
+- Commit de git: `507dedc0da1dce8b8e797c1d1211c46c920da88d` · manifiesto de la sección 11: `manifests/ppo-pasarela-viento-transfer-1m5-v0.5-s0.json`
+- Parte de los pesos de `ppo-pasarela-transfer-1m5-v0.4-s0` (transferencia)
+
+**Variables.**
+
+| Variable | Valor |
+|---|---|
+| ambiente | RocketLanding3D-N3-v1 v0.5 (N3) |
+| agente | PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12 |
+| total_timesteps | 1500000 |
+| n_envs | 8 |
+| n_steps | 256 |
+| batch_size | 256 |
+| n_epochs | 10 |
+| learning_rate | 0.0003 |
+| gamma | 0.99 |
+| gae_lambda | 0.95 |
+| clip_range | 0.2 |
+| ent_coef | 0.005 |
+| net_arch | 128 × 128 |
+| log_std_init | -0.5 |
+| eval_every | 20000 |
+| seed | 0 |
+| accion | relativa |
+| desde | ppo-pasarela-transfer-1m5-v0.4-s0 |
+
+**Diferencias de variables con `ppo-pasarela-transfer-1m5-v0.4-s0`.** ambiente: RocketLanding3D-N2-v1 v0.4 → RocketLanding3D-N3-v1 v0.5; ambiente: RocketLanding3D-N2-v1 → RocketLanding3D-N3-v1; desde: ppo-v2-v0.1-s1 → ppo-pasarela-transfer-1m5-v0.4-s0
+
+**Resultado.**
+
+| Métrica | Normal (suite v1) | Viento 15 m/s |
+|---|---|---|
+| aterrizajes seguros | 94.5 % | 65.5 % |
+| velocidad de contacto | 1.60 m/s | 1.78 m/s |
+| error de posición | 5.4 m | 11.9 m |
+| cómo terminan | aterrizaje 189, choque 5, colisión 6 | aterrizaje 131, fuera de plataforma 2, choque 8, sin pasos 7, colisión 52 |
+| primer aterrizaje / mejor época | 9 / 36122 | |
+| presupuesto | pasos_agente 1500000, epocas 37679, maquina pipeline Prefect en CPU de portátil (WSL2) | |
+
+**Decisión (2026-11-08).** Seleccionado por el pipeline: 94.5% de aterrizajes en la suite v1 (6 colisiones), 65.5% con viento de 15 m/s; supera al recomendado ppo-pasarela-transfer-1m5-v0.4-s0 con el criterio de aceptación (+2% de tasa, viento −5% como mucho, no más colisiones).
+
+### `ppo-pasarela-viento-transfer-1m5-v0.5-s1` · rechazado · 94.0 %
+
+**Hipótesis.** Semilla 1 de la intervención en N3 v1: queda a menos de 5 puntos de la semilla 0
+
+**Cambio frente a `ppo-pasarela-viento-transfer-1m5-v0.5-s0`.** Solo la semilla de entrenamiento: 1. Misma transferencia desde ppo-pasarela-transfer-1m5-v0.4-s0, ambiente y presupuesto
+
+**Dónde está el modelo.**
+
+- `resultados/runs/ppo-pasarela-viento-transfer-1m5-v0.5-s1/modelo.zip` · SHA-256 `78571036903eae5786dfe6493a9433072e37494caaf535670e92f6892211c6c1`
+- `resultados/runs/ppo-pasarela-viento-transfer-1m5-v0.5-s1/modelo_normalizador.pkl` · SHA-256 `759e9ea56be225bcf6f169ab87b3e1099b26f9990fa6bc1d72278d1539799b46`
+- En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/0d2b05347af9639dfc0177cce10de276e400e991/resultados/runs/ppo-pasarela-viento-transfer-1m5-v0.5-s1/modelo.zip
+- MLflow: modelo `rocket-landing-ppo` versión 20, run `040c374d54854bf386c6fad5ca31b52e` (https://alpha-centauri-mlflow.onrender.com/#/experiments/6/runs/040c374d54854bf386c6fad5ca31b52e)
+- Commit de git: `0d2b05347af9639dfc0177cce10de276e400e991` · manifiesto de la sección 11: `manifests/ppo-pasarela-viento-transfer-1m5-v0.5-s1.json`
+- Parte de los pesos de `ppo-pasarela-transfer-1m5-v0.4-s0` (transferencia)
+
+**Variables.**
+
+| Variable | Valor |
+|---|---|
+| ambiente | RocketLanding3D-N3-v1 v0.5 (N3) |
+| agente | PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12 |
+| total_timesteps | 1500000 |
+| n_envs | 8 |
+| n_steps | 256 |
+| batch_size | 256 |
+| n_epochs | 10 |
+| learning_rate | 0.0003 |
+| gamma | 0.99 |
+| gae_lambda | 0.95 |
+| clip_range | 0.2 |
+| ent_coef | 0.005 |
+| net_arch | 128 × 128 |
+| log_std_init | -0.5 |
+| eval_every | 20000 |
+| seed | 1 |
+| accion | relativa |
+| desde | ppo-pasarela-transfer-1m5-v0.4-s0 |
+
+**Diferencias de variables con `ppo-pasarela-viento-transfer-1m5-v0.5-s0`.** seed: 0 → 1
+
+**Resultado.**
+
+| Métrica | Normal (suite v1) | Viento 15 m/s |
+|---|---|---|
+| aterrizajes seguros | 94.0 % | 66.0 % |
+| velocidad de contacto | 1.69 m/s | 1.68 m/s |
+| error de posición | 4.0 m | 12.9 m |
+| cómo terminan | aterrizaje 188, choque 4, colisión 8 | aterrizaje 132, choque 2, sin pasos 8, colisión 58 |
+| primer aterrizaje / mejor época | 10 / 28745 | |
+| presupuesto | pasos_agente 1500000, epocas 36535, maquina pipeline Prefect en CPU de portátil (WSL2) | |
+
+**Decisión (2026-11-08).** Rechazado por el pipeline: 94.0% de aterrizajes en la suite v1 (8 colisiones), 66.0% con viento de 15 m/s. no mejora a ppo-pasarela-viento-transfer-1m5-v0.5-s0 en al menos 2% (94.0% frente a 94.5%); más colisiones que ppo-pasarela-viento-transfer-1m5-v0.5-s0 (8 frente a 6).
+
+### `ppo-pasarela-viento-transfer-1m5-v0.5-s2` · rechazado · 92.5 %
+
+**Hipótesis.** Semilla 2 de la intervención en N3 v1: queda a menos de 5 puntos de la semilla 0
+
+**Cambio frente a `ppo-pasarela-viento-transfer-1m5-v0.5-s0`.** Solo la semilla de entrenamiento: 2. Misma transferencia desde ppo-pasarela-transfer-1m5-v0.4-s0, ambiente y presupuesto
+
+**Dónde está el modelo.**
+
+- `resultados/runs/ppo-pasarela-viento-transfer-1m5-v0.5-s2/modelo.zip` · SHA-256 `cdbe65a0d9a154cdc191d4f166763bfd7b7a1aeb27eb49375f11a59aa05ba213`
+- `resultados/runs/ppo-pasarela-viento-transfer-1m5-v0.5-s2/modelo_normalizador.pkl` · SHA-256 `eb97da3ff9a904307f5a6668436e1459df131856a0aa602c496b0cd5add11252`
+- En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/72ad242c551acc79c7988b49e84f9552c7d67098/resultados/runs/ppo-pasarela-viento-transfer-1m5-v0.5-s2/modelo.zip
+- MLflow: modelo `rocket-landing-ppo` versión 21, run `fae4ff317d274d1b82971c4895d0d08a` (https://alpha-centauri-mlflow.onrender.com/#/experiments/6/runs/fae4ff317d274d1b82971c4895d0d08a)
+- Commit de git: `72ad242c551acc79c7988b49e84f9552c7d67098` · manifiesto de la sección 11: `manifests/ppo-pasarela-viento-transfer-1m5-v0.5-s2.json`
+- Parte de los pesos de `ppo-pasarela-transfer-1m5-v0.4-s0` (transferencia)
+
+**Variables.**
+
+| Variable | Valor |
+|---|---|
+| ambiente | RocketLanding3D-N3-v1 v0.5 (N3) |
+| agente | PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12 |
+| total_timesteps | 1500000 |
+| n_envs | 8 |
+| n_steps | 256 |
+| batch_size | 256 |
+| n_epochs | 10 |
+| learning_rate | 0.0003 |
+| gamma | 0.99 |
+| gae_lambda | 0.95 |
+| clip_range | 0.2 |
+| ent_coef | 0.005 |
+| net_arch | 128 × 128 |
+| log_std_init | -0.5 |
+| eval_every | 20000 |
+| seed | 2 |
+| accion | relativa |
+| desde | ppo-pasarela-transfer-1m5-v0.4-s0 |
+
+**Diferencias de variables con `ppo-pasarela-viento-transfer-1m5-v0.5-s0`.** seed: 0 → 2
+
+**Resultado.**
+
+| Métrica | Normal (suite v1) | Viento 15 m/s |
+|---|---|---|
+| aterrizajes seguros | 92.5 % | 74.5 % |
+| velocidad de contacto | 1.67 m/s | 1.74 m/s |
+| error de posición | 4.7 m | 11.8 m |
+| cómo terminan | aterrizaje 185, choque 3, sin pasos 2, colisión 10 | aterrizaje 149, fuera de plataforma 2, choque 3, sin pasos 3, colisión 43 |
+| primer aterrizaje / mejor época | 6 / 32059 | |
+| presupuesto | pasos_agente 1500000, epocas 35910, maquina pipeline Prefect en CPU de portátil (WSL2) | |
+
+**Decisión (2026-11-08).** Rechazado por el pipeline: 92.5% de aterrizajes en la suite v1 (10 colisiones), 74.5% con viento de 15 m/s. no mejora a ppo-pasarela-viento-transfer-1m5-v0.5-s0 en al menos 2% (92.5% frente a 94.5%); más colisiones que ppo-pasarela-viento-transfer-1m5-v0.5-s0 (10 frente a 6).
+
+### `ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0` · seleccionado · 97.5 %
+
+**Hipótesis.** Partir del nuevo recomendado de N2 v1 (s2: 100 % en N2, 93,5 % y 7 colisiones jugando en N3 v1) con la receta seleccionada en N3 v1 (1,5 M de pasos) mejora al recomendado de N3 en al menos 2 puntos sin más colisiones
+
+**Cambio frente a `ppo-pasarela-transfer-1m5-v0.4-s2`.** Solo el modelo de partida: ppo-pasarela-transfer-1m5-v0.4-s2 en vez de -s0 (mismo ambiente N3 v1, mismo presupuesto)
+
+**Dónde está el modelo.**
+
+- `resultados/runs/ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0/modelo.zip` · SHA-256 `e3e91323b56ee670dcb641ddcf755a4a64a82c8f5fe84acb2da09160171e615a`
+- `resultados/runs/ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0/modelo_normalizador.pkl` · SHA-256 `67e520059004fa746b18e00b221e8ab11930e715c4e7eb241aacb39bd1bf0c69`
+- En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/8ab04daf7c36cd8481a0fa07c7e53500f6428600/resultados/runs/ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0/modelo.zip
+- MLflow: modelo `rocket-landing-ppo` versión 22, run `68b2136313c243e7b4583f86a9e3338e` (https://alpha-centauri-mlflow.onrender.com/#/experiments/6/runs/68b2136313c243e7b4583f86a9e3338e)
+- Commit de git: `8ab04daf7c36cd8481a0fa07c7e53500f6428600` (había cambios sin commit al entrenar) · manifiesto de la sección 11: `manifests/ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0.json`
+- Parte de los pesos de `ppo-pasarela-transfer-1m5-v0.4-s2` (transferencia)
+
+**Variables.**
+
+| Variable | Valor |
+|---|---|
+| ambiente | RocketLanding3D-N3-v1 v0.5 (N3) |
+| agente | PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12 |
+| total_timesteps | 1500000 |
+| n_envs | 8 |
+| n_steps | 256 |
+| batch_size | 256 |
+| n_epochs | 10 |
+| learning_rate | 0.0003 |
+| gamma | 0.99 |
+| gae_lambda | 0.95 |
+| clip_range | 0.2 |
+| ent_coef | 0.005 |
+| net_arch | 128 × 128 |
+| log_std_init | -0.5 |
+| eval_every | 20000 |
+| seed | 0 |
+| accion | relativa |
+| desde | ppo-pasarela-transfer-1m5-v0.4-s2 |
+
+**Diferencias de variables con `ppo-pasarela-transfer-1m5-v0.4-s2`.** ambiente: RocketLanding3D-N2-v1 v0.4 → RocketLanding3D-N3-v1 v0.5; seed: 2 → 0; ambiente: RocketLanding3D-N2-v1 → RocketLanding3D-N3-v1; desde: ppo-v2-v0.1-s1 → ppo-pasarela-transfer-1m5-v0.4-s2
+
+**Resultado.**
+
+| Métrica | Normal (suite v1) | Viento 15 m/s |
+|---|---|---|
+| aterrizajes seguros | 97.5 % | 85.5 % |
+| velocidad de contacto | 1.47 m/s | 1.43 m/s |
+| error de posición | 4.7 m | 9.7 m |
+| cómo terminan | aterrizaje 195, choque 2, colisión 3 | aterrizaje 171, choque 6, colisión 23 |
+| primer aterrizaje / mejor época | 2 / 42570 | |
+| presupuesto | pasos_agente 1500000, epocas 42604, maquina pipeline Prefect en CPU de portátil (WSL2) | |
+
+**Decisión (2026-11-08).** Seleccionado por el pipeline: 97.5% de aterrizajes en la suite v1 (3 colisiones), 85.5% con viento de 15 m/s; supera al recomendado ppo-pasarela-viento-transfer-1m5-v0.5-s0 con el criterio de aceptación (+2% de tasa, viento −5% como mucho, no más colisiones).
 
