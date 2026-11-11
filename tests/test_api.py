@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 
 from api.main import app
 from entrenar import load_registry
+from rocket_env import OUTCOMES as OUTCOMES_TODOS
 
 cliente = TestClient(app)
 EJECUCIONES = [r["run_id"] for r in load_registry()["ejecuciones"]]
@@ -101,3 +102,21 @@ def test_monitoreo_resume_la_operacion():
     cliente.post("/evaluar", json={"run_id": EJECUCIONES[0], "episodios": 1})
     m2 = cliente.get("/monitoreo").json()
     assert m2["servicio"]["evaluaciones_servidas"] == antes + 1 and m2["evaluaciones"][-1]["run_id"] == EJECUCIONES[0]
+
+
+def test_mision_en_vivo_avanza_paso_a_paso_y_el_viento_se_aplica():
+    rec = cliente.get("/version").json()["catalogo"]["recomendado"]
+    s = cliente.post("/sesiones", json={"run_id": rec, "semilla": 10_000_000, "viento": 3.0}).json()
+    assert s["modo"] == "mision en vivo" and s["vuelo"]["f"]["t"] and s["viento"]["velocidad"] == 3.0
+    paso = cliente.post(f"/sesiones/{s['sesion']}/paso", json={"viento": 20.0, "direccion_grados": 90}).json()
+    assert paso["paso"] == 1 and len(paso["f"]["t"]) >= 1 and paso["viento"]["velocidad"] == 20.0 and paso["viento"]["direccion_grados"] == 90.0
+    assert paso["marca"]["label"] and not paso["fin"]
+    # sin viento nuevo, se conserva el anterior; la misión termina en menos de 50 pasos
+    for _ in range(60):
+        paso = cliente.post(f"/sesiones/{s['sesion']}/paso", json={}).json()
+        if paso["fin"]:
+            break
+    assert paso["fin"] and paso["resultado"] in OUTCOMES_TODOS and paso["resumen"]["steps"] == paso["paso"]
+    assert cliente.post(f"/sesiones/{s['sesion']}/paso", json={}).status_code == 409
+    assert cliente.delete(f"/sesiones/{s['sesion']}").json()["cerrada"] is True
+    assert cliente.post("/sesiones/no-existe/paso", json={}).status_code == 404

@@ -174,5 +174,21 @@ export interface Monitoreo {
 export const monitoreo = () => get<Monitoreo>('/monitoreo')
 export const suites = () => get<{ suites: Record<string, Suite>; maximo_por_peticion: number }>('/suites')
 export const urlManifiesto = (id: string) => `${API}/ejecuciones/${encodeURIComponent(id)}/manifiesto`
+/** Misión en vivo: la API simula paso a paso con el modelo congelado; el viento se cambia entre pasos. */
+export interface SesionVivo {
+  sesion: string; modo: string; semilla: number; caduca_s: number
+  modelo: { run_id: string; agente: string | null; accion: string | null; commit: string | null; mlflow: { modelo: string; version: number; url?: string | null } | null }
+  ambiente: Ambiente & { entrenado_en: string; adaptador: boolean }
+  viento: { velocidad: number; direccion_grados: number }
+  vuelo: Vuelo
+}
+export interface PasoVivo {
+  paso: number; f: Vuelo['f']; marca: { i: number; label: string; r: number }; recompensa: number; acumulada: number
+  terminado: boolean; truncado: boolean; fin: boolean; resultado: string | null; viento: { velocidad: number; direccion_grados: number }; latencia_ms: number
+  resumen: { reason: string; steps: number; reward: number; duration: number; landed: boolean; final_dist?: number; fuel_used?: number } | null
+}
+export const crearSesion = (peticion: { run_id: string; ambiente?: string | null; semilla?: number; viento?: number | null }) => post<SesionVivo>('/sesiones', peticion)
+export const pasoSesion = (sesion: string, cuerpo: { viento?: number | null; direccion_grados?: number | null }) => post<PasoVivo>(`/sesiones/${encodeURIComponent(sesion)}/paso`, cuerpo)
+export const cerrarSesion = (sesion: string) => fetch(`${API}/sesiones/${encodeURIComponent(sesion)}`, { method: 'DELETE' }).catch(() => null)
 export const evaluar = (peticion: { run_id: string; episodios: number; viento?: number | null; semilla_base?: number; grabar?: number; suite?: string | null; condicion?: string; ambiente?: string | null }) =>
   post<ResultadoEvaluacion>('/evaluar', peticion)

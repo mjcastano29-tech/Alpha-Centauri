@@ -15,6 +15,39 @@ function presupuesto(p: Record<string, string | number> | null | undefined) {
   return esc(Object.entries(p).map(([k, v]) => (ETIQUETA_PRESUPUESTO[k] ?? ((x: string | number) => `${k}: ${x}`))(v)).join(' · '))
 }
 
+// ---------- misión en vivo: elegir modelo, ambiente y viento inicial; la consola hace el resto ----------
+export async function vistaVivo(el: HTMLElement, runId?: string): Promise<() => void> {
+  const c = await cargarCatalogo()
+  const recomendados = Object.values(c.catalogo.niveles).map((v) => c.ejecuciones.find((r) => r.run_id === v.recomendado)).filter((r): r is Resumen => !!r)
+  const porDefecto = runId ?? (recomendados.find((r) => r.nivel === 'N3') ?? recomendados[recomendados.length - 1])?.run_id
+  const opciones = [...recomendados, ...c.ejecuciones.filter((r) => !recomendados.includes(r) && r.diseno?.estado !== 'rechazado')]
+  el.innerHTML = `
+    <h1>Viento en vivo</h1>
+    <p>Una misión paso a paso: la API simula con el modelo congelado y tú cambias el viento con una barra mientras vuela; el agente sigue decidiendo cada paso con lo que observa. Es la perturbación del nivel 3 (viento de hasta 15 m/s y más) aplicada a mano, sobre la pasarela, para ver cómo reacciona el cohete.</p>
+    <form id="form-vivo" class="fila card">
+      <label>modelo <select id="vv-modelo">${opciones.map((r) => `<option value="${esc(r.run_id)}"${r.run_id === porDefecto ? ' selected' : ''}>${esc(r.nivel)} · ${esc(r.run_id)} · ${pct(r.evaluacion.aterrizajes)}${r.estado === 'recomendado' ? ' · recomendado' : ''}</option>`).join('')}</select></label>
+      <label>ambiente <select id="vv-ambiente"><option value="">el de entrenamiento</option>${c.ambientes.filter((a) => a.vigente !== false).map((a) => `<option value="${esc(a.id)}">${esc(a.nivel)} · ${esc(a.id)}</option>`).join('')}</select></label>
+      <label>semilla <input type="number" id="vv-semilla" value="10000000" min="0"></label>
+      <label>viento inicial (m/s) <input type="number" id="vv-viento0" value="5" min="0" max="25" step="0.5"></label>
+      <button type="submit" class="btn primario">Lanzar misión</button>
+      <span id="vv-msg" class="muted"></span>
+    </form>
+    <p class="muted">Durante la misión, la barra de viento está en el panel lateral de la consola. Los modelos del nivel 2 con pasarela se entrenaron con viento de 0 a 10 m/s; los del nivel 3, de 0 a 15. Por encima verás cómo se degradan.</p>`
+  const form = el.querySelector<HTMLFormElement>('#form-vivo')!
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault()
+    const msg = el.querySelector<HTMLElement>('#vv-msg')!
+    msg.textContent = 'creando la misión en la API…'
+    try {
+      const run_id = el.querySelector<HTMLSelectElement>('#vv-modelo')!.value, ambiente = el.querySelector<HTMLSelectElement>('#vv-ambiente')!.value || null
+      const semilla = +el.querySelector<HTMLInputElement>('#vv-semilla')!.value, viento = +el.querySelector<HTMLInputElement>('#vv-viento0')!.value
+      sesion.vivo = await api.crearSesion({ run_id, ambiente, semilla, viento })
+      location.hash = `#/replay/${encodeURIComponent(run_id)}/vivo`
+    } catch (e) { msg.textContent = `error: ${(e as Error).message}` }
+  })
+  return () => {}
+}
+
 // ---------- monitoreo de la operación ----------
 const segundos = (s: number) => (s < 90 ? `${Math.round(s)} s` : s < 5400 ? `${Math.round(s / 60)} min` : `${(s / 3600).toFixed(1)} h`)
 

@@ -108,6 +108,11 @@ input[type="checkbox"], input[type="range"] { accent-color: var(--accent); }
 .modo { display: inline-flex; align-items: center; gap: 7px; font: 700 11px/1 var(--mono); padding: 6px 10px; border-radius: 999px; letter-spacing: .1em; text-transform: uppercase; }
 .modo-eval { background: rgba(255, 138, 66, .14); color: var(--naranja); box-shadow: inset 0 0 0 1px rgba(255, 138, 66, .45); }
 .modo-replay { background: rgba(66, 217, 206, .12); color: var(--accent); box-shadow: inset 0 0 0 1px rgba(66, 217, 206, .45); }
+.modo-vivo { background: rgba(170, 120, 255, .16); color: var(--violeta, #b58cff); box-shadow: inset 0 0 0 1px rgba(170, 120, 255, .5); }
+.viento-vivo .campo { display: grid; gap: 4px; margin: 6px 0; }
+.viento-vivo .deslizador { display: flex; align-items: center; gap: 8px; }
+.viento-vivo input[type="range"] { flex: 1 1 auto; min-width: 0; }
+.viento-vivo .vv-nota { font-size: 12px; }
 p.modo { text-transform: none; letter-spacing: 0; font: 500 13px/1.5 var(--font); border-radius: 12px; padding: 10px 12px; display: block; }
 .tabs { display: flex; gap: 8px; margin: 6px 0 12px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
 .tab { flex: 0 0 auto; width: 236px; display: block; padding: 10px 13px; border: 1px solid var(--border); border-radius: 12px; background: rgba(21, 26, 40, .7); color: var(--ink); text-decoration: none; font: 600 13px/1.3 var(--display); transition: border-color .15s, background .15s; }

@@ -57,6 +57,8 @@ export class Reproductor {
   camMode: ModoCamara = 'cine'
   onFrame?: (estado: EstadoReproductor) => void
   onEnd?: () => void
+  /** Misión en vivo: la trayectoria crece con anexar(); al llegar al final no se considera terminada hasta que lo diga quien la alimenta. */
+  enVivo = false
   /** Avisa cuando cambia el nivel de calidad (también cuando el modo automático baja de nivel por falta de fps). */
   onCalidad?: (nivel: NivelCalidad, auto: boolean) => void
   /** Motor, contacto, choque y viento; apagado hasta que el usuario lo activa con un clic. */
@@ -361,6 +363,20 @@ export class Reproductor {
     this.finT = -1; this.impacto.t = -1; this.plataforma.setEstado('vuelo')
   }
 
+  /** Misión en vivo: añade los fotogramas de un paso nuevo al vuelo cargado (misma referencia) y prolonga la estela y las marcas. */
+  anexar(f: Vuelo['f'], marca: { i: number; label: string; r: number }) {
+    const v = this.vuelo; if (!v) return
+    for (const k of Object.keys(v.f) as (keyof Vuelo['f'])[]) v.f[k].push(...(f[k] ?? []))
+    v.step_marks.push(marca); v.steps = v.step_marks.length; v.duration = v.f.t[v.f.t.length - 1]
+    const pos = this.posiciones(v)
+    for (const linea of [this.trailFull, this.trailDone]) {
+      if (!linea) continue
+      linea.geometry.dispose(); linea.geometry = new THREE.BufferGeometry(); linea.geometry.setAttribute('position', new THREE.BufferAttribute(pos, 3))
+    }
+    const s = new THREE.Mesh(new THREE.SphereGeometry(0.7, 10, 8), this.markerTodo)
+    s.position.set(pos[marca.i * 3], pos[marca.i * 3 + 1], pos[marca.i * 3 + 2]); s.userData.i = marca.i; this.markers.add(s)
+    if (!this.playing && this.enVivo) this.playing = true
+  }
   get indice() { return this.vuelo ? Math.min(Math.round(this.t), this.vuelo.f.t.length - 1) : 0 }
   get total() { return this.vuelo ? this.vuelo.f.t.length : 0 }
   ir(indice: number) { this.t = Math.max(0, Math.min(indice, this.total - 1)); this.playing = false; this.snap = true }
@@ -633,7 +649,7 @@ export class Reproductor {
       if (this.playing && this.prev !== null) {
         simDt = dt * this.eff
         this.t += simDt / DT
-        if (this.t >= n - 1) { this.t = n - 1; this.playing = false; fin = true }
+        if (this.t >= n - 1) { this.t = n - 1; if (!this.enVivo) { this.playing = false; fin = true } }
       }
     }
     this.prev = ts

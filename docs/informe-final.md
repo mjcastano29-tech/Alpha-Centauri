@@ -10,11 +10,11 @@ Un agente de aprendizaje por refuerzo que aterriza un cohete en un mundo 3D con 
 
 | Pieza | Dónde | Cómo se comprueba |
 |---|---|---|
-| Ambientes Gymnasium (N1 0.1.1, N2 v1 0.4, N3 v1 0.5; retirados 0.2 y 0.3) | `rocket_env/`, fichas `docs/ambiente-v0.*.md` | `python -m pytest` (111 pruebas de contrato, modelos y API) |
+| Ambientes Gymnasium (N1 0.1.1, N2 v1 0.4, N3 v1 0.5; retirados 0.2 y 0.3) | `rocket_env/`, fichas `docs/ambiente-v0.*.md` | `python -m pytest` (113 pruebas de contrato, modelos y API) |
 | 23 ejecuciones en 6 experimentos | `resultados/runs/`, `configs/`, `manifests/`, MLflow | `python cli.py verificar` (SHA-256 de modelos, datos y configuración) |
 | Pipeline de 8 etapas (Prefect) | `pipelines/entrenar_publicar.py`, evidencia en `pipelines/ejecuciones/` (21 ejecuciones) | cada ejecución deja su JSON con las etapas, la decisión y el commit publicado |
-| API FastAPI | `api/main.py` | `GET /version`, `GET /monitoreo`, `POST /evaluar` |
-| Web Vite + TypeScript + Three.js | `web/` | portada con el cohete, experimentos, catálogo, incidente, monitoreo, landing |
+| API FastAPI | `api/main.py` | `GET /version`, `GET /monitoreo`, `POST /evaluar`, `POST /sesiones` (misión en vivo paso a paso) |
+| Web Vite + TypeScript + Three.js | `web/` | portada con el cohete, experimentos, catálogo, incidente, monitoreo, viento en vivo (`#/vivo`: barra de viento mientras el modelo congelado pilota), landing |
 | Catálogo versionado con recomendado y anterior por nivel | `catalogo.json` (v15, 15 cambios en el historial) | `python catalogo.py ver`; rollback con `restaurar` |
 
 ## 2. Los niveles y cómo crece la complejidad
@@ -77,7 +77,7 @@ Según el historial de commits y las pull requests del repositorio:
 ```bash
 git clone https://github.com/mjcastano29-tech/Alpha-Centauri && cd Alpha-Centauri
 python -m venv .venv && .venv/bin/pip install -r requirements.txt
-python -m pytest                       # 111 pruebas
+python -m pytest                       # 113 pruebas
 python cli.py verificar                # huellas de las 23 ejecuciones
 python cli.py evaluar --run ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0 --viento 15
 uvicorn api.main:app --port 8000       # API local; web: cd web && npm install && npm run dev
