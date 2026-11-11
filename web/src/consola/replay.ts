@@ -96,6 +96,16 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
             </div>
             <div class="reticula" id="hud-reticula" aria-hidden="true"><i></i><i></i><i></i><i></i><span id="hud-ret-txt">Plataforma</span></div>
             <div class="hud hud-pasos" aria-hidden="true"><div class="pasos-txt"><b id="hud-paso"></b><span id="hud-accion"></span></div><span class="pasos-barra"><i id="hud-pasos"></i></span></div>
+            <button type="button" class="btn-icono btn-pantalla" id="rp-pantalla" aria-pressed="false" aria-label="Pantalla completa" title="Pantalla completa (F)">${ICONO.ampliar}</button>
+            <div class="barra-fs" aria-hidden="true">
+              <button type="button" class="btn-icono" id="fs-atras" aria-label="Paso anterior" title="Paso anterior (←)">${ICONO.pasoAtras}</button>
+              <button type="button" class="btn-icono principal" id="fs-play" aria-label="Pausa" title="Reproducir o pausar (espacio)">${ICONO.pausa}</button>
+              <button type="button" class="btn-icono" id="fs-adelante" aria-label="Paso siguiente" title="Paso siguiente (→)">${ICONO.pasoAdelante}</button>
+              <span id="fs-clock" class="mono reloj">0,0 s</span>
+              ${vivo ? `<label class="fs-viento">Viento <input type="range" id="fs-vel" min="0" max="25" step="0.5" value="${vivo.viento.velocidad}" aria-label="intensidad del viento"><output id="fs-vel-v">${num(vivo.viento.velocidad)} m/s</output></label>
+              <label class="fs-viento">Dirección <input type="range" id="fs-dir" min="0" max="360" step="5" value="${Math.round(vivo.viento.direccion_grados)}" aria-label="dirección del viento"><output id="fs-dir-v">${Math.round(vivo.viento.direccion_grados)}°</output></label>` : ''}
+              <span class="fs-pista">Esc sale de pantalla completa</span>
+            </div>
             <div class="resumen" id="rp-resumen" hidden></div>
           </div>
           <div class="transporte">
@@ -147,7 +157,7 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
           <details class="ayuda"><summary>Cómo leer este replay</summary>
             <p>La velocidad de reproducción no cambia las reglas ni el paso físico (0,1 s): solo cuánto tarda en verse. Entre dos muestras la posición se interpola con las velocidades grabadas; la telemetría muestra siempre el dato exacto de la muestra.</p>
             <p>Las fases (descenso, aproximación por debajo de ${UMBRAL.aproximacion} m, aterrizaje en los últimos ${UMBRAL.aterrizaje} m) se deducen de la trayectoria; el resultado final es el que decidió el ambiente al terminar el vuelo.</p>
-            <p>Arrastra para girar la cámara, rueda para acercar, doble clic para recentrar. Atajos: espacio reproduce o pausa, ← y → saltan al paso anterior o siguiente del agente, R reinicia y M activa el sonido. El cohete se dibuja a tamaño real (42 m); los fantasmas son las trayectorias de los vuelos anteriores, con el color de su resultado.</p>
+            <p>Arrastra para girar la cámara, rueda para acercar, doble clic para recentrar. Atajos: espacio reproduce o pausa, ← y → saltan al paso anterior o siguiente del agente, R reinicia, M activa el sonido y F amplía la escena a pantalla completa. El cohete se dibuja a tamaño real (42 m); los fantasmas son las trayectorias de los vuelos anteriores, con el color de su resultado.</p>
           </details>
         </div></aside>
       </div>
@@ -165,8 +175,12 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
     const vel = el.querySelector<HTMLInputElement>('#vv-vel')!, dir = el.querySelector<HTMLInputElement>('#vv-dir')!
     const velV = el.querySelector<HTMLElement>('#vv-vel-v')!, dirV = el.querySelector<HTMLElement>('#vv-dir-v')!, ultimo = el.querySelector<HTMLElement>('#vv-ultimo')!, estadoVivo = el.querySelector<HTMLElement>('#vv-estado')!
     let pendiente: { viento?: number; direccion_grados?: number } = {}
-    vel.addEventListener('input', () => { velV.textContent = `${num(+vel.value)} m/s`; pendiente.viento = +vel.value })
-    dir.addEventListener('input', () => { dirV.textContent = `${dir.value}°`; pendiente.direccion_grados = +dir.value })
+    const fsVel = el.querySelector<HTMLInputElement>('#fs-vel')!, fsDir = el.querySelector<HTMLInputElement>('#fs-dir')!, fsVelV = el.querySelector<HTMLElement>('#fs-vel-v')!, fsDirV = el.querySelector<HTMLElement>('#fs-dir-v')!
+    vel.addEventListener('input', () => { velV.textContent = fsVelV.textContent = `${num(+vel.value)} m/s`; fsVel.value = vel.value; pendiente.viento = +vel.value })
+    dir.addEventListener('input', () => { dirV.textContent = fsDirV.textContent = `${dir.value}°`; fsDir.value = dir.value; pendiente.direccion_grados = +dir.value })
+    // los deslizadores de la barra de pantalla completa son un espejo de los del panel lateral
+    fsVel.addEventListener('input', () => { vel.value = fsVel.value; vel.dispatchEvent(new Event('input')) })
+    fsDir.addEventListener('input', () => { dir.value = fsDir.value; dir.dispatchEvent(new Event('input')) })
     let pidiendo = false
     const avanzar = async () => {
       if (!vivoActivo || vivoFin || pidiendo || !rp.playing) return
@@ -197,7 +211,7 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
   if (import.meta.env.DEV) (window as unknown as { __rp: Reproductor }).__rp = rp // solo en desarrollo: lo usan las pruebas con el navegador
   const $ = (s: string) => el.querySelector<HTMLElement>(s)!
   const sel = el.querySelector<HTMLSelectElement>('#rp-vuelo')!, play = el.querySelector<HTMLButtonElement>('#rp-play')!, scrub = el.querySelector<HTMLInputElement>('#rp-scrub')!
-  const hud = { alt: $('#hud-alt'), vz: $('#hud-vz'), vh: $('#hud-vh'), ep: $('#hud-ep'), fase: $('#hud-fase'), t: $('#hud-t'), dist: $('#hud-dist'), paso: $('#hud-paso'), accion: $('#hud-accion'), pasos: $('#hud-pasos'), cinta: $('#hud-cinta'), rec: $('#hud-rec'), reloj: $('#rp-clock'), eff: $('#rp-eff'), miFase: $('#mi-fase') }
+  const hud = { alt: $('#hud-alt'), vz: $('#hud-vz'), vh: $('#hud-vh'), ep: $('#hud-ep'), fase: $('#hud-fase'), t: $('#hud-t'), dist: $('#hud-dist'), paso: $('#hud-paso'), accion: $('#hud-accion'), pasos: $('#hud-pasos'), cinta: $('#hud-cinta'), rec: $('#hud-rec'), reloj: $('#rp-clock'), eff: $('#rp-eff'), miFase: $('#mi-fase') }, fsReloj = $('#fs-clock')
   const instrumento = (s: string) => { const e = $(s); return { e, v: e.querySelector('b')!, barra: e.querySelector<HTMLElement>('.tm-barra i') } }
   const tm = { alt: instrumento('#tm-alt'), vz: instrumento('#tm-vz'), vh: instrumento('#tm-vh'), incl: instrumento('#tm-incl'), dist: instrumento('#tm-dist'), motor: instrumento('#tm-motor'), pot: instrumento('#tm-pot'), fuel: instrumento('#tm-fuel'), temp: instrumento('#tm-temp'), viento: instrumento('#tm-viento'), aire: instrumento('#tm-aire'), p: instrumento('#tm-p') }
   const poner = (t: ReturnType<typeof instrumento>, valor: string, barra?: number, estado = '') => { t.v.textContent = valor; if (t.barra && barra !== undefined) t.barra.style.width = `${(clamp01(barra) * 100).toFixed(1)}%`; if (t.e.dataset.estado !== estado) t.e.dataset.estado = estado }
@@ -263,11 +277,12 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
     hud.pasos.style.width = `${Math.min(100, (s.paso / pasos) * 100)}%`
     hud.cinta.style.height = `${(clamp01(m.z / salida) * 100).toFixed(1)}%`
     hud.rec.textContent = `acumulado ${num(s.recompensaAcumulada)} · ${actual.steps} pasos`
-    scrub.value = String(i); hud.reloj.textContent = `${num(f.t[i])} / ${num(f.t[n - 1])} s`; hud.t.textContent = `T+ ${num(f.t[i])} s`
+    scrub.value = String(i); hud.reloj.textContent = fsReloj.textContent = `${num(f.t[i])} / ${num(f.t[n - 1])} s`; hud.t.textContent = `T+ ${num(f.t[i])} s`
     hud.eff.textContent = `${num(s.velocidadEfectiva, 1)}×`
     if (rp.playing !== reproduciendo) {
       reproduciendo = rp.playing; consola.classList.toggle('reproduciendo', reproduciendo)
       play.innerHTML = reproduciendo ? ICONO.pausa : ICONO.play; play.setAttribute('aria-label', reproduciendo ? 'Pausa' : 'Reproducir')
+      fsPlay.innerHTML = play.innerHTML; fsPlay.setAttribute('aria-label', play.getAttribute('aria-label')!)
     }
     const fz = faseMision(actual, i)
     if (fz !== fase) { fase = fz; consola.dataset.fase = fz; hud.fase.textContent = TEXTO_FASE[fz]; hud.miFase.textContent = TEXTO_FASE[fz] }
@@ -308,6 +323,34 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
   $('#rp-reiniciar').addEventListener('click', () => { clearTimeout(temporizador); ocultarResumen(); rp.reiniciar() })
   $('#rp-atras').addEventListener('click', () => rp.pasoAnterior())
   $('#rp-adelante').addEventListener('click', () => rp.pasoSiguiente())
+  // pantalla completa de la escena: la API Fullscreen sobre .escena (los instrumentos van encima); si el navegador no la
+  // ofrece (Safari en iPhone), se fija la escena a la ventana con CSS. La barra flotante repite reproducir, pasos y, en vivo, el viento.
+  const escena = el.querySelector<HTMLElement>('.escena')!, botonPantalla = el.querySelector<HTMLButtonElement>('#rp-pantalla')!, fsPlay = el.querySelector<HTMLButtonElement>('#fs-play')!
+  const ampliada = () => document.fullscreenElement === escena || escena.classList.contains('ampliada')
+  const pintarPantalla = () => {
+    const on = ampliada()
+    botonPantalla.innerHTML = on ? ICONO.reducir : ICONO.ampliar
+    botonPantalla.setAttribute('aria-pressed', String(on)); botonPantalla.title = on ? 'Salir de pantalla completa (F o Esc)' : 'Pantalla completa (F)'
+    botonPantalla.setAttribute('aria-label', on ? 'Salir de pantalla completa' : 'Pantalla completa')
+    escena.querySelector('.barra-fs')!.setAttribute('aria-hidden', String(!on))
+    document.documentElement.classList.toggle('escena-ampliada', on && !document.fullscreenElement)
+  }
+  const alternarPantalla = async () => {
+    if (document.fullscreenElement === escena) { await document.exitFullscreen().catch(() => {}); return }
+    if (escena.classList.contains('ampliada')) { escena.classList.remove('ampliada'); pintarPantalla(); return }
+    if (escena.requestFullscreen) {
+      try { await escena.requestFullscreen({ navigationUI: 'hide' }); pintarPantalla(); return } catch { /* sin permiso o sin soporte: se usa el modo fijo */ }
+    }
+    escena.classList.add('ampliada'); pintarPantalla()
+  }
+  botonPantalla.addEventListener('click', () => { alternarPantalla().catch(() => {}) })
+  const cambioPantalla = () => pintarPantalla()
+  document.addEventListener('fullscreenchange', cambioPantalla)
+  const escape = (e: KeyboardEvent) => { if (e.key === 'Escape' && escena.classList.contains('ampliada')) { escena.classList.remove('ampliada'); pintarPantalla() } }
+  window.addEventListener('keydown', escape)
+  fsPlay.addEventListener('click', () => play.click())
+  $('#fs-atras').addEventListener('click', () => rp.pasoAnterior())
+  $('#fs-adelante').addEventListener('click', () => rp.pasoSiguiente())
   const botonSonido = $('#rp-sonido')
   const pintarSonido = (on: boolean) => {
     const txt = on ? 'Silenciar (M)' : 'Activar sonido (M)'
@@ -350,10 +393,11 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
     else if (e.key === 'ArrowRight') rp.pasoSiguiente()
     else if (e.key === 'r' || e.key === 'R') { clearTimeout(temporizador); ocultarResumen(); rp.reiniciar() }
     else if (e.key === 'm' || e.key === 'M') botonSonido.click()
+    else if (e.key === 'f' || e.key === 'F') botonPantalla.click()
     else return
     e.preventDefault()
   }
   window.addEventListener('keydown', teclas)
   cargar(0)
-  return () => { clearTimeout(temporizador); window.removeEventListener('keydown', teclas); (el as HTMLElement & { __limpiarVivo?: () => void }).__limpiarVivo?.(); rp.destruir() }
+  return () => { clearTimeout(temporizador); window.removeEventListener('keydown', teclas); window.removeEventListener('keydown', escape); document.removeEventListener('fullscreenchange', cambioPantalla); document.documentElement.classList.remove('escena-ampliada'); if (document.fullscreenElement === escena) document.exitFullscreen().catch(() => {}); (el as HTMLElement & { __limpiarVivo?: () => void }).__limpiarVivo?.(); rp.destruir() }
 }
