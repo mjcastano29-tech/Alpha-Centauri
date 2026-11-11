@@ -82,7 +82,21 @@ Los 10 aterrizajes a ciegas son salidas que caen sobre la abertura por casualida
 
 ## Cinco transiciones
 
-Pendientes del primer modelo aceptado del nivel 2 v1 (`python cli.py transiciones --run <id>`); se añaden al cerrar el experimento 5.
+Cinco pasos consecutivos del recomendado del nivel 2 v1 (`ppo-pasarela-transfer-1m5-v0.4-s2`) en la época de evaluación con semilla 10 000 000 (`python cli.py transiciones --run ppo-pasarela-transfer-1m5-v0.4-s2`). La columna "obstáculos" son las cuatro entradas nuevas: `o_x − x`, `o_y − y` (objetivo de la fase: aquí la abertura), `H − z` (altura hasta la pasarela, negativa por encima) y `r_a − d_a` (margen hasta el borde de la abertura, positivo dentro). La salida de esta época cae casi sobre la abertura (a 4 m), así que la primera fase es mantenerse en ella mientras baja 420 m.
+
+| # | Observación (resumen) | Obstáculos | Acción | Recompensa | Fin |
+|---|---|---|---|---|---|
+| 1 | pos (31,7, 10,1, 600,0) m · vel (1,4, 1,1, −19,6) m/s · viento (−6,3, 12,9) m/s | (−4, +2, −420, +12) | motor apagado | +10,28 | no |
+| 2 | pos (32,9, 11,2, 578,2) · vel (1,2, 1,4, −27,9) | (−5, +1, −398, +11) | motor apagado | −0,09 | no |
+| 3 | pos (33,7, 12,3, 556,1) · vel (1,1, 1,6, −34,1) | (−6, 0, −376, +10) | empuje ×0,30 · 7° hacia −y | −1,31 | no |
+| 4 | pos (34,3, 13,2, 534,5) · vel (0,9, 1,6, −37,5) · incl. 7,3° | (−6, −1, −354, +10) | empuje ×0,70 · 8° hacia −y | +1,45 | no |
+| 5 | pos (34,7, 14,1, 511,7) · vel (0,4, 1,4, −38,3) · incl. 8,0° | (−7, −2, −332, +9) | empuje ×0,75 · 8° hacia −y | +1,73 | no |
+
+Lectura: deja caer el cohete dos pasos y después enciende el motor inclinado hacia −y para frenar la deriva que lo aleja de la abertura (el margen baja de 12 a 9 m); el viento sopla hacia +y a 12 m/s. La época termina en aterrizaje. Comparadas con las mismas transiciones del modelo del nivel 1 en la ficha 0.1, la diferencia es el objetivo: aquí corrige respecto a la abertura, no respecto a la plataforma.
+
+### Test final reservado
+
+El 10 de noviembre se aplicó una sola vez la suite reservada (`python suite_reservada.py`: misma estructura que la v1, semilla guardada por el equipo fuera del repo, resultado en `resultados/suite-reservada/`): el recomendado de N2 v1 aterriza el 99,0 % (198/200, 2 choques) frente al 100 % de la suite v1, y el 58,5 % con viento fijo de 15 m/s (68 % en la v1). La diferencia de 1 punto indica que la selección entre semillas no sobreajustó a la suite v1.
 
 ## Posibles trampas y decisiones pendientes
 
@@ -98,6 +112,21 @@ Pendientes del primer modelo aceptado del nivel 2 v1 (`python cli.py transicione
 Se documentan en `configs/<run_id>.json` y se resumen aquí al cerrar cada uno (experimento 5 de MLflow, `experimento-5-pasarela`).
 
 **Intento abortado (6 de noviembre, sin run_id).** Primera versión de la observación, con la posición relativa de la abertura fija en las entradas 16 y 17, y transferencia simple desde `ppo-v2-v0.1-s1` (entradas nuevas en cero). A los 320 000 pasos de 1,5 M la evaluación sin ruido seguía en 2 % y la tasa de entrenamiento en 1 %: la política heredada volaba hacia la plataforma y chocaba con la pasarela antes de aprender a usar las entradas nuevas. Se detuvo y se cambió el diseño a la observación "objetivo de la fase" con herencia de pesos (`TRANSFERENCIA_ENTRADAS`), que hace que la política de partida vuele hacia la abertura desde el primer paso.
+
+**Configuración seleccionada (8 de noviembre): transferencia desde `ppo-v2-v0.1-s1` y 1,5 M de pasos, tres semillas.** Con la observación "objetivo de la fase" el diseño funciona: el primer aterrizaje llega en la época 13. Las tres semillas se entrenaron y decidieron con el pipeline. La referencia es el recomendado del nivel 1 jugando a ciegas (5 %), porque el recomendado de N2 era entonces un modelo de torres, de otro ambiente, y el pipeline no lo usa como referencia.
+
+| Ejecución | Aterrizajes (suite v1) | Colisiones | Choques | Con viento fijo de 15 m/s | Decisión del pipeline |
+|---|---|---|---|---|---|
+| `ppo-pasarela-transfer-1m5-v0.4-s0` | 91,5 % | 14 | 3 | 30,0 % | seleccionada (frente al 5 % a ciegas): catálogo v11 |
+| `ppo-pasarela-transfer-1m5-v0.4-s1` | 97,5 % | 4 | 0 | 52,0 % | seleccionada: mejora a s0 en 6 puntos |
+| `ppo-pasarela-transfer-1m5-v0.4-s2` | **100 %** | **0** | 0 | 68,0 % | **seleccionada: recomendado de N2**; s1 queda como anterior |
+| **media ± desviación típica** | **96,3 ± 4,4 %** | 6,0 ± 7,2 | | 50,0 ± 19,1 % | |
+
+Lectura:
+- La pasarela se aprende: de 5 % a ciegas a 96 % de media. La herencia de los pesos de posición es lo que lo hizo posible (el intento sin ella seguía en 2 %).
+- La variabilidad entre semillas es grande, sobre todo con viento (30 % a 68 %). Las semillas se entrenaron como réplicas, pero el pipeline las compara con el recomendado vigente y promueve a la que mejora en 2 puntos, así que el recomendado es la mejor de tres (100 %). Lo esperable de la receta es ~96 %.
+- La fragilidad con viento fijo de 15 m/s (50 % de media, con la colisión con la pasarela como fallo principal) es el incidente que el nivel 3 v1 convierte en operación normal ([ambiente-v0.5.md](ambiente-v0.5.md)).
+- Cada cambio de recomendado queda en el historial de `catalogo.json`. El anterior de N2 es ahora s1; el modelo de torres (`ppo-n2-transfer-1m5-v0.2-s1`) salió del catálogo al promover s1, aunque sigue reproducible como histórico.
 
 ## Anexo: cómo reproducir
 

@@ -124,6 +124,11 @@ el **presupuesto** (épocas, pasos del agente, tiempo, máquina), la **suite** c
 | `ppo-n3-transfer-1m5-desde-s1-v0.3-s0` | partir del nuevo recomendado de N2 (s1) mejora al recomendado de N3 sin más colisiones | modelo de partida N2-s1 en vez de N2-s0 | seleccionado N3 (92,0 %, 15 colisiones, 79,0 % con viento) |
 | `ppo-n3-transfer-1m5-desde-s1-v0.3-s1` | con otra semilla, la configuración seleccionada en N3 queda a menos de 5 puntos del 92 % | solo la semilla (1); pipeline | rechazado (91,5 %, 16 colisiones, 87,5 % con viento): se cumple la hipótesis, no mejora al recomendado |
 | `ppo-n3-transfer-1m5-desde-s1-v0.3-s2` | ídem con la semilla 2 | solo la semilla (2); pipeline | rechazado (84,5 %, 18 colisiones): no se cumple la hipótesis. Las tres semillas: 89,3 ± 4,2 % |
+| `ppo-pasarela-transfer-1m5-v0.4-s0` | partir del recomendado de N1 con los pesos de posición heredados aprende la pasarela (N1 a ciegas: 5 %) | ambiente N2 v1 (pasarela) y transferencia desde `ppo-v2-v0.1-s1`; 1,5 M de pasos | seleccionado N2 (91,5 %, 14 colisiones) |
+| `ppo-pasarela-transfer-1m5-v0.4-s1` / `-s2` | con otra semilla queda a menos de 5 puntos del 91,5 % | solo la semilla | seleccionados al mejorar en 2 puntos: s2 recomendado de N2 (100 %, 0 colisiones). Tres semillas: 96,3 ± 4,4 % |
+| `ppo-pasarela-viento-transfer-1m5-v0.5-s0` | reentrenar el recomendado de N2 v1 en N3 v1 lo mejora en 2 puntos sin más colisiones | ambiente N3 v1 y transferencia desde N2-s0; 1,5 M de pasos | seleccionado N3 (94,5 % frente a 64,5 %) |
+| `ppo-pasarela-viento-transfer-1m5-v0.5-s1` / `-s2` | con otra semilla queda a menos de 5 puntos | solo la semilla | rechazados (94,0 % y 92,5 %). Tres semillas: 93,7 ± 1,0 % |
+| `ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0` | partir del nuevo recomendado de N2 (s2) mejora al recomendado de N3 | modelo de partida N2-s2 | seleccionado N3 (97,5 %, 3 colisiones, 85,5 % con viento) |
 
 Suites: [configs/suites/suite-v1.json](configs/suites/suite-v1.json) (200 épocas, semillas desde 10 000 000, condiciones
 `normal` y `viento-15`) y `suite-reservada` (misma estructura, semilla fuera del repo, solo para los finalistas).
@@ -179,19 +184,26 @@ El orquestador tiene su propio entorno (`requirements-pipeline.txt`, carpeta `.v
                                                 └──────────────────────────────────┘
 ```
 
-- **API** ([api/main.py](api/main.py)): `GET /version` (commit, catálogo y software servidos), `GET /catalogo`, `GET /ejecuciones/{id}` (+ `/manifest`, `/evaluacion`, `/vuelos`), `GET /comparar?runs=a,b`, `GET /incidentes` (degradación al cambiar de nivel e intervenciones), `POST /evaluar` (modelo congelado en el ambiente, modo `evaluacion`, trayectorias para replay). Documentación interactiva en `/docs`.
+- **API** ([api/main.py](api/main.py)): `GET /version` (commit, catálogo y software servidos), `GET /monitoreo` (operación: servicio, niveles, pipeline, evaluaciones recientes, alertas), `GET /catalogo`, `GET /ejecuciones/{id}` (+ `/manifest`, `/evaluacion`, `/vuelos`), `GET /comparar?runs=a,b`, `GET /incidentes` (degradación al cambiar de nivel e intervenciones), `POST /evaluar` (modelo congelado en el ambiente, modo `evaluacion`, trayectorias para replay). Documentación interactiva en `/docs`.
   ```bash
   pip install -r requirements-api.txt
   uvicorn api.main:app --reload --port 8000
   python -m pytest tests/test_api.py
   ```
-- **Catálogo y rollback** ([catalogo.py](catalogo.py), [catalogo.json](catalogo.json)): `python catalogo.py recomendar <run_id> --motivo "…"` promueve un modelo; `python catalogo.py restaurar --motivo "…"` es el rollback al anterior. Ambos se versionan con un commit y `GET /version` confirma qué catálogo y qué commit se sirven.
-- **Web** ([web/](web/)): vista **Experimentos** (`#/experimentos`) con la progresión de complejidad entre niveles, un selector para pasar de un experimento a otro y, por experimento, sus configuraciones, las variables que cambian y las decisiones; catálogo con estado de cada modelo (recomendado, anterior, histórico), detalle con identidad (commit, huellas, versión en MLflow), comparación, evaluación en vivo contra la API y replay 3D con la etiqueta de modo (replay de vuelos grabados o evaluación en vivo). El visor 3D ([web/src/escena.ts](web/src/escena.ts)) es la misma escena cinematográfica de la fase 3D: cielo de Alfa Centauri, terreno de regolito, losa de aterrizaje, dos cohetes (nave de acero y propulsor), penacho con diamantes de choque, polvo, bola de fuego al chocar, tres cámaras (seguimiento, torre, a bordo), fantasmas de los vuelos anteriores y posproceso; interpola entre muestras con las velocidades grabadas.
+- **Catálogo y rollback** ([catalogo.py](catalogo.py), [catalogo.json](catalogo.json)): `python catalogo.py recomendar <run_id> --motivo "…"` promueve un modelo; `python catalogo.py restaurar --motivo "…"` es el rollback al anterior. Rollback demostrado en producción con el nivel 3 de torres (0.3), con la evidencia de `python comprobar_api.py` (ver [docs/ambiente-v0.3.md](docs/ambiente-v0.3.md#rollback-demostrado-en-producción)). Ambos se versionan con un commit y `GET /version` confirma qué catálogo y qué commit se sirven.
+- **Web** ([web/](web/)): vista **Monitoreo** (`#/monitoreo`, con `GET /monitoreo` en la API: commit y catálogo servidos, recomendado de cada nivel y su comportamiento, últimas decisiones del pipeline y rollbacks, latencia de las evaluaciones servidas y alertas); vista **Experimentos** (`#/experimentos`) con la progresión de complejidad entre niveles, un selector para pasar de un experimento a otro y, por experimento, sus configuraciones, las variables que cambian y las decisiones; catálogo con estado de cada modelo (recomendado, anterior, histórico), detalle con identidad (commit, huellas, versión en MLflow), comparación, evaluación en vivo contra la API y replay 3D con la etiqueta de modo (replay de vuelos grabados o evaluación en vivo). El visor 3D ([web/src/escena.ts](web/src/escena.ts)) es la misma escena cinematográfica de la fase 3D: cielo de Alfa Centauri, terreno de regolito, losa de aterrizaje, dos cohetes (nave de acero y propulsor), penacho con diamantes de choque, polvo, bola de fuego al chocar, tres cámaras (seguimiento, torre, a bordo), fantasmas de los vuelos anteriores y posproceso; interpola entre muestras con las velocidades grabadas.
   ```bash
   cd web && npm ci && npm run dev        # http://localhost:5173, usa VITE_API_BASE_URL de .env.development
   npm run build && npm run preview       # compila a dist/
   ```
 - **Despliegue**: Vercel con Root Directory `web`, Build Command `npm run build`, Output Directory `dist` y la variable `VITE_API_BASE_URL` apuntando a la API HTTPS. La API se sirve como contenedor ([Dockerfile](Dockerfile)) o como servicio Python: [render.yaml](render.yaml) la despliega en Render (plan gratuito, 512 MB; por eso la API no importa MLflow y lee `mlflow.db` con sqlite3). `python desplegar_hf.py` haría lo mismo en un Space de Hugging Face, pero los Spaces con Docker exigen suscripción PRO. Variables en [.env.example](.env.example). Versiones verificadas: Node 24, npm 11, Vite 8, three 0.187, FastAPI 0.162, Uvicorn 0.54.
+
+## Informe, defensa y test reservado
+
+- [docs/informe-final.md](docs/informe-final.md): qué construimos, los niveles y su complejidad, la cadena de hipótesis, pipeline, incidente, intervención, rollback, límites y contribuciones.
+- [docs/guion-defensa.md](docs/guion-defensa.md): guion de 15 minutos sobre la web pública, con preguntas probables.
+- [docs/diagnostico-proyecto-final.md](docs/diagnostico-proyecto-final.md): diagnóstico frente al enunciado, actualizado en cada hito.
+- `python suite_reservada.py`: test final reservado (misma estructura que la suite v1, semilla guardada por el equipo fuera del repo en `.suite_reservada` o `SUITE_RESERVADA_SEMILLA`); resultados sin la semilla en `resultados/suite-reservada/`.
 
 ## Versionado
 

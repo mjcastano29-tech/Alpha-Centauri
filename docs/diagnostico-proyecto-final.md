@@ -6,6 +6,54 @@ Las secciones 1 a 6 son el diagnóstico inicial del 2 de noviembre; lo hecho des
 
 Contraste entre lo que pide el enunciado del proyecto final de MLOps (30 de octubre de 2026) y lo que hay en el repositorio hoy. Cada afirmación remite a un archivo o a un comando; lo que no se ha podido comprobar se dice.
 
+## Diagnóstico · 10 de noviembre de 2026: pasarela cerrada en N2 y N3, web de presentación, lo que falta
+
+Revisión sobre `main` en el commit `7bc672e` (PR #9 a #12 de jhrojas02 e Isaías, 6 a 8 de noviembre), comprobada desde fuera: 111 pruebas pasan, `python cli.py verificar` da OK en las 23 ejecuciones, la API pública sirve ese commit con el catálogo v15 y los cinco ambientes (tres vigentes y dos retirados), la web muestra la portada con el cohete, la vista de experimentos con seis experimentos, la landing de presentación en `/landing/` y el replay como consola de misión, también a 390 px de ancho.
+
+### Qué cambió desde el 6 de noviembre
+
+- **Obstáculo nuevo de los niveles 2 y 3** (decisión del equipo): la pasarela con abertura desplazada (ambientes 0.4 y 0.5, `RocketLanding3D-N2-v1` y `-N3-v1`) sustituye a las torres, que quedan retiradas pero reproducibles. La observación da el objetivo de la fase y la transferencia hereda los pesos de posición; sin eso el primer intento no aprendía (documentado en la ficha). Dificultad: el recomendado de N1 a ciegas cae de 99 % a 5 %.
+- **Experimento 5 (N2 v1)**: tres semillas por el pipeline, 91,5, 97,5 y 100 % (96,3 ± 4,4 %); recomendado de N2 `ppo-pasarela-transfer-1m5-v0.4-s2` (100 %, 0 colisiones, 68 % con viento).
+- **Experimento 6 (N3 v1)**: incidente medido para las tres semillas de N2 v1 jugando en N3 v1 (−27, −12,5 y −6,5 puntos) e intervención por el pipeline: tres semillas de la receta (93,7 ± 1,0 %) y una cuarta desde el nuevo recomendado de N2, **seleccionada: 97,5 %, 3 colisiones, 85,5 % con viento** (catálogo v15).
+- **Web**: landing de presentación (`/landing/`), replay rediseñado como consola de misión con criterios de aterrizaje en vivo, sonido sintetizado del motor y el viento, portada que abre el último experimento con ejecuciones. MLflow se registra desde cualquier máquina (`seguimiento.py`).
+- **Incidencia de coordinación**: la misma ejecución (`ppo-pasarela-transfer-1m5-v0.4-s0`) se entrenó en dos máquinas a la vez; se conservó la de `main` y la copia local quedó en la rama `respaldo/pasarela-local-6nov`. Confirma el riesgo ya anotado: una sola persona ejecuta el pipeline cada vez.
+
+### Resumen por hito
+
+| Hito del enunciado | Resultado verificable que pide | Estado hoy |
+|---|---|---|
+| 1 · Reproducir | contrato, baseline, primer run y despliegue inicial | **Completo** (release `v0.2.0`, web en Vercel, API y MLflow en Render). |
+| 2 · Experimentar | niveles, hipótesis, catálogo y modelos históricos | **Completo**: tres niveles vigentes con ficha y mapa (0.1.1, 0.4, 0.5) y dos retirados (0.2, 0.3) que siguen siendo reproducibles; 23 configuraciones con hipótesis, cambio, presupuesto y decisión; seis experimentos; catálogo por nivel (v15) con historial; tres semillas por finalista en los tres niveles (N1 97,8 ± 1,0 %, N2 v1 96,3 ± 4,4 %, N3 v1 93,7 ± 1,0 % de la receta). |
+| 3 · Operar | pipeline, comparaciones y detección de degradación | **Completo salvo el monitoreo**: 21 ejecuciones del pipeline con evidencia, comparación y vista de experimentos con la progresión de complejidad, degradación medida por viento y por cambio de nivel (9 incidentes). Falta la vista de monitoreo de la operación. |
+| 4 · Recuperar y defender | intervención, rollback, release e informe | **A medias**: intervención hecha y decidida dos veces (N3 con torres y N3 con pasarela), rollback demostrado en producción con evidencia (catálogos v8 a v10). Faltan la release final, el informe, la suite reservada y el guion de la defensa. |
+
+### Cobertura estimada de la rúbrica
+
+| Criterio (peso) | Estimación | Qué falta |
+|---|---|---|
+| Versionamiento y recuperación (30 %) | ≈ 90 % | 8 de las 23 ejecuciones marcadas con cambios sin commit (en todas, el archivo sin confirmar era documentación o el propio código del nivel, y la ficha lo documenta); la suite reservada sin aplicar |
+| Diseño experimental y análisis (25 %) | ≈ 90 % | el informe que una los seis experimentos; decir explícitamente que el recomendado de cada nivel es la mejor de tres semillas y que la media es la cifra honesta |
+| Pipeline, despliegue, monitoreo y rollback (20 %) | ≈ 80 % | vista de monitoreo; rollback reciente sobre el catálogo actual (el demostrado fue con las torres; sigue valiendo como evidencia, pero conviene repetirlo en la defensa) |
+| Contrato y funcionamiento del ambiente (10 %) | ≈ 95 % | la ficha de 0.4 tiene pendientes las "Cinco transiciones" del modelo aceptado |
+| Defensa (15 %) | pendiente | guion y ensayo; la landing y la consola de misión ya son el soporte visual |
+
+### Hecho el mismo día (10 de noviembre, tarde)
+
+- **Monitoreo**: `GET /monitoreo` y vista `#/monitoreo` (servicio, recomendado de cada nivel y su comportamiento, decisiones del pipeline y rollbacks, latencia de las evaluaciones servidas, alertas). Comprobado en la web pública.
+- **Test reservado** aplicado una vez a los tres recomendados con una semilla guardada fuera del repo (`suite_reservada.py`): N1 97,5 %, N2 v1 99,0 %, N3 v1 97,0 % (frente a 99, 100 y 97,5 % en la suite v1): sin sobreajuste a la suite.
+- **Informe final** ([informe-final.md](informe-final.md)), **guion de la defensa** ([guion-defensa.md](guion-defensa.md)) y **release `v1.0.0`** sobre `main`.
+- Cinco transiciones del recomendado de N2 v1 en la ficha 0.4; `EXPERIMENTOS.md` regenerado con las 23 ejecuciones.
+
+Queda por hacer el ensayo de la defensa con la web pública (despertar la API y MLflow diez minutos antes) y, si el equipo quiere, el rollback en vivo sobre el catálogo actual.
+
+### Siguientes pasos, en orden (tal como estaban al mediodía)
+
+1. **Monitoreo** (hoy): ruta `GET /monitoreo` en la API y vista `#/monitoreo` en la web con salud y commit servidos, catálogo por nivel, últimas decisiones del pipeline, latencia de las evaluaciones y alertas (recomendado frágil con viento, ejecuciones con cambios sin commit, API dormida).
+2. **Release `v1.0.0` e informe final** (`docs/informe-final.md`): decisiones, resultados por nivel con media de semillas, incidente, intervención, rollback, límites y contribuciones de cada integrante; guion de la defensa de 15 minutos con la web pública.
+3. **Suite reservada** sobre los tres recomendados, una sola vez, y su resultado en el informe.
+4. **Cinco transiciones** del recomendado de N2 v1 en la ficha 0.4; texto de la vista de experimentos ("seis experimentos").
+5. **Coordinación**: pipeline desde una sola máquina a la vez; `git pull` antes de cada ejecución.
+
 ## Diagnóstico · 6 de noviembre de 2026: estado frente al enunciado tras el nivel 3
 
 Revisión hecha sobre `main` en el commit `d19acd0` (PR #4 a #8 de jhrojas02 fusionados el 5 de noviembre), comprobada desde fuera: 79 pruebas pasan, `python cli.py verificar` da OK en las 15 ejecuciones, la API pública sirve ese commit con el catálogo v10 y los tres ambientes, la web muestra la vista de incidente y el catálogo por nivel.
@@ -49,7 +97,8 @@ Revisión hecha sobre `main` en el commit `d19acd0` (PR #4 a #8 de jhrojas02 fus
 - **Intervención** (reentrenar en N3 con transferencia de pesos), cinco ejecuciones del pipeline, todas conservadas: 600 000 pasos rechazada (más colisiones), 1,5 M seleccionada y después sustituida, 1,5 M desde N2-s1 **seleccionada: 92,0 %, 15 colisiones, 79 % con viento** (catálogo v8). Tres semillas del finalista: 89,3 ± 4,2 %.
 - El pipeline decide en un nivel nuevo comparando con el modelo anterior jugando en ese nivel (`--baseline`), y la etapa 8 admite un nivel sin recomendado.
 - `terminated`/`truncated` (brecha 10) estaba resuelto desde el ambiente 0.1.1.
-- Pendiente: rollback demostrado en producción, monitoreo, release final, informe y defensa.
+- **Rollback demostrado en producción** (PR #7 y #8): restaurar el anterior de N3 (catálogo v9, 75 % en vivo) y volver al recomendado (v10, 95 %), con evidencia de `comprobar_api.py` en `pipelines/ejecuciones/rollback-n3-*.json`.
+- Pendiente: monitoreo, release final, informe y defensa.
 
 ## Actualización · 5 de noviembre de 2026 (noche): pipeline orquestado con Prefect
 

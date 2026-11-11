@@ -9,6 +9,7 @@ Arranque local:
     uvicorn api.main:app --reload --port 8000        # documentación interactiva en /docs
 Variables de entorno (ver .env.example): CORS_ORIGENES, MAX_EPISODIOS, COMMIT_SHA.
 """
+import collections
 import json
 import os
 import platform
@@ -57,6 +58,9 @@ MANIFESTS = ROOT / "manifests"
 INCIDENTES = ROOT / "resultados" / "incidentes"
 MAX_EPISODIOS = int(os.environ.get("MAX_EPISODIOS", "50"))
 ARRANQUE = time.strftime("%Y-%m-%dT%H:%M:%S")
+ARRANQUE_T = time.time()
+EVALUACIONES = collections.deque(maxlen=100)  # telemetría de operación: últimas evaluaciones servidas (en memoria; se pierde al reiniciar)
+EVIDENCIA_PIPELINE = ROOT / "pipelines" / "ejecuciones"
 
 
 def commit_servido():
@@ -335,6 +339,72 @@ class PeticionEvaluacion(BaseModel):
     ambiente: str | None = Field(None, description="otro ambiente (nivel) distinto del de entrenamiento; un modelo de N2 juega en N3 tal cual y uno de N1 en N2 o N3 con AdaptadorN1")
 
 
+@app.get("/monitoreo", summary="Monitoreo de la operación: servicio, catálogo servido por nivel, decisiones del pipeline, evaluaciones recientes y alertas")
+def monitoreo():
+    """Lo que un operador mira: qué commit y catálogo se sirven, qué modelo atiende cada nivel y cómo se comporta (suite v1 y viento),
+    qué decidió el pipeline en sus últimas ejecuciones (pipelines/ejecuciones/), qué latencia tienen las evaluaciones servidas por
+    este proceso y qué merece atención (alertas)."""
+    cat = catalogo_git.leer()
+    registro = load_registry()
+    alertas = []
+    uptime = time.time() - ARRANQUE_T
+    if uptime < 300:
+        alertas.append({"nivel": None, "tipo": "arranque", "texto": f"La API arrancó hace {uptime:.0f} s: el plan gratuito la duerme tras 15 min sin uso; la primera evaluación carga el modelo."})
+    niveles = []
+    for nivel, v in cat.get("niveles", {}).items():
+        rec = v.get("recomendado")
+        fila = {"nivel": nivel, "ambiente_vigente": VIGENTES.get(nivel), "recomendado": rec, "anterior": v.get("anterior")}
+        if rec and (RUNS / rec / "manifest.json").exists():
+            r = resumen_ejecucion(rec, cat)
+            viento = r["perturbado"]["aterrizajes"] if r["perturbado"] else None
+            fila.update({"ambiente_modelo": r["ambiente_id"], "aterrizajes": r["evaluacion"]["aterrizajes"], "aterrizajes_viento": viento,
+                         "colisiones": r["evaluacion"]["resultados"].get("colisión", 0), "velocidad_contacto": r["evaluacion"]["velocidad_contacto"],
+                         "cambios_sin_commit": r["git"]["cambios_sin_commit"], "commit": r["git"]["commit"], "mlflow": r["mlflow"],
+                         "fecha": r["fecha"], "modelo_cargado": rec in _agentes})
+            if r["ambiente_id"] != VIGENTES.get(nivel):
+                alertas.append({"nivel": nivel, "tipo": "ambiente", "texto": f"El recomendado de {nivel} ({rec}) juega en {r['ambiente_id']}, que no es el ambiente vigente del nivel ({VIGENTES.get(nivel)})."})
+            if viento is not None and viento < 0.6:
+                alertas.append({"nivel": nivel, "tipo": "viento", "texto": f"El recomendado de {nivel} baja a {viento:.0%} con viento de 15 m/s (suite v1): frágil ante la perturbación."})
+            if r["git"]["cambios_sin_commit"]:
+                alertas.append({"nivel": nivel, "tipo": "trazabilidad", "texto": f"El recomendado de {nivel} se entrenó con cambios sin commit (marcado con * en el catálogo); su ficha documenta qué archivo era."})
+        elif rec:
+            alertas.append({"nivel": nivel, "tipo": "catalogo", "texto": f"El catálogo recomienda {rec} para {nivel}, pero su ejecución no está en resultados/runs."})
+        niveles.append(fila)
+    pipeline = []
+    if EVIDENCIA_PIPELINE.exists():
+        for path in sorted(EVIDENCIA_PIPELINE.glob("*.json"), key=lambda q: q.stat().st_mtime, reverse=True)[:15]:
+            try:
+                e = leer_json(path)
+            except (ValueError, OSError):
+                continue
+            if "flujo" not in e:  # otros archivos de evidencia (p. ej. rollback-*.json)
+                pipeline.append({"archivo": path.name, "tipo": "rollback" if path.name.startswith("rollback") else "otro", "fecha": e.get("fecha"), "ok": e.get("ok"),
+                                 "nivel": (e.get("catalogo") or {}).get("nivel"), "recomendado": (e.get("catalogo") or {}).get("recomendado"), "commit": e.get("commit")})
+                continue
+            par, et = e.get("parametros", {}), e.get("etapas", {})
+            pipeline.append({"archivo": path.name, "tipo": "pipeline", "run_id": par.get("run_id") or par.get("run_existente"), "ambiente": par.get("ambiente"),
+                             "inicio": e["flujo"].get("inicio"), "duracion_s": e["flujo"].get("duracion_s"), "estado": e["flujo"].get("estado"),
+                             "etapas_completadas": len(et), "decision": et.get("6 decidir", {}).get("estado"), "aceptado": et.get("6 decidir", {}).get("aceptado"),
+                             "commit": et.get("7 publicar", {}).get("commit"), "comprobacion": et.get("8 comprobar", {}).get("modo"),
+                             "aterrizajes": et.get("4 evaluar", {}).get("aterrizajes")})
+        ultimo = next((x for x in pipeline if x.get("tipo") == "pipeline"), None)
+        if ultimo and str(ultimo.get("estado", "")).startswith("fallido"):
+            alertas.append({"nivel": None, "tipo": "pipeline", "texto": f"La última ejecución del pipeline ({ultimo.get('run_id')}) terminó en fallo: {ultimo.get('estado')}"})
+    sin_commit = [e["run_id"] for e in registro["ejecuciones"] if str(e.get("commit", "")).endswith("*")]
+    return {
+        "servicio": {"api": VERSION_API, "commit": COMMIT, "arranque": ARRANQUE, "uptime_s": round(uptime), "python": platform.python_version(),
+                     "modelos_cargados": sorted(_agentes), "evaluaciones_servidas": len(EVALUACIONES), "max_episodios": MAX_EPISODIOS,
+                     "mlflow_ui": MLFLOW_UI_URL, "versiones_mlflow": len(MLFLOW), "ambientes_vigentes": VIGENTES},
+        "catalogo": {"version": cat["version"], "actualizado": cat["actualizado"], "historial": cat["historial"][-6:]},
+        "niveles": niveles,
+        "pipeline": pipeline,
+        "evaluaciones": list(EVALUACIONES)[-25:],
+        "resumen": {"ejecuciones": len(registro["ejecuciones"]), "con_cambios_sin_commit": sin_commit, "incidentes": len(list(INCIDENTES.glob("*.json"))) if INCIDENTES.exists() else 0,
+                    "evidencias_pipeline": len(list(EVIDENCIA_PIPELINE.glob("*.json"))) if EVIDENCIA_PIPELINE.exists() else 0},
+        "alertas": alertas,
+    }
+
+
 @app.post("/evaluar", summary="Ejecuta el modelo congelado de una ejecución en el ambiente (modo evaluación)")
 def evaluar(p: PeticionEvaluacion):
     m = manifest(p.run_id)
@@ -382,7 +452,7 @@ def evaluar(p: PeticionEvaluacion):
         "combustible": float(np.mean([f["combustible"] for f in filas])),
         "resultados": {name: sum(f["resultado"] == name for f in filas) for name in OUTCOMES},
     }
-    return {
+    respuesta = {
         "modo": "evaluacion",
         "modelo": {"run_id": p.run_id, "agente": m["agente"].get("nombre"), "accion": m["agente"].get("accion"),
                    "commit": m["git"]["commit"], "sha256": (m.get("sha256") or {}).get("archivos"), "mlflow": MLFLOW.get(p.run_id)},
@@ -400,3 +470,7 @@ def evaluar(p: PeticionEvaluacion):
         "latencia": {"total_ms": round(latencia * 1000), "por_paso_ms": round(latencia * 1000 / max(1, pasos), 2), "pasos": pasos},
         "servido_por": {"api": VERSION_API, "commit": COMMIT},
     }
+    EVALUACIONES.append({"fecha": time.strftime("%Y-%m-%dT%H:%M:%S"), "run_id": p.run_id, "ambiente": rocket.ID, "nivel": rocket.NIVEL,
+                         "episodios": p.episodios, "aterrizajes": resumen["aterrizajes"], "total_ms": round(latencia * 1000),
+                         "por_paso_ms": round(latencia * 1000 / max(1, pasos), 2), "adaptador": isinstance(env, AdaptadorN1), "suite": p.suite})
+    return respuesta

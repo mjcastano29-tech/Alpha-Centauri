@@ -1,0 +1,20 @@
+{
+  "run_id": "ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0",
+  "experimento": "experimento-6-pasarela-viento",
+  "nivel": "N3",
+  "ambiente": "RocketLanding3D-N3-v1@0.5",
+  "hipotesis": "Partir del nuevo recomendado de N2 v1 (s2: 100 % en N2, 93,5 % y 7 colisiones jugando en N3 v1) con la receta seleccionada en N3 v1 (1,5 M de pasos) mejora al recomendado de N3 en al menos 2 puntos sin más colisiones",
+  "cambio": "Solo el modelo de partida: ppo-pasarela-transfer-1m5-v0.4-s2 en vez de -s0 (mismo ambiente N3 v1, mismo presupuesto)",
+  "baseline": "ppo-pasarela-transfer-1m5-v0.4-s2",
+  "comparacion_principal": "ppo-pasarela-transfer-1m5-v0.4-s2",
+  "presupuesto": {
+    "pasos_agente": 1500000,
+    "epocas": 42604,
+    "maquina": "pipeline Prefect en CPU de portátil (WSL2)"
+  },
+  "suite": "suite-v1",
+  "estado": "seleccionado",
+  "decision": "Seleccionado por el pipeline: 97.5% de aterrizajes en la suite v1 (3 colisiones), 85.5% con viento de 15 m/s; supera al recomendado ppo-pasarela-viento-transfer-1m5-v0.5-s0 con el criterio de aceptación (+2% de tasa, viento −5% como mucho, no más colisiones).",
+  "fecha_decision": "2026-11-08",
+  "pipeline": true
+}

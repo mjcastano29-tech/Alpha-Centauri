@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alpha Centauri · Aterrizaje autónomo</title>
+    <meta name="description" content="Un agente de aprendizaje por refuerzo que aterriza un cohete en 3D, entrenado y publicado por un pipeline con trazabilidad completa." />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" />
+  </head>
+  <body>
+    <div class="meta">
+      <div class="ancho meta-fila">
+        <span>EXPEDIENTE AC-01</span>
+        <span>PROYECTO FINAL · MLOPS</span>
+        <span>NOVIEMBRE 2026</span>
+        <span class="meta-estado"><i id="meta-punto"></i><span id="meta-catalogo">CONECTANDO CON LA API…</span></span>
+      </div>
+    </div>
+
+    <header class="ancho cabecera">
+      <a class="marca" href="#inicio">Alpha Centauri</a>
+      <nav aria-label="Secciones">
+        <a href="#mision">01 Misión</a>
+        <a href="#niveles">02 Niveles</a>
+        <a href="#bitacora">03 Bitácora</a>
+        <a href="#pipeline">04 Pipeline</a>
+        <a href="#rollback">05 Rollback</a>
+      </nav>
+      <a class="boton-negro" href="/#/">Abrir la app
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7" /><path d="M8 7h9v9" /></svg>
+      </a>
+    </header>
+
+    <main>
+      <section id="inicio" class="ancho portada" data-seccion>
+        <h1>Alpha<br />Centauri<span class="acento">.</span></h1>
+      </section>
+
+      <section class="ancho intro">
+        <div class="intro-texto">
+          <p class="entrada">Un agente de aprendizaje por refuerzo que aterriza un cohete en 3D con viento, obstáculos y ráfagas, entrenado y publicado por un pipeline que deja rastro de cada decisión.</p>
+          <div class="acciones">
+            <a class="boton-acento" id="cta-replay" href="/#/">Ver el replay 3D
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" /><path d="m13 6 6 6-6 6" /></svg>
+            </a>
+            <a class="enlace" href="https://github.com/mjcastano29-tech/Alpha-Centauri">Código en GitHub</a>
+            <a class="enlace" href="https://alpha-centauri-mlflow.onrender.com">Registro en MLflow</a>
+          </div>
+        </div>
+        <figure class="figura">
+          <svg viewBox="0 0 640 440" role="img" aria-label="Dibujo técnico del cohete con lo que observa, lo que decide y su límite de pasos">
+            <g fill="none" stroke="#141414" stroke-width="1.5" stroke-linejoin="round">
+              <path d="M320 30 C 340 58 348 96 348 130 L 348 330 L 292 330 L 292 130 C 292 96 300 58 320 30 Z" />
+              <path d="M292 130 L 348 130" /><path d="M292 300 L 348 300" />
+              <path d="M292 270 L 264 340 L 292 330" /><path d="M348 270 L 376 340 L 348 330" />
+              <path d="M306 330 L 334 330 L 340 352 L 300 352 Z" />
+              <path d="M296 332 L 270 378" /><path d="M344 332 L 370 378" />
+              <path d="M258 378 L 282 378" /><path d="M358 378 L 382 378" />
+            </g>
+            <path d="M306 356 Q 320 420 334 356 Z" fill="#E8480C" />
+            <rect x="292" y="200" width="56" height="12" fill="#E8480C" />
+            <line x1="120" y1="392" x2="520" y2="392" stroke="#141414" stroke-width="1.5" />
+            <path stroke="#141414" d="M200 392l-10 14M230 392l-10 14M260 392l-10 14M290 392l-10 14M320 392l-10 14M350 392l-10 14M380 392l-10 14M410 392l-10 14M440 392l-10 14" />
+            <g stroke="#141414" fill="none">
+              <path d="M348 90 H 440" /><path d="M352 206 H 440" /><path d="M330 380 L 440 380 L 440 360" />
+              <path d="M288 160 H 200" /><path d="M290 300 H 200" />
+            </g>
+            <g fill="#141414"><circle cx="348" cy="90" r="3" /><circle cx="352" cy="206" r="3" /><circle cx="288" cy="160" r="3" /><circle cx="290" cy="300" r="3" /></g>
+            <g font-family="IBM Plex Mono, monospace" font-size="12" fill="#141414">
+              <text x="448" y="86">OBSERVACIÓN</text><text x="448" y="102" fill="#55534D">16 valores en N1</text>
+              <text x="448" y="202">ESTADO DEL MOTOR</text><text x="448" y="218" fill="#55534D">temperatura y combustible</text>
+              <text x="448" y="356">ACCIÓN</text><text x="448" y="372" fill="#55534D">encendido, acelerador, x·y·z</text>
+              <text x="192" y="156" text-anchor="end">PASO</text><text x="192" y="172" text-anchor="end" fill="#55534D">mantiene la acción 20 m</text>
+              <text x="192" y="296" text-anchor="end">LÍMITE</text><text x="192" y="312" text-anchor="end" fill="#55534D">50 pasos por época</text>
+            </g>
+          </svg>
+          <figcaption>FIG. 1 — El agente: lo que ve, lo que decide y cuánto puede intentarlo.</figcaption>
+        </figure>
+      </section>
+
+      <section id="mision" class="ancho seccion dos-columnas" data-seccion>
+        <div class="titular">
+          <span class="numero">§ 01</span>
+          <h2>La misión</h2>
+          <p>Un cohete sale a 600 m de altura y tiene que posarse en la plataforma del origen. El ambiente es propio, construido sobre Gymnasium, con física de viento, atmósfera y motor.</p>
+        </div>
+        <dl class="ficha">
+          <div><dt>Salida</dt><dd>600 m de altura</dd></div>
+          <div><dt>Paso</dt><dd>Mantiene la acción hasta bajar 20 m (o 2 s); hasta 50 pasos por época</dd></div>
+          <div><dt>Física</dt><dd>Viento con ráfagas, atmósfera estándar (ISA) y un motor que se sobrecalienta</dd></div>
+          <div><dt>Aterrizaje</dt><dd>≤ 3 m/s vertical · ≤ 2 m/s horizontal · ≤ 10° · a menos de 10 m del centro</dd></div>
+          <div><dt>Recompensa</dt><dd>+100 al aterrizar · −100 al chocar, salir de la zona o agotar los pasos</dd></div>
+        </dl>
+      </section>
+
+      <section id="niveles" class="ancho seccion" data-seccion>
+        <div class="encabezado">
+          <div class="titular"><span class="numero">§ 02</span><h2>Tres niveles</h2></div>
+          <p>Porcentaje de aterrizajes del modelo recomendado de cada nivel en la suite v1, con semillas que nunca vio al entrenar.</p>
+        </div>
+        <div class="niveles" id="niveles-lista"></div>
+      </section>
+
+      <section id="bitacora" class="ancho seccion" data-seccion>
+        <div class="encabezado">
+          <div class="titular"><span class="numero">§ 03</span><h2>Bitácora de experimentos</h2></div>
+          <p id="bitacora-resumen"></p>
+        </div>
+        <div class="tabla">
+          <table>
+            <thead><tr><th>Ejecución</th><th>Nivel</th><th>Agente</th><th>Aterrizajes</th><th>Decisión</th></tr></thead>
+            <tbody id="bitacora-filas"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="pipeline" class="ancho seccion" data-seccion>
+        <div class="encabezado">
+          <div class="titular"><span class="numero">§ 04</span><h2>Ocho etapas, cero atajos</h2></div>
+          <p>Orquestado con Prefect. Un modelo nuevo solo se publica si supera al recomendado de su nivel; si no, queda registrado como rechazado.</p>
+        </div>
+        <ol class="etapas">
+          <li><span>01</span><div><strong>Validar</strong>El ambiente y su versión.</div></li>
+          <li><span>02</span><div><strong>Probar</strong>El contrato del ambiente con pytest.</div></li>
+          <li><span>03</span><div><strong>Entrenar</strong>PPO con Stable-Baselines3.</div></li>
+          <li><span>04</span><div><strong>Evaluar</strong>Suite v1: 200 épocas normales y 200 con viento de 15 m/s.</div></li>
+          <li><span>05</span><div><strong>Registrar</strong>Manifiesto, MLflow y huellas SHA-256.</div></li>
+          <li><span>06</span><div><strong>Decidir</strong>Contra el recomendado del nivel.</div></li>
+          <li><span>07</span><div><strong>Publicar</strong>El catálogo, con commit y push.</div></li>
+          <li><span>08</span><div><strong>Comprobar</strong>Que la API sirve la versión nueva.</div></li>
+        </ol>
+      </section>
+
+      <section id="rollback" class="ancho seccion dos-columnas" data-seccion>
+        <div class="titular">
+          <span class="numero">§ 05 · ROLLBACK EN PRODUCCIÓN</span>
+          <span class="cifra-gigante">164<span class="acento"> s</span></span>
+          <p class="cifra-texto">desde el merge del rollback hasta que la API pública sirvió el modelo restaurado.</p>
+        </div>
+        <ol class="pasos-rollback">
+          <li><span>v8</span><p>Se sirve el recomendado de N3 (92 % de aterrizajes).</p></li>
+          <li><span>v9</span><p>Se restaura el modelo anterior con <code>catalogo.py restaurar</code> y se comprueba en vivo.</p></li>
+          <li><span>v10</span><p>Se vuelve a promover el recomendado. Cada paso guarda su evidencia en JSON.</p></li>
+        </ol>
+      </section>
+
+      <section class="ancho creditos">
+        <div><span class="etiqueta">CONSTRUIDO CON</span><p>Gymnasium · Stable-Baselines3 · PyTorch · MLflow · Prefect · FastAPI · Three.js · Vite</p></div>
+        <div><span class="etiqueta">DESPLEGADO EN</span><p>Vercel (web) · Render (API y MLflow) · Hugging Face (modelos)</p></div>
+        <div class="enlaces">
+          <span class="etiqueta">ENLACES</span>
+          <a id="enlace-api" href="https://alpha-centauri-api.onrender.com/docs">Documentación de la API</a>
+          <a href="https://alpha-centauri-mlflow.onrender.com">Registro de modelos en MLflow</a>
+          <a href="https://github.com/mjcastano29-tech/Alpha-Centauri">Repositorio en GitHub</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="ancho pie" data-seccion>
+      <a class="cierre" href="/#/">
+        <span>Míralo aterrizar</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5" /><path d="M7 5h12v12" /></svg>
+      </a>
+      <div class="pie-fila"><span>ALPHA CENTAURI · ROCKET LANDING</span><span>PROYECTO FINAL DE MLOPS · 2026</span></div>
+    </footer>
+
+    <script type="module" src="/src/landing.ts"></script>
+  </body>
+</html>

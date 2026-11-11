@@ -1,0 +1,45 @@
+{
+  "run_id": "ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0",
+  "fecha": "2026-11-10T15:47:40",
+  "suite": "suite-reservada",
+  "episodios": 200,
+  "ambiente": "RocketLanding3D-N3-v1",
+  "nivel": "N3",
+  "semilla_sha256": "d44c44c35a7954cd006d02b0e662798f85c551df9b7760f1a2a7c022c646fe97",
+  "normal": {
+    "episodes": 200,
+    "outcomes": {
+      "aterrizaje": 194,
+      "fuera de plataforma": 1,
+      "choque": 0,
+      "sin pasos": 0,
+      "fuera de zona": 0,
+      "colisión": 5
+    },
+    "landing_rate": 0.97,
+    "contact_speed": 1.4593026693805622,
+    "position_error": 4.987132950403887,
+    "fuel_used": 243.17420445414348
+  },
+  "viento_15": {
+    "episodes": 200,
+    "outcomes": {
+      "aterrizaje": 167,
+      "fuera de plataforma": 1,
+      "choque": 4,
+      "sin pasos": 0,
+      "fuera de zona": 0,
+      "colisión": 28
+    },
+    "landing_rate": 0.835,
+    "contact_speed": 1.4697567181010642,
+    "position_error": 9.851929889808183,
+    "fuel_used": 225.12493556064248
+  },
+  "suite_v1": {
+    "aterrizajes": 0.975,
+    "velocidad_contacto": 1.467427665749095,
+    "error_posicion": 4.673484576939543
+  },
+  "diferencia_con_suite_v1": -0.005
+}
