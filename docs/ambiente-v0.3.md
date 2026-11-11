@@ -85,3 +85,23 @@ Lectura:
 - El recomendado es la mejor de tres semillas: lo esperable de la receta es ~89 %, no 92 %. La variabilidad entre semillas es mayor que en N1 (2 puntos) y que el margen de mejora del criterio (2 puntos); por eso una sola semilla no basta para comparar recetas.
 - La intervención funciona en las tres semillas: hasta la peor (84,5 %, 18 colisiones) supera al recomendado de N2 jugando en N3 sin reentrenar (82,5 %, 18 colisiones), y la media lo supera en 7 puntos de aterrizajes y 23 con viento de 15 m/s.
 - Las semillas rechazadas no sustituyen al recomendado: el pipeline compara cada candidato con el recomendado vigente, y ninguna lo mejora.
+
+## Rollback demostrado en producción
+
+La guía define rollback como restaurar una versión anterior identificada y comprobar su funcionamiento. Se hizo el 5 de noviembre en este nivel 3 (torres, 0.3), antes de que el equipo lo sustituyera por la pasarela (0.5); el procedimiento es el mismo para cualquier nivel. Se hizo contra la API pública, con `python catalogo.py` para cambiar el catálogo y `python comprobar_api.py` para comprobar lo servido. Cada paso fue un PR revisado y fusionado en `main`:
+
+| Paso | PR | Commit servido | Catálogo | Recomendado de N3 servido | Evaluación en vivo (20 épocas de la suite v1) | Evidencia |
+|---|---|---|---|---|---|---|
+| antes | #6 | `104fe05` | v8 | `ppo-n3-transfer-1m5-desde-s1-v0.3-s0` | 95 % | `pipelines/ejecuciones/rollback-n3-0-antes.json` |
+| restaurar el anterior | #7 | `e872565` (164 s tras el merge) | v9 | `ppo-n3-transfer-1m5-v0.3-s0` | 75 % | `pipelines/ejecuciones/rollback-n3-1-restaurado.json` |
+| volver al recomendado | #8 | `d19acd0` (90 s tras el merge) | v10 | `ppo-n3-transfer-1m5-desde-s1-v0.3-s0` | 95 % | `pipelines/ejecuciones/rollback-n3-2-vuelta.json` |
+
+Cada paso queda en el historial del catálogo (`catalogo.json`, acciones `restaurar` y `recomendar` con su motivo y su commit base) y en la vista del catálogo de la web. La evaluación en vivo confirma que lo que cambia es el modelo servido, no solo la etiqueta: con las mismas 20 épocas, el modelo restaurado aterriza 75 % y el recomendado 95 %.
+
+Para repetirlo en cualquier nivel:
+
+```bash
+python catalogo.py restaurar --nivel N3 --motivo "…"        # commit + PR + merge
+python comprobar_api.py --nivel N3 --esperado <anterior> --commit <merge> --salida pipelines/ejecuciones/<archivo>.json
+python catalogo.py recomendar <run_id> --motivo "…"         # volver
+```

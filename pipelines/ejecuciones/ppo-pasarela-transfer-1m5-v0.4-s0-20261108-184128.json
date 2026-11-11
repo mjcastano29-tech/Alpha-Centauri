@@ -1,0 +1,37 @@
+{
+  "flujo": {
+    "prefect_flow_run_id": "921fd6e8-8cfc-4cb2-8154-3bfa47753825",
+    "nombre": "voracious-grebe",
+    "inicio": "2026-11-08T18:41:28",
+    "duracion_s": 1,
+    "estado": "fallido: /home/jorge/Alpha-Centauri/.venv/bin/python cli.py entrenar-ppo terminó con código 1"
+  },
+  "parametros": {
+    "ambiente": "RocketLanding3D-N2-v1",
+    "seed": 0,
+    "run_id": "ppo-pasarela-transfer-1m5-v0.4-s0",
+    "run_existente": null,
+    "desde": "ppo-v2-v0.1-s1",
+    "total_timesteps": 1500000,
+    "hipotesis": "Partir del recomendado del nivel 1 (transferencia de pesos y normalización, con los pesos de posición heredados para el objetivo de la fase) y entrenar 1,5 M de pasos bajo la pasarela supera en al menos 2 puntos al modelo del nivel 1 jugando a ciegas (5 %)",
+    "cambio": "Ambiente N2 v1 (pasarela a 180 m con abertura desplazada 30 m; observación de 20 valores) y transferencia desde ppo-v2-v0.1-s1; 1 500 000 pasos",
+    "baseline": "ppo-v2-v0.1-s1",
+    "push": false,
+    "sin_commit": false,
+    "api": "https://alpha-centauri-api.onrender.com",
+    "espera_api": 900
+  },
+  "etapas": {
+    "1 validar": {
+      "id": "RocketLanding3D-N2-v1",
+      "version": "0.4",
+      "nivel": "N2",
+      "observacion": 20,
+      "accion": 5,
+      "obstaculos": 5,
+      "suite": "suite-v1",
+      "git_limpio": true
+    },
+    "2 probar": "using dumb terminal settings."
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "run_id": "ppo-pasarela-transfer-1m5-v0.4-s0",
+  "experimento": "experimento-5-pasarela",
+  "nivel": "N2",
+  "ambiente": "RocketLanding3D-N2-v1@0.4",
+  "hipotesis": "Partir del recomendado del nivel 1 (transferencia de pesos y normalización, con los pesos de posición heredados para el objetivo de la fase) y entrenar 1,5 M de pasos bajo la pasarela supera en al menos 2 puntos al modelo del nivel 1 jugando a ciegas (5 %)",
+  "cambio": "Ambiente N2 v1 (pasarela a 180 m con abertura desplazada 30 m; observación de 20 valores) y transferencia desde ppo-v2-v0.1-s1; 1 500 000 pasos",
+  "baseline": "ppo-v2-v0.1-s1",
+  "comparacion_principal": "ppo-v2-v0.1-s1",
+  "presupuesto": {
+    "pasos_agente": 1500000,
+    "epocas": 35334,
+    "maquina": "pipeline Prefect en CPU de portátil (WSL2)"
+  },
+  "suite": "suite-v1",
+  "estado": "seleccionado",
+  "decision": "Seleccionado por el pipeline: 91.5% de aterrizajes en la suite v1 (14 colisiones), 30.0% con viento de 15 m/s; supera al recomendado ppo-v2-v0.1-s1 con el criterio de aceptación (+2% de tasa, viento −5% como mucho, no más colisiones).",
+  "fecha_decision": "2026-11-08",
+  "pipeline": true
+}

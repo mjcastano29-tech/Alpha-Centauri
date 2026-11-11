@@ -114,6 +114,11 @@ p.modo { text-transform: none; letter-spacing: 0; font: 500 13px/1.5 var(--font)
 .tab:hover { color: var(--ink); border-color: rgba(66, 217, 206, .45); }
 .tab .muted { font: 500 11.5px/1.4 var(--font); }
 .tab.activa { border-color: var(--accent); background: linear-gradient(180deg, rgba(66, 217, 206, .14), rgba(66, 217, 206, .03)); box-shadow: inset 0 0 0 1px var(--accent), 0 0 24px rgba(66, 217, 206, .12); }
+/* alertas de la vista de monitoreo: ámbar por defecto, rojo para viento, ambiente, pipeline y catálogo, cian para el arranque */
+.alertas { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.alerta { padding: 9px 12px; border-radius: 10px; border-left: 3px solid var(--ambar); background: rgba(255, 200, 87, .08); font-size: 13px; }
+.alerta-viento, .alerta-ambiente, .alerta-pipeline, .alerta-catalogo { border-left-color: var(--rojo); background: rgba(255, 77, 90, .08); }
+.alerta-arranque { border-left-color: var(--cian); background: rgba(66, 217, 206, .07); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 4px; }
 .chip { display: inline-flex; align-items: center; gap: 7px; padding: 6px 11px; border: 1px solid var(--border); border-radius: 999px; background: rgba(21, 26, 40, .7); color: var(--ink); text-decoration: none; font: 500 12px var(--mono); }
 .chip:hover { color: var(--ink); border-color: rgba(66, 217, 206, .45); }

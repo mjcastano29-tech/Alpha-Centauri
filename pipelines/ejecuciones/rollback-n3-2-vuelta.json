@@ -1,0 +1,47 @@
+{
+  "fecha": "2026-11-05T21:10:03",
+  "api": "https://alpha-centauri-api.onrender.com",
+  "commit": "d19acd07ee92e0c650e05f9339497db578a73090",
+  "espera_s": 90,
+  "catalogo": {
+    "version": 10,
+    "actualizado": "2026-11-05T21:03:53",
+    "nivel": "N3",
+    "recomendado": "ppo-n3-transfer-1m5-desde-s1-v0.3-s0",
+    "anterior": "ppo-n3-transfer-1m5-v0.3-s0"
+  },
+  "esperado": "ppo-n3-transfer-1m5-desde-s1-v0.3-s0",
+  "ok": true,
+  "evaluacion": {
+    "run_id": "ppo-n3-transfer-1m5-desde-s1-v0.3-s0",
+    "ambiente": "RocketLanding3D-N3-v0",
+    "suite": {
+      "id": "suite-v1",
+      "condicion": "normal",
+      "episodios": 20,
+      "semilla_base": 10000000,
+      "viento": null,
+      "deterministico": true
+    },
+    "resumen": {
+      "episodios": 20,
+      "aterrizajes": 0.95,
+      "velocidad_contacto": 1.38,
+      "error_posicion": 3.9299999999999997,
+      "combustible": 210.79000000000002,
+      "resultados": {
+        "aterrizaje": 19,
+        "fuera de plataforma": 0,
+        "choque": 0,
+        "sin pasos": 0,
+        "fuera de zona": 0,
+        "colisión": 1
+      }
+    },
+    "latencia_ms": 5101,
+    "servido_por": {
+      "api": "0.2.0",
+      "commit": "d19acd07ee92e0c650e05f9339497db578a73090"
+    }
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "flujo": {
+    "prefect_flow_run_id": "8964abf8-6ca1-4ad4-9cc7-ea985fbcf6c4",
+    "nombre": "maize-rat",
+    "inicio": "2026-11-08T19:02:07",
+    "duracion_s": 13,
+    "estado": "completado"
+  },
+  "parametros": {
+    "ambiente": "RocketLanding3D-N2-v1",
+    "seed": 0,
+    "run_id": null,
+    "run_existente": "ppo-pasarela-transfer-1m5-v0.4-s0",
+    "desde": null,
+    "total_timesteps": null,
+    "hipotesis": "Partir del recomendado del nivel 1 (transferencia de pesos y normalización, con los pesos de posición heredados para el objetivo de la fase) y entrenar 1,5 M de pasos bajo la pasarela supera en al menos 2 puntos al modelo del nivel 1 jugando a ciegas (5 %)",
+    "cambio": "Ambiente N2 v1 (pasarela a 180 m con abertura desplazada 30 m; observación de 20 valores) y transferencia desde ppo-v2-v0.1-s1; 1 500 000 pasos",
+    "baseline": "ppo-v2-v0.1-s1",
+    "push": false,
+    "sin_commit": false,
+    "api": "https://alpha-centauri-api.onrender.com",
+    "espera_api": 900
+  },
+  "etapas": {
+    "1 validar": {
+      "id": "RocketLanding3D-N2-v1",
+      "version": "0.4",
+      "nivel": "N2",
+      "observacion": 20,
+      "accion": 5,
+      "obstaculos": 5,
+      "suite": "suite-v1",
+      "git_limpio": true
+    },
+    "2 probar": "using dumb terminal settings.",
+    "3 entrenar": {
+      "run_id": "ppo-pasarela-transfer-1m5-v0.4-s0",
+      "reutilizada": true
+    },
+    "4 evaluar": {
+      "episodios": 200,
+      "viento": 15.0,
+      "aterrizajes": 0.915,
+      "colisiones": 14,
+      "velocidad_contacto": 1.5783870967741935,
+      "error_posicion": 4.846,
+      "resultados": {
+        "aterrizaje": 183,
+        "fuera de plataforma": 0,
+        "choque": 3,
+        "sin pasos": 0,
+        "fuera de zona": 0,
+        "colisión": 14
+      },
+      "aterrizajes_viento": 0.3,
+      "colisiones_viento": 103
+    },
+    "5 registrar": {
+      "config": "configs/ppo-pasarela-transfer-1m5-v0.4-s0.json",
+      "manifest": "manifests/ppo-pasarela-transfer-1m5-v0.4-s0.json",
+      "sha256": "OK"
+    },
+    "6 decidir": {
+      "aceptado": true,
+      "estado": "seleccionado",
+      "decision": "Seleccionado por el pipeline: 91.5% de aterrizajes en la suite v1 (14 colisiones), 30.0% con viento de 15 m/s; supera al recomendado ppo-v2-v0.1-s1 con el criterio de aceptación (+2% de tasa, viento −5% como mucho, no más colisiones).",
+      "comparacion": {
+        "recomendado": "ppo-v2-v0.1-s1",
+        "aterrizajes": 0.05,
+        "aterrizajes_viento": 0.035,
+        "colisiones": 190
+      },
+      "criterio": {
+        "margen_mejora": 0.02,
+        "tolerancia_viento": 0.05
+      }
+    },
+    "7 publicar": {
+      "commit": "6b5b4314af7bfe97a7257804726aab001af7bb6b",
+      "push": false
+    },
+    "8 comprobar": {
+      "commit": "6b5b4314af7bfe97a7257804726aab001af7bb6b",
+      "catalogo": 11,
+      "recomendado": "ppo-pasarela-transfer-1m5-v0.4-s0",
+      "evaluacion": 1.0,
+      "compatible": true,
+      "modo": "local (sin push)"
+    }
+  }
+}

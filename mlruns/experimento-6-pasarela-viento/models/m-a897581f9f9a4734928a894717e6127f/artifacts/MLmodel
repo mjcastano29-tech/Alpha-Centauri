@@ -1,0 +1,23 @@
+artifact_path: file:///home/jorge/Alpha-Centauri/mlruns/experimento-6-pasarela-viento/models/m-a897581f9f9a4734928a894717e6127f/artifacts
+flavors:
+  python_function:
+    artifacts:
+      modelo:
+        path: artifacts/modelo
+        uri: /tmp/tmppa0cj7pj/modelo
+    cloudpickle_version: 3.1.2
+    code: code
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pyfunc.model
+    python_model: python_model.pkl
+    python_version: 3.10.12
+    streamable: false
+mlflow_version: 3.17.2
+model_id: m-a897581f9f9a4734928a894717e6127f
+model_size_bytes: 508316
+model_uuid: m-a897581f9f9a4734928a894717e6127f
+prompts: null
+run_id: fae4ff317d274d1b82971c4895d0d08a
+utc_time_created: '2026-11-09 01:37:25.643073'

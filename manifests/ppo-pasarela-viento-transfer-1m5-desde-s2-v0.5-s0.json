@@ -1,0 +1,62 @@
+{
+  "run_id": "ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0",
+  "level_id": "N3",
+  "environment_version": "RocketLanding3D-N3-v1@0.5",
+  "git_commit": "8ab04daf7c36cd8481a0fa07c7e53500f6428600",
+  "git_branch": "pasarela",
+  "config_sha256": "2f63771263b26051693ac414fb9c93f4aea068635f19720b0fbc4cad74ed26bf",
+  "model_uri": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/8ab04daf7c36cd8481a0fa07c7e53500f6428600/resultados/runs/ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0/modelo.zip",
+  "model_sha256": "e3e91323b56ee670dcb641ddcf755a4a64a82c8f5fe84acb2da09160171e615a",
+  "normalization_uri": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/8ab04daf7c36cd8481a0fa07c7e53500f6428600/resultados/runs/ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0/modelo_normalizador.pkl",
+  "normalization_sha256": "67e520059004fa746b18e00b221e8ab11930e715c4e7eb241aacb39bd1bf0c69",
+  "model_registry": null,
+  "runtime_ref": {
+    "python": "3.10.12",
+    "requirements": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/8ab04daf7c36cd8481a0fa07c7e53500f6428600/requirements.txt",
+    "docker": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/8ab04daf7c36cd8481a0fa07c7e53500f6428600/Dockerfile",
+    "paquetes": {
+      "gymnasium": "1.4.0",
+      "numpy": "2.2.6",
+      "torch": "2.14.1+cpu",
+      "stable_baselines3": "2.9.2"
+    }
+  },
+  "evaluation_suite_id": "suite-v1",
+  "seed": 0,
+  "parent_run_id": "ppo-pasarela-transfer-1m5-v0.4-s2",
+  "experiment_id": "experimento-6-pasarela-viento",
+  "agent": {
+    "class": "ppo",
+    "name": "PPO (red neuronal)",
+    "action": "relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12"
+  },
+  "hypothesis": "Partir del nuevo recomendado de N2 v1 (s2: 100 % en N2, 93,5 % y 7 colisiones jugando en N3 v1) con la receta seleccionada en N3 v1 (1,5 M de pasos) mejora al recomendado de N3 en al menos 2 puntos sin más colisiones",
+  "change": "Solo el modelo de partida: ppo-pasarela-transfer-1m5-v0.4-s2 en vez de -s0 (mismo ambiente N3 v1, mismo presupuesto)",
+  "baseline_run_id": "ppo-pasarela-transfer-1m5-v0.4-s2",
+  "budget": {
+    "pasos_agente": 1500000,
+    "epocas": 42604,
+    "maquina": "pipeline Prefect en CPU de portátil (WSL2)"
+  },
+  "status": "seleccionado",
+  "decision": "Seleccionado por el pipeline: 97.5% de aterrizajes en la suite v1 (3 colisiones), 85.5% con viento de 15 m/s; supera al recomendado ppo-pasarela-viento-transfer-1m5-v0.5-s0 con el criterio de aceptación (+2% de tasa, viento −5% como mucho, no más colisiones).",
+  "evaluation": {
+    "suite": "suite-v1",
+    "episodes": 200,
+    "landing_rate": 0.975,
+    "contact_speed": 1.467427665749095,
+    "position_error": 4.673484576939543,
+    "fuel_used": 244.7181581266215,
+    "outcomes": {
+      "aterrizaje": 195,
+      "fuera de plataforma": 0,
+      "choque": 2,
+      "sin pasos": 0,
+      "fuera de zona": 0,
+      "colisión": 3
+    },
+    "per_case": "https://github.com/mjcastano29-tech/Alpha-Centauri/blob/8ab04daf7c36cd8481a0fa07c7e53500f6428600/resultados/runs/ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0/evaluacion.json"
+  },
+  "trained_at": "2026-11-08T20:56:38",
+  "generated_at": "2026-11-08T20:56:50"
+}

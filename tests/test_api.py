@@ -88,3 +88,16 @@ def test_incidentes_muestran_la_degradacion_y_las_intervenciones_del_nivel_3():
     assert m["despues"]["normal"]["aterrizajes"] < m["antes"]["normal"]["aterrizajes"]  # se degrada al cambiar de condiciones
     ids = [r["run_id"] for r in d["intervenciones"][n3]]
     assert "ppo-n3-transfer-v0.3-s0" in ids and any(r["estado"] == "recomendado" for r in d["intervenciones"][n3])
+
+
+def test_monitoreo_resume_la_operacion():
+    m = cliente.get("/monitoreo").json()
+    cat = cliente.get("/catalogo").json()["catalogo"]
+    assert m["servicio"]["api"] and m["catalogo"]["version"] == cat["version"]
+    assert {n["nivel"]: n["recomendado"] for n in m["niveles"]} == {k: v["recomendado"] for k, v in cat["niveles"].items()}
+    assert all("aterrizajes" in n for n in m["niveles"] if n["recomendado"])
+    assert m["resumen"]["ejecuciones"] == len(EJECUCIONES) and isinstance(m["alertas"], list)
+    antes = m["servicio"]["evaluaciones_servidas"]
+    cliente.post("/evaluar", json={"run_id": EJECUCIONES[0], "episodios": 1})
+    m2 = cliente.get("/monitoreo").json()
+    assert m2["servicio"]["evaluaciones_servidas"] == antes + 1 and m2["evaluaciones"][-1]["run_id"] == EJECUCIONES[0]

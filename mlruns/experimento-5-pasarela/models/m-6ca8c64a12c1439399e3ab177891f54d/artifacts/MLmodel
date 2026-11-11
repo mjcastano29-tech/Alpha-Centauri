@@ -1,0 +1,23 @@
+artifact_path: file:///home/jorge/Alpha-Centauri/mlruns/experimento-5-pasarela/models/m-6ca8c64a12c1439399e3ab177891f54d/artifacts
+flavors:
+  python_function:
+    artifacts:
+      modelo:
+        path: artifacts/modelo
+        uri: /tmp/tmp0qlp_2e_/modelo
+    cloudpickle_version: 3.1.2
+    code: code
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pyfunc.model
+    python_model: python_model.pkl
+    python_version: 3.10.12
+    streamable: false
+mlflow_version: 3.17.2
+model_id: m-6ca8c64a12c1439399e3ab177891f54d
+model_size_bytes: 508316
+model_uuid: m-6ca8c64a12c1439399e3ab177891f54d
+prompts: null
+run_id: 3b0589ed32b14f2a809a33f806856f65
+utc_time_created: '2026-11-09 00:01:25.811391'

@@ -162,6 +162,16 @@ export const ejecucion = (id: string) => get<Detalle>(`/ejecuciones/${encodeURIC
 export const vuelos = (id: string) => get<{ episodes: Vuelo[] }>(`/ejecuciones/${encodeURIComponent(id)}/vuelos`)
 export const comparar = (ids: string[]) => get<{ ejecuciones: Resumen[] }>(`/comparar?runs=${encodeURIComponent(ids.join(','))}`)
 export const incidentes = () => get<Incidentes>('/incidentes')
+export interface Monitoreo {
+  servicio: { api: string; commit: string | null; arranque: string; uptime_s: number; python: string; modelos_cargados: string[]; evaluaciones_servidas: number; max_episodios: number; mlflow_ui: string | null; versiones_mlflow: number; ambientes_vigentes: Record<string, string> }
+  catalogo: { version: number; actualizado: string | null; historial: { version: number; fecha: string; accion: string; nivel?: string; run_id: string; motivo: string; commit_base: string | null }[] }
+  niveles: { nivel: string; ambiente_vigente: string | null; recomendado: string | null; anterior: string | null; ambiente_modelo?: string; aterrizajes?: number; aterrizajes_viento?: number | null; colisiones?: number; velocidad_contacto?: number | null; cambios_sin_commit?: boolean; commit?: string | null; mlflow?: { modelo: string; version: number; url?: string | null } | null; fecha?: string; modelo_cargado?: boolean }[]
+  pipeline: { archivo: string; tipo: string; run_id?: string | null; ambiente?: string | null; inicio?: string; duracion_s?: number; estado?: string; etapas_completadas?: number; decision?: string | null; aceptado?: boolean | null; commit?: string | null; comprobacion?: string | null; aterrizajes?: number | null; fecha?: string | null; ok?: boolean | null; nivel?: string | null; recomendado?: string | null }[]
+  evaluaciones: { fecha: string; run_id: string; ambiente: string; nivel: string; episodios: number; aterrizajes: number; total_ms: number; por_paso_ms: number; adaptador: boolean; suite: string | null }[]
+  resumen: { ejecuciones: number; con_cambios_sin_commit: string[]; incidentes: number; evidencias_pipeline: number }
+  alertas: { nivel: string | null; tipo: string; texto: string }[]
+}
+export const monitoreo = () => get<Monitoreo>('/monitoreo')
 export const suites = () => get<{ suites: Record<string, Suite>; maximo_por_peticion: number }>('/suites')
 export const urlManifiesto = (id: string) => `${API}/ejecuciones/${encodeURIComponent(id)}/manifiesto`
 export const evaluar = (peticion: { run_id: string; episodios: number; viento?: number | null; semilla_base?: number; grabar?: number; suite?: string | null; condicion?: string; ambiente?: string | null }) =>
