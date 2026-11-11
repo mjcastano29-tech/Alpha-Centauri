@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ficha del ambiente 0.4 (nivel 2, pasarela) · Alpha Centauri</title><style>
+:root { --ink: #1d2126; --muted: #5d6572; --line: #d9d7cf; --accent: #1f6f5c; --soft: #eef3f1; }
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--ink); background: #fff; font: 11pt/1.5 "Source Sans 3", "Segoe UI", system-ui, sans-serif; }
+main { max-width: 86ch; margin: 0 auto; padding: 28px 32px 48px; }
+.portada { border-bottom: 2px solid var(--accent); margin-bottom: 22px; padding-bottom: 10px; }
+.portada .proyecto { font: 600 10pt/1.2 ui-monospace, Menlo, monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.portada h1 { margin: 6px 0 4px; font-size: 22pt; line-height: 1.15; }
+.portada .meta { color: var(--muted); font-size: 9.5pt; }
+h1, h2, h3 { line-height: 1.2; page-break-after: avoid; }
+h1 { font-size: 18pt; margin: 26px 0 10px; }
+h2 { font-size: 14pt; margin: 22px 0 8px; border-bottom: 1px solid var(--line); padding-bottom: 3px; }
+h3 { font-size: 12pt; margin: 16px 0 6px; }
+p, li { orphans: 3; widows: 3; }
+a { color: var(--accent); text-decoration: none; word-break: break-word; }
+code { font: 9.5pt ui-monospace, Menlo, Consolas, monospace; background: var(--soft); padding: 1px 4px; border-radius: 4px; }
+pre { background: var(--soft); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; overflow-x: auto; font-size: 9pt; line-height: 1.4; page-break-inside: avoid; }
+pre code { background: none; padding: 0; font-size: inherit; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0 16px; font-size: 9.5pt; page-break-inside: auto; }
+tr { page-break-inside: avoid; }
+th, td { border: 1px solid var(--line); padding: 5px 7px; vertical-align: top; text-align: left; }
+th { background: var(--soft); font-weight: 600; }
+img, svg { max-width: 100%; height: auto; }
+blockquote { margin: 10px 0; padding: 4px 14px; border-left: 3px solid var(--accent); color: var(--muted); }
+hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
+@page { size: A4; margin: 16mm 14mm 18mm; }
+@media print { main { padding: 0; max-width: none; } a { color: inherit; } }
+</style></head>
+<body><main>
+<header class="portada"><div class="proyecto">Alpha Centauri · Rocket Landing · proyecto final de MLOps</div>
+
+<div class="meta">Generado el 2026-11-11 desde <code>docs/ambiente-v0.4.md</code> · etiqueta <code>v1.1.0</code> · fuente de verdad: el Markdown del repositorio</div></header>
+<h1 id="ambiente-v04-nivel-2-v1-pasarela-con-abertura-desplazada">Ambiente v0.4 · nivel 2 (v1): pasarela con abertura desplazada</h1>
+<p><strong>Equipo Alpha Centauri · ficha 02 Rocket Landing · 6 de noviembre de 2026</strong></p>
+<p>Misión de la ficha: <em>aterrizar en una plataforma con velocidad e inclinación seguras y combustible limitado.</em> El nivel 2 añade <strong>una decisión de ruta en dos tiempos</strong>: una pasarela cubre la plataforma y hay que entrar por su única abertura, desplazada del centro, y después trasladarse por debajo hasta la plataforma.</p>
+<p>Esta ficha describe lo que cambia respecto al nivel 1 (<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/ambiente-v0.1.md">ambiente-v0.1.md</a>): el entorno Gymnasium <code>RocketLanding3D-N2-v1</code> (<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/rocket_env/pasarela.py"><code>rocket_env/pasarela.py</code></a>) hereda la física, la atmósfera, el viento, el combustible, los pasos y las reglas de aterrizaje del nivel 1 sin tocar un número. Sustituye al ambiente 0.2 con torres (<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/ambiente-v0.2.md">ambiente-v0.2.md</a>), que queda retirado: el equipo decidió el 6 de noviembre cambiar el obstáculo por uno que obligue a una decisión más clara, y los modelos de 0.2 siguen siendo reproducibles como históricos.</p>
+<h2 id="mision-y-mapa">Mision y mapa</h2>
+<p><img alt="Mapa del nivel 2 v1: pasarela con abertura desplazada, vista cenital y lateral" src="../docs/mapa-ambiente-v0.4.svg"></p>
+<table>
+<thead>
+<tr>
+<th>Elemento</th>
+<th>Dónde</th>
+<th>Dimensiones</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Plataforma, zona de vuelo, salida</td>
+<td>como en v0.1</td>
+<td>radio 10 m; cilindro de 300 × 1200 m; salida a 600 m sobre x, y ∈ [−50, 50] m</td>
+</tr>
+<tr>
+<td>Pasarela</td>
+<td>disco horizontal centrado en la plataforma, a 180 m de altura</td>
+<td>radio 90 m, grosor 3 m</td>
+</tr>
+<tr>
+<td>Abertura</td>
+<td>círculo en la pasarela, centrado en (28, 12) m (a 30,5 m del centro)</td>
+<td>radio 16 m; con el fuselaje de 3 m, 13 m de margen</td>
+</tr>
+<tr>
+<td>Pilares</td>
+<td>cuatro, en el borde de la pasarela, azimuts 45°, 135°, 225°, 315°</td>
+<td>radio 2,5 m, altura 180 m</td>
+</tr>
+</tbody>
+</table>
+<p>La pasarela tiene 90 m de radio para cubrir todo el cuadrado de salida (su diagonal llega a 70,7 m del centro): <strong>no se puede rodear</strong>, la única vía es la abertura. La abertura no cae sobre la plataforma (su borde más cercano queda a 14,5 m del centro), así que después de cruzarla hay que trasladarse 30 m en horizontal mientras se baja de 180 m a 0 frenando. Los pilares están fuera del cuadrado de salida; solo molestan a quien se desvíe mucho.</p>
+<p><strong>Por qué este diseño.</strong> La guía pide para el nivel 2 "más decisiones (rutas, obstáculos…)". Con las torres de 0.2 la ruta recta solo cruzaba una torre en el 30 % de las salidas; con la pasarela, la ruta recta choca siempre salvo que la salida caiga sobre la abertura (menos del 5 % del cuadrado). La decisión es inevitable y se ve en el replay: el cohete tiene que irse hacia la abertura y volver.</p>
+<h2 id="variables-y-unidades">Variables y unidades</h2>
+<p>Todo lo de v0.1, más:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Significado</th>
+<th>Unidad</th>
+<th>Rango</th>
+<th>Visible para el agente</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(a_x, a_y, r_a)</td>
+<td>centro y radio de la abertura; fijos</td>
+<td>m</td>
+<td>tabla anterior</td>
+<td>sí, como margen r_a − d_a; su posición, a través del objetivo de la fase</td>
+</tr>
+<tr>
+<td>(o_x, o_y)</td>
+<td>objetivo de la fase: la abertura por encima de la pasarela, la plataforma (0, 0) por debajo</td>
+<td>m</td>
+<td>—</td>
+<td>sí, como posición relativa o − p</td>
+</tr>
+<tr>
+<td>H, R, g</td>
+<td>altura, radio y grosor de la pasarela; fijos</td>
+<td>m</td>
+<td>180, 90, 3</td>
+<td>H sí, como altura restante hasta la pasarela</td>
+</tr>
+<tr>
+<td>d_a</td>
+<td>distancia horizontal del eje del cohete al centro de la abertura</td>
+<td>m</td>
+<td>≥ 0</td>
+<td>sí, como margen r_a − d_a (positivo dentro de la abertura)</td>
+</tr>
+<tr>
+<td>sobre_pasarela</td>
+<td>el cohete está por encima de la pasarela (z &gt; H + g/2)</td>
+<td>0/1</td>
+<td>—</td>
+<td>se deduce del signo de H − z; está en <code>info["sobre_pasarela"]</code></td>
+</tr>
+</tbody>
+</table>
+<p>Constante nueva: radio del fuselaje 3 m (solo para la colisión; la física sigue siendo de masa puntual).</p>
+<h2 id="observaciones-y-acciones">Observaciones y acciones</h2>
+<p><strong>Observación</strong>: 20 valores. Los 16 primeros son exactamente los del nivel 1; después: <code>o_x − x</code>, <code>o_y − y</code> (posición relativa del <strong>objetivo de la fase</strong>: el centro de la abertura mientras el cohete está por encima de la pasarela y la plataforma una vez debajo, como un sistema de navegación que da el siguiente punto de paso), <code>H − z</code> (altura que queda hasta la pasarela; negativa una vez debajo) y <code>r_a − d_a</code> (margen hasta el borde de la abertura; positivo si el eje está dentro). El objetivo de la fase es la misma referencia que usa el potencial de la recompensa. Es una <strong>familia nueva de modelos</strong>: una red del nivel 1 espera 16 entradas y una del nivel 2 con torres, 25. <code>AdaptadorN1</code> recorta la observación a los 16 valores del nivel 1 para evaluar un modelo del nivel 1 a ciegas.</p>
+<p><strong>Acción</strong>: la misma del nivel 1. Los agentes PPO usan la acción relativa v2.</p>
+<h2 id="dinamica">Dinamica</h2>
+<p>Igual que en v0.1. Reglas nuevas, comprobadas en cada paso de física (0,1 s):</p>
+<ul>
+<li><strong>Pasarela.</strong> Si entre dos pasos de física el cohete cruza el plano de la pasarela (o queda dentro de su grosor) estando a menos de 90 m del centro y con el eje a más de r_a − 3 m del centro de la abertura, la época termina con "colisión". Cruzar por la abertura es legal en los dos sentidos.</li>
+<li><strong>Pilares.</strong> Como las torres de 0.2: eje a menos de 2,5 + 3 m del eje del pilar y por debajo de su cima.</li>
+</ul>
+<h2 id="recompensa">Recompensa</h2>
+<p>Potencial del nivel 1 con dos cambios:</p>
+<p>Φ = −d_obj/5 − v_h − |vz − v_seg(z)| − z/10 − 8 · c</p>
+<ul>
+<li><strong>d_obj</strong> es la distancia horizontal <strong>a la abertura</strong> mientras el cohete está por encima de la pasarela, y <strong>a la plataforma</strong> una vez debajo. Así el potencial guía las dos fases de la decisión.</li>
+<li><strong>c</strong> castiga acercarse a la pasarela fuera de la abertura: c = 1 − (z − H)/20 cuando el cohete está en los 20 m por encima de la pasarela y su eje fuera de la abertura (0 en otro caso). Vale hasta 8 puntos, como en 0.2.</li>
+</ul>
+<p>Como es una diferencia de potencial, no cambia qué política es óptima; el salto del potencial al cruzar la pasarela es una recompensa de una sola vez que no depende de la política.</p>
+<p>Resultado nuevo al terminar: <strong>colisión, −100</strong> (pasarela o pilar). Los otros cinco no cambian.</p>
+<h2 id="exito-fracaso-y-limite-de-tiempo">Exito, fracaso y limite de tiempo</h2>
+<p>Como en v0.1; "colisión" se suma a los fracasos con <code>terminated=True</code>. El límite sigue siendo 50 pasos: desde 600 m, pasar por la abertura (180 m) y trasladarse 30 m debajo cabe con margen (los modelos del nivel 1 aterrizan en 30–40 pasos).</p>
+<h2 id="metricas-e-incidente">Metricas e incidente</h2>
+<p>Las tres métricas de v0.1 en la misma suite v1 (200 épocas, semillas desde 10 000 000, con y sin viento de 15 m/s), más el recuento de colisiones.</p>
+<p><strong>Dificultad del nivel</strong>, medida con el recomendado del nivel 1 jugando a ciegas (<code>python incidente.py --run ppo-v2-v0.1-s1 --ambiente RocketLanding3D-N2-v1</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Controlador (nivel 1)</th>
+<th>En el nivel 1</th>
+<th>Bajo la pasarela, a ciegas</th>
+<th>Colisiones</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ppo-v2-v0.1-s1</code>, recomendado del nivel 1</td>
+<td>198/200 (99 %)</td>
+<td>10/200 (5 %)</td>
+<td>190</td>
+</tr>
+<tr>
+<td>mismo modelo, con viento de 15 m/s</td>
+<td>144/200 (72 %)</td>
+<td>7/200 (3,5 %)</td>
+<td>189</td>
+</tr>
+</tbody>
+</table>
+<p>Los 10 aterrizajes a ciegas son salidas que caen sobre la abertura por casualidad. Con las torres de 0.2, el mismo modelo conservaba el 72 %: la pasarela es un nivel mucho más exigente.</p>
+<p><strong>Incidente / perturbación:</strong> el mismo viento de 15 m/s de v0.1; el nivel 3 (v1) lo convierte en operación normal (<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/ambiente-v0.5.md">ambiente-v0.5.md</a>).</p>
+<h2 id="cinco-transiciones">Cinco transiciones</h2>
+<p>Cinco pasos consecutivos del recomendado del nivel 2 v1 (<code>ppo-pasarela-transfer-1m5-v0.4-s2</code>) en la época de evaluación con semilla 10 000 000 (<code>python cli.py transiciones --run ppo-pasarela-transfer-1m5-v0.4-s2</code>). La columna "obstáculos" son las cuatro entradas nuevas: <code>o_x − x</code>, <code>o_y − y</code> (objetivo de la fase: aquí la abertura), <code>H − z</code> (altura hasta la pasarela, negativa por encima) y <code>r_a − d_a</code> (margen hasta el borde de la abertura, positivo dentro). La salida de esta época cae casi sobre la abertura (a 4 m), así que la primera fase es mantenerse en ella mientras baja 420 m.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Observación (resumen)</th>
+<th>Obstáculos</th>
+<th>Acción</th>
+<th>Recompensa</th>
+<th>Fin</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>pos (31,7, 10,1, 600,0) m · vel (1,4, 1,1, −19,6) m/s · viento (−6,3, 12,9) m/s</td>
+<td>(−4, +2, −420, +12)</td>
+<td>motor apagado</td>
+<td>+10,28</td>
+<td>no</td>
+</tr>
+<tr>
+<td>2</td>
+<td>pos (32,9, 11,2, 578,2) · vel (1,2, 1,4, −27,9)</td>
+<td>(−5, +1, −398, +11)</td>
+<td>motor apagado</td>
+<td>−0,09</td>
+<td>no</td>
+</tr>
+<tr>
+<td>3</td>
+<td>pos (33,7, 12,3, 556,1) · vel (1,1, 1,6, −34,1)</td>
+<td>(−6, 0, −376, +10)</td>
+<td>empuje ×0,30 · 7° hacia −y</td>
+<td>−1,31</td>
+<td>no</td>
+</tr>
+<tr>
+<td>4</td>
+<td>pos (34,3, 13,2, 534,5) · vel (0,9, 1,6, −37,5) · incl. 7,3°</td>
+<td>(−6, −1, −354, +10)</td>
+<td>empuje ×0,70 · 8° hacia −y</td>
+<td>+1,45</td>
+<td>no</td>
+</tr>
+<tr>
+<td>5</td>
+<td>pos (34,7, 14,1, 511,7) · vel (0,4, 1,4, −38,3) · incl. 8,0°</td>
+<td>(−7, −2, −332, +9)</td>
+<td>empuje ×0,75 · 8° hacia −y</td>
+<td>+1,73</td>
+<td>no</td>
+</tr>
+</tbody>
+</table>
+<p>Lectura: deja caer el cohete dos pasos y después enciende el motor inclinado hacia −y para frenar la deriva que lo aleja de la abertura (el margen baja de 12 a 9 m); el viento sopla hacia +y a 12 m/s. La época termina en aterrizaje. Comparadas con las mismas transiciones del modelo del nivel 1 en la ficha 0.1, la diferencia es el objetivo: aquí corrige respecto a la abertura, no respecto a la plataforma.</p>
+<h3 id="test-final-reservado">Test final reservado</h3>
+<p>El 10 de noviembre se aplicó una sola vez la suite reservada (<code>python suite_reservada.py</code>: misma estructura que la v1, semilla guardada por el equipo fuera del repo, resultado en <code>resultados/suite-reservada/</code>): el recomendado de N2 v1 aterriza el 99,0 % (198/200, 2 choques) frente al 100 % de la suite v1, y el 58,5 % con viento fijo de 15 m/s (68 % en la v1). La diferencia de 1 punto indica que la selección entre semillas no sobreajustó a la suite v1.</p>
+<h2 id="posibles-trampas-y-decisiones-pendientes">Posibles trampas y decisiones pendientes</h2>
+<ul>
+<li><strong>Flotar sobre la pasarela.</strong> Quedarse por encima hasta agotar los pasos evita la colisión pero cuesta "sin pasos" (−100) y el término −z/10, que siempre empuja a bajar.</li>
+<li><strong>Pasar la abertura demasiado rápido.</strong> Debajo quedan 180 m para frenar desde la velocidad de cruce; v_seg(180) = 14,4 m/s. Cruzar a más de 30 m/s obliga a un frenado al límite del empuje. El agente tiene que aprender a llegar a la abertura ya frenando.</li>
+<li><strong>Salir por fuera de la pasarela.</strong> Rodearla no es posible (cubre el cuadrado de salida), pero un cohete que derive más de 90 m podría bajar por fuera y entrar por debajo: legal, caro en pasos y combustible, y el castigo de proximidad no lo impide. Se vigilará en los replays.</li>
+<li><strong>Trayectoria por debajo de la pasarela con viento.</strong> En el nivel 3 (v1) el viento empuja al cohete lateralmente durante el traslado de 30 m; es la parte sensible de la intervención.</li>
+<li><strong>La abertura es fija.</strong> Un modelo podría memorizar su posición; una abertura aleatoria por época sería una versión 0.6. Decisión pendiente.</li>
+<li><strong>Visibilidad en el replay.</strong> La pasarela se dibuja translúcida y se vuelve casi transparente cuando queda entre la cámara y el cohete, para no taparlo.</li>
+</ul>
+<h2 id="experimentos-del-nivel-2-v1">Experimentos del nivel 2 (v1)</h2>
+<p>Se documentan en <code>configs/&lt;run_id&gt;.json</code> y se resumen aquí al cerrar cada uno (experimento 5 de MLflow, <code>experimento-5-pasarela</code>).</p>
+<p><strong>Intento abortado (6 de noviembre, sin run_id).</strong> Primera versión de la observación, con la posición relativa de la abertura fija en las entradas 16 y 17, y transferencia simple desde <code>ppo-v2-v0.1-s1</code> (entradas nuevas en cero). A los 320 000 pasos de 1,5 M la evaluación sin ruido seguía en 2 % y la tasa de entrenamiento en 1 %: la política heredada volaba hacia la plataforma y chocaba con la pasarela antes de aprender a usar las entradas nuevas. Se detuvo y se cambió el diseño a la observación "objetivo de la fase" con herencia de pesos (<code>TRANSFERENCIA_ENTRADAS</code>), que hace que la política de partida vuele hacia la abertura desde el primer paso.</p>
+<p><strong>Configuración seleccionada (8 de noviembre): transferencia desde <code>ppo-v2-v0.1-s1</code> y 1,5 M de pasos, tres semillas.</strong> Con la observación "objetivo de la fase" el diseño funciona: el primer aterrizaje llega en la época 13. Las tres semillas se entrenaron y decidieron con el pipeline. La referencia es el recomendado del nivel 1 jugando a ciegas (5 %), porque el recomendado de N2 era entonces un modelo de torres, de otro ambiente, y el pipeline no lo usa como referencia.</p>
+<table>
+<thead>
+<tr>
+<th>Ejecución</th>
+<th>Aterrizajes (suite v1)</th>
+<th>Colisiones</th>
+<th>Choques</th>
+<th>Con viento fijo de 15 m/s</th>
+<th>Decisión del pipeline</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ppo-pasarela-transfer-1m5-v0.4-s0</code></td>
+<td>91,5 %</td>
+<td>14</td>
+<td>3</td>
+<td>30,0 %</td>
+<td>seleccionada (frente al 5 % a ciegas): catálogo v11</td>
+</tr>
+<tr>
+<td><code>ppo-pasarela-transfer-1m5-v0.4-s1</code></td>
+<td>97,5 %</td>
+<td>4</td>
+<td>0</td>
+<td>52,0 %</td>
+<td>seleccionada: mejora a s0 en 6 puntos</td>
+</tr>
+<tr>
+<td><code>ppo-pasarela-transfer-1m5-v0.4-s2</code></td>
+<td><strong>100 %</strong></td>
+<td><strong>0</strong></td>
+<td>0</td>
+<td>68,0 %</td>
+<td><strong>seleccionada: recomendado de N2</strong>; s1 queda como anterior</td>
+</tr>
+<tr>
+<td><strong>media ± desviación típica</strong></td>
+<td><strong>96,3 ± 4,4 %</strong></td>
+<td>6,0 ± 7,2</td>
+<td></td>
+<td>50,0 ± 19,1 %</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Lectura:
+- La pasarela se aprende: de 5 % a ciegas a 96 % de media. La herencia de los pesos de posición es lo que lo hizo posible (el intento sin ella seguía en 2 %).
+- La variabilidad entre semillas es grande, sobre todo con viento (30 % a 68 %). Las semillas se entrenaron como réplicas, pero el pipeline las compara con el recomendado vigente y promueve a la que mejora en 2 puntos, así que el recomendado es la mejor de tres (100 %). Lo esperable de la receta es ~96 %.
+- La fragilidad con viento fijo de 15 m/s (50 % de media, con la colisión con la pasarela como fallo principal) es el incidente que el nivel 3 v1 convierte en operación normal (<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/ambiente-v0.5.md">ambiente-v0.5.md</a>).
+- Cada cambio de recomendado queda en el historial de <code>catalogo.json</code>. El anterior de N2 es ahora s1; el modelo de torres (<code>ppo-n2-transfer-1m5-v0.2-s1</code>) salió del catálogo al promover s1, aunque sigue reproducible como histórico.</p>
+<h2 id="anexo-como-reproducir">Anexo: cómo reproducir</h2>
+<pre><code class="language-bash">python -m pytest tests/test_ambiente_pasarela.py                                   # contrato del nivel 2 v1 (y 3 v1)
+python incidente.py --run ppo-v2-v0.1-s1 --ambiente RocketLanding3D-N2-v1           # dificultad: modelo del nivel 1 a ciegas
+.venv-prefect/bin/python pipelines/entrenar_publicar.py --ambiente RocketLanding3D-N2-v1 --seed 0 \
+    --run-id ppo-pasarela-transfer-1m5-v0.4-s0 --desde ppo-v2-v0.1-s1 --total-timesteps 1500000 --baseline ppo-v2-v0.1-s1 --push
+</code></pre>
+</main></body></html>

@@ -2,7 +2,7 @@
 
 **Proyecto final del curso de MLOps · Universidad Externado · noviembre de 2026 · equipo Alpha Centauri (mjcastano29-tech, Isaías Céspedes, jhrojas02; nombres completos según el acta del curso)**
 
-Web: https://alpha-centauri-five.vercel.app · API: https://alpha-centauri-api.onrender.com · MLflow: https://alpha-centauri-mlflow.onrender.com · Repositorio: https://github.com/mjcastano29-tech/Alpha-Centauri · Release: `v1.0.0`
+Web: https://alpha-centauri-five.vercel.app · API: https://alpha-centauri-api.onrender.com · MLflow: https://alpha-centauri-mlflow.onrender.com · Repositorio: https://github.com/mjcastano29-tech/Alpha-Centauri · Entrega: etiqueta `v1.1.0` (índice en [entregables.md](entregables.md))
 
 ## 1. Qué construimos
 
@@ -14,7 +14,7 @@ Un agente de aprendizaje por refuerzo que aterriza un cohete en un mundo 3D con 
 | 23 ejecuciones en 6 experimentos | `resultados/runs/`, `configs/`, `manifests/`, MLflow | `python cli.py verificar` (SHA-256 de modelos, datos y configuración) |
 | Pipeline de 8 etapas (Prefect) | `pipelines/entrenar_publicar.py`, evidencia en `pipelines/ejecuciones/` (21 ejecuciones) | cada ejecución deja su JSON con las etapas, la decisión y el commit publicado |
 | API FastAPI | `api/main.py` | `GET /version`, `GET /monitoreo`, `POST /evaluar`, `POST /sesiones` (misión en vivo paso a paso) |
-| Web Vite + TypeScript + Three.js | `web/` | portada con el cohete, experimentos, catálogo, incidente, monitoreo, viento en vivo (`#/vivo`: barra de viento mientras el modelo congelado pilota), landing |
+| Web Vite + TypeScript + Three.js | `web/` | portada con el cohete (pantalla completa con F), experimentos, catálogo, incidente, monitoreo, viento en vivo (`#/vivo`: barra de viento mientras el modelo congelado pilota), landing |
 | Catálogo versionado con recomendado y anterior por nivel | `catalogo.json` (v15, 15 cambios en el historial) | `python catalogo.py ver`; rollback con `restaurar` |
 
 ## 2. Los niveles y cómo crece la complejidad
@@ -81,4 +81,5 @@ python -m pytest                       # 113 pruebas
 python cli.py verificar                # huellas de las 23 ejecuciones
 python cli.py evaluar --run ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0 --viento 15
 uvicorn api.main:app --port 8000       # API local; web: cd web && npm install && npm run dev
+python entregables.py                  # regenera los PDF de entregables/
 ```

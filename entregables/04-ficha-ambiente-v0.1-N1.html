@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ficha del ambiente 0.1 (nivel 1) · Alpha Centauri</title><style>
+:root { --ink: #1d2126; --muted: #5d6572; --line: #d9d7cf; --accent: #1f6f5c; --soft: #eef3f1; }
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--ink); background: #fff; font: 11pt/1.5 "Source Sans 3", "Segoe UI", system-ui, sans-serif; }
+main { max-width: 86ch; margin: 0 auto; padding: 28px 32px 48px; }
+.portada { border-bottom: 2px solid var(--accent); margin-bottom: 22px; padding-bottom: 10px; }
+.portada .proyecto { font: 600 10pt/1.2 ui-monospace, Menlo, monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.portada h1 { margin: 6px 0 4px; font-size: 22pt; line-height: 1.15; }
+.portada .meta { color: var(--muted); font-size: 9.5pt; }
+h1, h2, h3 { line-height: 1.2; page-break-after: avoid; }
+h1 { font-size: 18pt; margin: 26px 0 10px; }
+h2 { font-size: 14pt; margin: 22px 0 8px; border-bottom: 1px solid var(--line); padding-bottom: 3px; }
+h3 { font-size: 12pt; margin: 16px 0 6px; }
+p, li { orphans: 3; widows: 3; }
+a { color: var(--accent); text-decoration: none; word-break: break-word; }
+code { font: 9.5pt ui-monospace, Menlo, Consolas, monospace; background: var(--soft); padding: 1px 4px; border-radius: 4px; }
+pre { background: var(--soft); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; overflow-x: auto; font-size: 9pt; line-height: 1.4; page-break-inside: avoid; }
+pre code { background: none; padding: 0; font-size: inherit; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0 16px; font-size: 9.5pt; page-break-inside: auto; }
+tr { page-break-inside: avoid; }
+th, td { border: 1px solid var(--line); padding: 5px 7px; vertical-align: top; text-align: left; }
+th { background: var(--soft); font-weight: 600; }
+img, svg { max-width: 100%; height: auto; }
+blockquote { margin: 10px 0; padding: 4px 14px; border-left: 3px solid var(--accent); color: var(--muted); }
+hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
+@page { size: A4; margin: 16mm 14mm 18mm; }
+@media print { main { padding: 0; max-width: none; } a { color: inherit; } }
+</style></head>
+<body><main>
+<header class="portada"><div class="proyecto">Alpha Centauri · Rocket Landing · proyecto final de MLOps</div>
+
+<div class="meta">Generado el 2026-11-11 desde <code>docs/ambiente-v0.1.md</code> · etiqueta <code>v1.1.0</code> · fuente de verdad: el Markdown del repositorio</div></header>
+<h1 id="ambiente-v01">Ambiente v0.1</h1>
+<p><strong>Equipo Alpha Centauri · ficha 02 Rocket Landing · 28 de octubre de 2026</strong></p>
+<p>Misión de la ficha: <em>aterrizar en una plataforma con velocidad e inclinación seguras y combustible limitado.</em></p>
+<p>Esta ficha describe el ambiente tal como está implementado en <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/rocket_env"><code>rocket_env/</code></a> (entorno Gymnasium <code>RocketLanding3D-v0</code>) y el agente de referencia con el que comprobamos que se puede aprender (<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/agente_qlearning.py"><code>agente_qlearning.py</code></a>). Todos los números salen del código; cuando un valor es una propuesta por calibrar, lo decimos. Las decisiones que dejamos abiertas están al final.</p>
+<h2 id="mision-y-mapa">Mision y mapa</h2>
+<p><img alt="Mapa del ambiente: vista lateral y cenital a escala" src="../docs/mapa-ambiente-v0.1.svg"></p>
+<p>El mundo es un cilindro de aire sobre un suelo plano. El eje z apunta hacia arriba y la plataforma está en el origen. Unidades SI en todo el ambiente: metros, segundos, kilogramos, newtons, kelvin, pascales.</p>
+<table>
+<thead>
+<tr>
+<th>Elemento</th>
+<th>Dónde</th>
+<th>Dimensiones</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Suelo</td>
+<td>plano z = 0</td>
+<td>ilimitado, sin obstáculos en v0.1</td>
+</tr>
+<tr>
+<td>Meta: plataforma</td>
+<td>círculo centrado en el origen</td>
+<td>radio 10 m</td>
+</tr>
+<tr>
+<td>Zona de vuelo</td>
+<td>cilindro alrededor de la plataforma</td>
+<td>radio 300 m, techo 1200 m; salir de él termina la época con fracaso</td>
+</tr>
+<tr>
+<td>Inicio</td>
+<td>z = 600 m, sobre un cuadrado centrado en la plataforma</td>
+<td>x, y ∈ [−50, 50] m</td>
+</tr>
+<tr>
+<td>Velocidad inicial</td>
+<td>descendiendo con algo de deriva</td>
+<td>vz ∈ [−20, −15] m/s; vx, vy ∈ [−3, 3] m/s</td>
+</tr>
+</tbody>
+</table>
+<p>Las "zonas inseguras" de la ficha son, en v0.1, todo lo que queda fuera del cilindro y todo el suelo salvo la plataforma. No hay rocas ni obstáculos (decisión pendiente).</p>
+<p><strong>Parametría</strong> (lo que configuramos antes de ejecutar; propuestas por calibrar):</p>
+<table>
+<thead>
+<tr>
+<th>Parámetro de la ficha</th>
+<th>Valor v0.1</th>
+<th>Por qué</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ancho de plataforma</td>
+<td>radio 10 m (20 m de diámetro)</td>
+<td>Es el 3 % del radio de la zona: obliga a corregir la deriva del viento, pero deja margen a un controlador sencillo.</td>
+</tr>
+<tr>
+<td>Empuje máximo</td>
+<td>27 kN en vacío; 27 kN − p·0,02 m² ≈ 25 kN al nivel del mar</td>
+<td>Relación empuje/peso 1,7 con el depósito lleno y 2,5 vacío: frena un descenso de 20 m/s en unos 3 s sin ser incontrolable.</td>
+</tr>
+<tr>
+<td>Combustible inicial</td>
+<td>500 kg (masa en seco 1000 kg), impulso específico 250 s</td>
+<td>A empuje máximo dura 49 s; flotando con el depósito lleno, 83 s. Alcanza para aterrizar (60–75 s de vuelo) pero no para flotar hasta agotar los pasos.</td>
+</tr>
+<tr>
+<td>Viento lateral</td>
+<td>velocidad del aire a 10 m de 0–10 m/s con dirección aleatoria por época; crece con la altura; ráfagas de 1,5 m/s</td>
+<td>Modelado como velocidad del aire, no como fuerza: entra por el arrastre, así su efecto depende de la densidad del aire y de la velocidad relativa del cohete.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="variables-y-unidades">Variables y unidades</h2>
+<p>Estado del mundo (lo que el simulador guarda) y qué parte ve el agente:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Significado</th>
+<th>Unidad</th>
+<th>Rango</th>
+<th>Visible para el agente</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>x, y</td>
+<td>posición horizontal respecto al centro de la plataforma</td>
+<td>m</td>
+<td>[−300, 300]; fuera, fin de época</td>
+<td>sí</td>
+</tr>
+<tr>
+<td>z</td>
+<td>altitud sobre el suelo</td>
+<td>m</td>
+<td>[0, 1200]; fuera, fin de época</td>
+<td>sí</td>
+</tr>
+<tr>
+<td>vx, vy, vz</td>
+<td>velocidad</td>
+<td>m/s</td>
+<td>sin tope; típicas [−30, 30]</td>
+<td>sí</td>
+</tr>
+<tr>
+<td>d = (dx, dy, dz)</td>
+<td>eje del cohete, igual a la dirección del último empuje</td>
+<td>vector unitario</td>
+<td>—</td>
+<td>como inclinación θ = arccos(dz), en grados [0, 180)</td>
+</tr>
+<tr>
+<td>m_c</td>
+<td>combustible</td>
+<td>kg</td>
+<td>[0, 500]</td>
+<td>sí, como fracción [0, 1]</td>
+</tr>
+<tr>
+<td>T_m</td>
+<td>temperatura del motor</td>
+<td>K</td>
+<td>[T_aire, ≈900]</td>
+<td>sí</td>
+</tr>
+<tr>
+<td>motor</td>
+<td>motor encendido</td>
+<td>0/1</td>
+<td>—</td>
+<td>sí</td>
+</tr>
+<tr>
+<td>sobrecalentado</td>
+<td>motor bloqueado hasta enfriarse por debajo de 800 K</td>
+<td>0/1</td>
+<td>—</td>
+<td><strong>no</strong> (pendiente)</td>
+</tr>
+<tr>
+<td>k</td>
+<td>pasos usados</td>
+<td>—</td>
+<td>[0, 50]</td>
+<td>sí, como pasos restantes 1 − k/50</td>
+</tr>
+<tr>
+<td>t</td>
+<td>tiempo de vuelo</td>
+<td>s</td>
+<td>[0, 100]</td>
+<td>no directamente (se deduce de los pasos)</td>
+</tr>
+<tr>
+<td>w = (wx, wy, wz)</td>
+<td>viento en la posición del cohete: medio + ráfaga</td>
+<td>m/s</td>
+<td>aprox. [−25, 25]</td>
+<td>sí</td>
+</tr>
+<tr>
+<td>w₁₀, φ</td>
+<td>velocidad media del viento a 10 m y su dirección; fijos por época</td>
+<td>m/s, rad</td>
+<td>[0, 10], [0, 2π)</td>
+<td>no directamente (solo a través de w)</td>
+</tr>
+<tr>
+<td>g_r</td>
+<td>estado de las ráfagas (proceso de Ornstein-Uhlenbeck)</td>
+<td>m/s</td>
+<td>—</td>
+<td>no (solo su efecto en w)</td>
+</tr>
+<tr>
+<td>T₀, p₀</td>
+<td>temperatura y presión en el suelo; fijas por época</td>
+<td>K, Pa</td>
+<td>[263, 313] (−10…40 °C), [98 000, 104 000]</td>
+<td>no directamente: el agente ve T(z) y p(z)</td>
+</tr>
+<tr>
+<td>T(z), p(z), ρ(z)</td>
+<td>temperatura, presión y densidad del aire en la posición</td>
+<td>K, kPa, kg/m³</td>
+<td>ρ entre 1,09 y 1,38</td>
+<td>T y p sí; ρ se deduce</td>
+</tr>
+</tbody>
+</table>
+<p>Constantes del cohete y de la atmósfera (fijas en v0.1):</p>
+<table>
+<thead>
+<tr>
+<th>Constante</th>
+<th>Valor</th>
+<th>Constante</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>masa en seco</td>
+<td>1000 kg</td>
+<td>gravedad g₀</td>
+<td>9,80665 m/s²</td>
+</tr>
+<tr>
+<td>empuje en vacío T_vac</td>
+<td>27 000 N</td>
+<td>gradiente térmico L</td>
+<td>0,0065 K/m</td>
+</tr>
+<tr>
+<td>área de salida de la tobera A_e</td>
+<td>0,02 m²</td>
+<td>constante del aire R</td>
+<td>287,05 J/(kg·K)</td>
+</tr>
+<tr>
+<td>impulso específico Isp</td>
+<td>250 s</td>
+<td>tiempo de las ráfagas τ</td>
+<td>3 s</td>
+</tr>
+<tr>
+<td>coeficiente de arrastre C_d</td>
+<td>0,8</td>
+<td>intensidad de las ráfagas σ</td>
+<td>1,5 m/s (vertical ×0,3)</td>
+</tr>
+<tr>
+<td>área frontal A</td>
+<td>3 m²</td>
+<td>calentamiento del motor</td>
+<td>30 K/s a acelerador 1</td>
+</tr>
+<tr>
+<td>temperatura máxima del motor</td>
+<td>900 K (vuelve a arrancar por debajo de 800 K)</td>
+<td>enfriamiento del motor</td>
+<td>0,05 1/s hacia T_aire</td>
+</tr>
+</tbody>
+</table>
+<h2 id="observaciones-y-acciones">Observaciones y acciones</h2>
+<p><strong>Observación</strong>: vector de 16 números en unidades físicas, sin normalizar (decisión pendiente).</p>
+<table>
+<thead>
+<tr>
+<th>Índice</th>
+<th>Contenido</th>
+<th>Unidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0–2</td>
+<td>posición x, y, z</td>
+<td>m</td>
+</tr>
+<tr>
+<td>3–5</td>
+<td>velocidad vx, vy, vz</td>
+<td>m/s</td>
+</tr>
+<tr>
+<td>6–8</td>
+<td>viento en la posición del cohete (wx, wy, wz)</td>
+<td>m/s</td>
+</tr>
+<tr>
+<td>9</td>
+<td>temperatura del aire</td>
+<td>K</td>
+</tr>
+<tr>
+<td>10</td>
+<td>presión del aire</td>
+<td>kPa</td>
+</tr>
+<tr>
+<td>11</td>
+<td>temperatura del motor</td>
+<td>K</td>
+</tr>
+<tr>
+<td>12</td>
+<td>combustible restante</td>
+<td>fracción 0–1</td>
+</tr>
+<tr>
+<td>13</td>
+<td>motor encendido</td>
+<td>0/1</td>
+</tr>
+<tr>
+<td>14</td>
+<td>pasos restantes</td>
+<td>fracción 0–1</td>
+</tr>
+<tr>
+<td>15</td>
+<td>inclinación del eje respecto a la vertical</td>
+<td>grados</td>
+</tr>
+</tbody>
+</table>
+<p>Respecto a la ficha: el "desplazamiento a la plataforma" es (x, y) porque la plataforma está en el origen, y no hace falta observar el "contacto" porque el contacto termina la época. El agente <strong>no</strong> observa las ráfagas futuras, si el motor está bloqueado por sobrecalentamiento ni el tiempo absoluto.</p>
+<p><strong>Acción del entorno</strong>: vector continuo de 5 números (<code>Box</code>).</p>
+<table>
+<thead>
+<tr>
+<th>Índice</th>
+<th>Contenido</th>
+<th>Rango</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>motor: &gt; 0 encendido, ≤ 0 apagado</td>
+<td>[−1, 1]</td>
+</tr>
+<tr>
+<td>1</td>
+<td>acelerador, fracción del empuje máximo</td>
+<td>[0, 1]</td>
+</tr>
+<tr>
+<td>2–4</td>
+<td>dirección del empuje (x, y, z); el entorno la normaliza</td>
+<td>[−1, 1] cada uno</td>
+</tr>
+</tbody>
+</table>
+<p>Respecto a la ficha: la "potencia del motor principal" es el acelerador; el "torque de orientación" se simplifica a "dirección del empuje": el eje del cohete sigue al empuje sin dinámica de rotación (decisión pendiente).</p>
+<p><strong>Catálogo discreto del agente de referencia</strong>. El Q-learning no usa el vector continuo directamente; elige dos cosas por paso y las traduce:</p>
+<ul>
+<li>Motor (6 opciones): apagado, o encendido con empuje igual a ×0,6, ×0,9, ×1,0, ×1,1 o ×1,4 el peso actual del cohete. Se traduce a acelerador con la masa y la presión observadas, así "×1,0" siempre significa "flotar", con el depósito lleno o vacío.</li>
+<li>Dirección (5 opciones): recto hacia arriba, o inclinado hacia +x, −x, +y o −y con componente lateral 0,10 (5,7° de inclinación, por debajo del límite de 10° al aterrizar).</li>
+</ul>
+<h2 id="dinamica">Dinamica</h2>
+<p>Qué pasa cuando el agente actúa:</p>
+<ol>
+<li><strong>Paso del agente.</strong> La acción se mantiene hasta que el cohete se ha desplazado 20 m en vertical (subiendo o bajando) o hasta que pasan 2 s, lo que ocurra antes. Dentro del paso la física avanza con Euler explícito cada Δt = 0,1 s: entre 7 y 20 subpasos según la velocidad.</li>
+<li><strong>Empuje.</strong> T = (T_vac − p(z)·A_e) · acelerador, aplicado en la dirección d (unitaria). Solo si el motor está encendido, queda combustible y no está sobrecalentado. A más presión exterior, menos empuje (unos 2 kN de pérdida al nivel del mar). Consumo ṁ = T / (Isp · g₀).</li>
+<li><strong>Arrastre con viento.</strong> D = −½ ρ(z) C_d A |v − w| (v − w). Es la única vía por la que el viento mueve el cohete: un viento de 10 m/s sobre un cohete quieto empuja con unos 130 N (0,09 m/s² con el depósito lleno), suficiente para sacarlo de la plataforma si no corrige.</li>
+<li><strong>Gravedad.</strong> −m g₀ en z, con m = 1000 kg + combustible.</li>
+<li><strong>Integración.</strong> a = (T·d + D)/m + g; v ← v + a·Δt; r ← r + v·Δt.</li>
+<li><strong>Atmósfera (ISA desde el suelo).</strong> T(z) = T₀ − 0,0065·z; p(z) = p₀ · (T/T₀)^(g₀ / (R·0,0065)); ρ = p / (R·T). Entre la época más fría y densa y la más cálida y ligera, la densidad cambia un 25 %, y con ella el arrastre.</li>
+<li><strong>Viento.</strong> w(z) = w₁₀ · (max(z, 1)/10)^(1/7) + g_r, con ráfaga g_r que sigue un proceso de Ornstein-Uhlenbeck: dg_r = −g_r/τ · dt + σ·√(2·dt/τ)·ξ, con τ = 3 s, σ = 1,5 m/s y la componente vertical reducida a 0,3. A 600 m el viento medio es 1,8 veces el de 10 m.</li>
+<li><strong>Motor térmico.</strong> dT_m/dt = 30 · acelerador − 0,05 · (T_m − T_aire). Si T_m ≥ 900 K el motor se bloquea hasta enfriarse por debajo de 800 K. Con el agente de referencia el motor llega a unos 600 K: el límite existe pero no se alcanza (pendiente calibrar).</li>
+<li><strong>Inclinación.</strong> El eje del cohete es la dirección del último empuje; θ = arccos(dz).</li>
+<li><strong>Fin del paso.</strong> Se comprueba el resultado (sección <em>Éxito, fracaso y límite de tiempo</em>), se suma un paso y se calcula la recompensa. Si se toca el suelo a mitad de paso, el paso termina ahí.</li>
+</ol>
+<h2 id="recompensa">Recompensa</h2>
+<p>Dos partes: una recompensa <strong>por paso</strong> que guía la aproximación y una recompensa <strong>final</strong> según cómo termina la época.</p>
+<p><strong>Por paso:</strong> r = Φ(s′) − Φ(s) − 0,1 · combustible gastado en el paso (kg), con</p>
+<pre><code>Φ(s) = −d_h / 5 − v_h − |vz − v_seg(z)| − z / 10
+v_seg(z) = −clip(0,08 · z, 1,5, 30)   (m/s; bajar rápido arriba y despacio cerca del suelo)
+</code></pre>
+<p>donde d_h = √(x² + y²) es la distancia horizontal a la plataforma y v_h = √(vx² + vy²) la velocidad horizontal. Φ es un <em>potencial</em>: sumada a lo largo de la época, la parte de aproximación vale Φ(final) − Φ(inicio), unos +80 puntos como máximo (de Φ ≈ −82 en la salida a Φ ≈ −2 posado en la plataforma), sea cual sea el camino. Dar vueltas o flotar no la aumenta. El combustible resta hasta 50 puntos si se vacía el depósito.</p>
+<p><strong>Al terminar:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Resultado</th>
+<th>Cuándo</th>
+<th>Puntos</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizaje</td>
+<td>contacto con |vz| ≤ 3 m/s, v_h ≤ 2 m/s, inclinación ≤ 10° y a ≤ 10 m del centro</td>
+<td><strong>+100</strong></td>
+</tr>
+<tr>
+<td>fuera de plataforma</td>
+<td>contacto suave (las mismas tres condiciones) pero a más de 10 m del centro</td>
+<td><strong>−50</strong></td>
+</tr>
+<tr>
+<td>choque</td>
+<td>contacto que incumple alguna de las tres condiciones de suavidad</td>
+<td><strong>−100</strong></td>
+</tr>
+<tr>
+<td>sin pasos</td>
+<td>agota los 50 pasos sin tocar el suelo</td>
+<td><strong>−100</strong></td>
+</tr>
+<tr>
+<td>fuera de zona</td>
+<td>d_h &gt; 300 m o z &gt; 1200 m</td>
+<td><strong>−100</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Desde 0.1.1, "sin pasos" se informa con <code>truncated=True</code> (límite externo de la época) y los otros cuatro con
+<code>terminated=True</code> (estado final del cohete). La recompensa es la misma; ver el CHANGELOG.</p>
+<p>Por qué estos valores: aterrizar y chocar son simétricos (±100) y dominan sobre la aproximación (+80) y el combustible (−50), así que la única forma de terminar con una recompensa alta es aterrizar. "Fuera de plataforma" vale la mitad del choque porque la parte difícil (posarse suave) está hecha, pero la misión no.</p>
+<p>Recompensa total típica por resultado, en las 5000 épocas de entrenamiento del agente de referencia:</p>
+<table>
+<thead>
+<tr>
+<th>Resultado</th>
+<th>Épocas</th>
+<th>Recompensa media</th>
+<th>Mínima</th>
+<th>Máxima</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizaje</td>
+<td>1653</td>
+<td>+152,8</td>
+<td>+134,9</td>
+<td>+167,6</td>
+</tr>
+<tr>
+<td>fuera de plataforma</td>
+<td>159</td>
+<td>+0,8</td>
+<td>−18,0</td>
+<td>+12,8</td>
+</tr>
+<tr>
+<td>choque</td>
+<td>2727</td>
+<td>−72,9</td>
+<td>−136,6</td>
+<td>−34,3</td>
+</tr>
+<tr>
+<td>sin pasos</td>
+<td>189</td>
+<td>−95,3</td>
+<td>−162,8</td>
+<td>−60,2</td>
+</tr>
+<tr>
+<td>fuera de zona</td>
+<td>272</td>
+<td>−127,4</td>
+<td>−210,3</td>
+<td>−107,1</td>
+</tr>
+</tbody>
+</table>
+<p>Las bandas no se solapan: un aterrizaje siempre vale más que cualquier otro final. "Fuera de plataforma" queda cerca de cero (ver la trampa 2 al final).</p>
+<h2 id="exito-fracaso-y-limite-de-tiempo">Exito, fracaso y limite de tiempo</h2>
+<p><strong>Éxito.</strong> Tocar el suelo (z ≤ 0) con |vz| ≤ 3 m/s, v_h ≤ 2 m/s, inclinación ≤ 10° y a ≤ 10 m del centro de la plataforma. La ficha pide además "estabilidad durante un intervalo"; en v0.1 la época termina en el contacto (decisión pendiente).</p>
+<p><strong>Fracaso.</strong> Cualquiera de los otros cuatro resultados de la tabla anterior: choque, fuera de plataforma, fuera de zona, sin pasos.</p>
+<p><strong>Límite de tiempo.</strong> 50 pasos. Desde 600 m hacen falta 30 pasos de 20 m bajando en línea recta; los 20 restantes son el margen para frenar (cerca del suelo cada paso dura 2 s y recorre menos de 20 m) y para corregir la deriva. Como cada paso dura 2 s como máximo, una época dura 100 s como máximo. Bajar desde 800 m (nuestra primera versión) dejaba demasiado poco margen: el controlador hecho a mano necesitaba 45 pasos.</p>
+<h2 id="metricas-e-incidente">Metricas e incidente</h2>
+<p><strong>Tres métricas</strong>, medidas en 200 épocas de evaluación sin exploración y con semillas (meteorología y punto de salida) que no aparecen en el entrenamiento:</p>
+<ol>
+<li><strong>Tasa de aterrizajes seguros</strong> (%): la medida de la misión.</li>
+<li><strong>Velocidad de contacto</strong> (m/s): media de |vz| en las épocas que tocan el suelo; dice <em>cómo</em> de bien aterriza, no solo si lo hace.</li>
+<li><strong>Error de posición final</strong> (m): distancia al centro de la plataforma al terminar; mide la corrección de la deriva.</li>
+</ol>
+<p>Complementaria: combustible gastado (kg). Durante el entrenamiento medimos además <strong>cuántas épocas tarda en aterrizar</strong>: la primera vez y la época en que la media móvil de 100 épocas alcanza el 25, el 50 y el 75 % de aterrizajes.</p>
+<p><strong>Incidente / perturbación:</strong> viento lateral fijo de 15 m/s a 10 m de altura, fuera del rango 0–10 m/s del entrenamiento, con dirección aleatoria por época. Se activa con <code>options={"viento": 15}</code> en <code>reset</code> o con <code>python cli.py evaluar --viento 15</code>. Comparamos las mismas 200 épocas con y sin perturbación.</p>
+<p><strong>Resultados del agente de referencia</strong> (Q-learning con dos tablas, 5000 épocas, unos 2 minutos de entrenamiento; detalles en <code>agente_qlearning.py</code> y <code>entrenamiento.py</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Épocas hasta…</th>
+<th>Época</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>el primer aterrizaje</td>
+<td>1785</td>
+</tr>
+<tr>
+<td>aterrizar el 25 % de las veces (media de 100 épocas)</td>
+<td>2697</td>
+</tr>
+<tr>
+<td>aterrizar el 50 %</td>
+<td>2779</td>
+</tr>
+<tr>
+<td>aterrizar el 75 %</td>
+<td>2970</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Métrica (las mismas 200 épocas)</th>
+<th>Condiciones normales (viento 0–10 m/s)</th>
+<th>Perturbación (viento 15 m/s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Tasa de aterrizajes seguros</td>
+<td>157 / 200 (78 %)</td>
+<td>76 / 200 (38 %)</td>
+</tr>
+<tr>
+<td>2. Velocidad de contacto</td>
+<td>1,95 m/s</td>
+<td>1,98 m/s</td>
+</tr>
+<tr>
+<td>3. Error de posición final</td>
+<td>5,5 m</td>
+<td>33,6 m</td>
+</tr>
+<tr>
+<td>Combustible gastado</td>
+<td>272 kg</td>
+<td>275 kg</td>
+</tr>
+<tr>
+<td>Cómo terminan</td>
+<td>aterrizaje 157, fuera de plataforma 10, choque 33</td>
+<td>aterrizaje 76, fuera de plataforma 6, choque 118</td>
+</tr>
+</tbody>
+</table>
+<p>Lectura: con viento fuerte el agente sigue frenando igual de bien en vertical (la velocidad de contacto no cambia), pero pierde el control lateral: el error de posición se multiplica por seis y los 118 choques se deben todos a llegar al suelo con más de 2 m/s de velocidad horizontal, arrastrado por el viento (ninguno a la velocidad vertical ni a la inclinación). Un candidato que aguante la perturbación tendrá que inclinarse más de los 5,7° del catálogo actual o anticipar la deriva.</p>
+<p>El agente aprende con dos tablas Q pequeñas (297 valores en total): una para el motor, indexada por altitud (6 intervalos) y velocidad vertical (7 intervalos), y otra para la dirección, indexada por hacia dónde derivará el cohete en 4 s en cada eje horizontal (3 intervalos por eje). Exploración ε de 1 a 0,02 en el 60 % de las épocas; tasa de aprendizaje de 0,1 a 0,01; descuento 0,99. Cada 250 épocas se evalúa sin explorar en 50 épocas y nos quedamos con la mejor versión. Es un agente de referencia para comprobar que el ambiente se puede aprender y evaluar, no el modelo final del proyecto.</p>
+<h2 id="cinco-transiciones">Cinco transiciones</h2>
+<p>Cinco pasos consecutivos del agente de referencia ya entrenado, en la época de evaluación con semilla 10 000 000 (reproducible con <code>python cli.py transiciones</code>). La observación se resume a lo que cambia; "fin" indica si la época termina.</p>
+<p>Condiciones de la época: suelo a 13 °C y 99,9 kPa (a 600 m el agente lee 9,1 °C y 92,4 kPa), viento de 14 m/s a 600 m soplando sobre todo hacia +y.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Observación (antes del paso)</th>
+<th>Acción del agente → acción del entorno</th>
+<th>Nuevo estado (después del paso)</th>
+<th>Recompensa</th>
+<th>Fin</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>z 600,0 m; vz −19,6 m/s; (x, y) = (31,7, 10,1) m; vy +1,1 m/s; viento (−6,3, +12,9) m/s; combustible 100 %; inclinación 0°</td>
+<td>empuje ×0,6 inclinado a −y → motor encendido, acelerador 0,35, dirección (0, −0,10, 1)</td>
+<td>z 578,5 m; vz −23,0; (33,0, 11,0); vy +0,8; comb. 99 %; incl. 5,7° · 10 subpasos de física (1,0 s)</td>
+<td>+5,24</td>
+<td>no</td>
+</tr>
+<tr>
+<td>2</td>
+<td>el nuevo estado del paso 1</td>
+<td>motor apagado → motor −1, acelerador 0</td>
+<td>z 556,8 m; vz −30,3; (33,9, 11,8); vy +1,0; comb. 99 %; incl. 0° · 8 subpasos</td>
+<td>+8,54</td>
+<td>no</td>
+</tr>
+<tr>
+<td>3</td>
+<td>el nuevo estado del paso 2</td>
+<td>empuje ×1,1 a −y → acelerador 0,65, dirección (0, −0,10, 1)</td>
+<td>z 536,1 m; vz −29,0; (34,7, 12,3); vy +0,5; motor 305 K; comb. 98 % · 7 subpasos</td>
+<td>+1,12</td>
+<td>no</td>
+</tr>
+<tr>
+<td>4</td>
+<td>el nuevo estado del paso 3</td>
+<td>empuje ×1,1 a −y → acelerador 0,64</td>
+<td>z 513,6 m; vz −27,5; (35,4, 12,4); vy −0,1; motor 319 K; comb. 97 % · 8 subpasos</td>
+<td>+0,39</td>
+<td>no</td>
+</tr>
+<tr>
+<td>5</td>
+<td>el nuevo estado del paso 4</td>
+<td>empuje ×1,1 a −y → acelerador 0,64</td>
+<td>z 492,3 m; vz −26,1; (36,0, 12,1); vy −0,6; viento (−6,6, +13,8); motor 333 K; comb. 96 % · 8 subpasos</td>
+<td>+0,01</td>
+<td>no</td>
+</tr>
+</tbody>
+</table>
+<p>Lectura de las cinco:</p>
+<ol>
+<li>El agente sale con el motor suave e inclinado a −y, contra el viento que sopla hacia +y. Gana +5,2 porque baja hacia la velocidad segura (−30 m/s a 600 m) y se acerca al suelo.</li>
+<li>Apaga el motor para acelerar la caída hasta la velocidad segura: el error de descenso cae de 7 a 0 m/s y es el paso mejor pagado (+8,5).</li>
+<li>– 5. Con empuje ×1,1 (un 10 % más que su peso) sostiene unos −28 m/s. La recompensa por paso tiende a cero porque Φ apenas cambia: lo que gana por bajar 20 m lo pierde por frenarse. La deriva lateral se corrige: vy pasa de +1,1 a −0,6 m/s mientras el viento sigue empujando hacia +y.</li>
+</ol>
+<p>Ninguna de las cinco termina la época. Esta época sigue hasta el paso 38 y se posa suave (1,0 m/s vertical, 1,8 m/s horizontal, 5,7° de inclinación) pero a 16,2 m del centro: termina <strong>fuera de plataforma</strong> (−50) con recompensa total −5,5. Es uno de los 10 casos de 200 de la evaluación, y justo el caso de la trampa 2.</p>
+<h2 id="posibles-trampas-y-decisiones-pendientes">Posibles trampas y decisiones pendientes</h2>
+<p><strong>Trampa 1 (el reto de la ficha): acumular premio flotando sin aterrizar.</strong> No compensa, por tres motivos: la recompensa de aproximación es un potencial (sumada a lo largo de la época solo depende de dónde empieza y dónde acaba, así que flotar aporta 0), cada kilogramo de combustible resta 0,1 y agotar los 50 pasos vale −100. Lo comprobamos con políticas fijas en 50 épocas de evaluación:</p>
+<table>
+<thead>
+<tr>
+<th>Política fija (50 épocas de evaluación)</th>
+<th>Recompensa media</th>
+<th>Pasos</th>
+<th>Cómo termina</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>flotar: frena y mantiene la altura con empuje = peso</td>
+<td>−204,8</td>
+<td>40</td>
+<td>fuera de zona 32 (el viento lo saca del cilindro), sin pasos 18; gasta 413 kg de combustible</td>
+</tr>
+<tr>
+<td>empuje = peso desde la salida, sin frenar</td>
+<td>−93,3</td>
+<td>31</td>
+<td>choque 39, fuera de zona 11</td>
+</tr>
+<tr>
+<td>subir siempre (empuje ×1,4)</td>
+<td>−261,0</td>
+<td>33</td>
+<td>fuera de zona 50 (sale por el techo)</td>
+</tr>
+<tr>
+<td>frenar siempre (empuje ×1,1)</td>
+<td>−268,3</td>
+<td>44</td>
+<td>fuera de zona 50</td>
+</tr>
+<tr>
+<td>caída libre (motor apagado)</td>
+<td>−113,1</td>
+<td>27</td>
+<td>choque 50</td>
+</tr>
+</tbody>
+</table>
+<p>Flotar es la peor opción después de subir: no suma aproximación (la pierde al derivar con el viento: Φ baja de −82 a unos −156), gasta casi todo el combustible y acaba con −100 por agotar los pasos o salir de la zona. Un aterrizaje típico vale unos +150 (tabla de la sección <em>Recompensa</em>).</p>
+<p><strong>Trampa 2: aterrizar suave fuera de la plataforma.</strong> Como la aproximación suma hasta +80 y el resultado vale −50, posarse suave junto a la plataforma puede acabar con recompensa total positiva: en el entrenamiento, media +0,8 y máximo +12,8 (tabla de la sección <em>Recompensa</em>). Es una forma de ganar puntos sin cumplir la misión. Mitigación actual: la plataforma vale 150 puntos más, así que el agente de referencia solo termina así en el 5 % de las épocas de evaluación, y la métrica "fuera de plataforma" lo vigila. La época de la sección <em>Cinco transiciones</em> es uno de esos casos. Pendiente: hacer la penalización proporcional a la distancia al centro.</p>
+<p><strong>Trampa 3: chocar rápido para ahorrar combustible.</strong> Chocar vale −100 y el ahorro máximo de combustible son 50 puntos, así que un choque nunca supera a un aterrizaje (diferencia mínima de 150 puntos). Comprobado: la política "caída libre" de la tabla anterior es la peor de todas.</p>
+<p><strong>Decisiones pendientes</strong> (para discutir con el otro equipo):</p>
+<ol>
+<li>Obstáculos y zonas inseguras en el suelo, como en la ilustración de la ficha. v0.1 no los tiene.</li>
+<li>"Estabilidad durante un intervalo" tras el contacto. Ahora la época termina al tocar el suelo.</li>
+<li>Dinámica de rotación real (torque e inercia) en lugar de que el eje siga instantáneamente a la dirección del empuje. Cambiaría la acción a "potencia + torque", como dice la ficha.</li>
+<li>Hacer observable el bloqueo por sobrecalentamiento, y calibrar el límite térmico para que importe (hoy el agente llega a 600 K de 900).</li>
+<li>Normalizar la observación (hoy va en unidades físicas crudas, mezclando metros con kelvin).</li>
+<li>Penalización explícita por tiempo, que la ficha pide. Hoy solo actúa a través del límite de pasos y del combustible.</li>
+<li>Penalización de "fuera de plataforma" proporcional a la distancia (trampa 2).</li>
+<li>Definición del paso: "20 m de desplazamiento vertical" cuenta también subidas. ¿Debe contar solo descensos?</li>
+<li>Rango del viento y de las ráfagas, y la altura de salida: 600 m se eligió para que 50 pasos alcancen; conviene justificarlo con más datos.</li>
+<li>Viento como velocidad del aire (elegido) frente a viento como fuerza. La ficha deja abierto el modelo; el nuestro acopla el viento a la densidad del aire, que a su vez depende de la temperatura y la presión.</li>
+</ol>
+<h2 id="anexo-como-reproducir">Anexo: cómo reproducir</h2>
+<pre><code class="language-bash">python cli.py entrenar               # entrena 5000 épocas y dice cuántas tarda en aterrizar
+python cli.py ver                    # una época del modelo entrenado, paso a paso
+python cli.py evaluar --viento 15    # las tres métricas, con y sin la perturbación
+python cli.py transiciones           # las cinco transiciones de esta ficha
+</code></pre>
+<p><code>python cli.py entrenar</code> genera además <code>aprendizaje.html</code>, una página con las curvas de aprendizaje y la repetición de épocas en 3D.</p>
+</main></body></html>
