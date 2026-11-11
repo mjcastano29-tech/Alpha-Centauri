@@ -31,7 +31,10 @@ sys.path.insert(0, str(ROOT))
 import gymnasium as gym  # noqa: E402
 import rocket_env  # noqa: E402, F401  (registra RocketLanding3D-v0)
 import catalogo as catalogo_git  # noqa: E402
+import uuid  # noqa: E402
+
 from entrenamiento import CHECK_EPISODES, EVAL_SEED_BASE, OUTCOMES, episode_record, run_epoch  # noqa: E402
+from visualizacion.datos import summary, trajectory_columns, weather  # noqa: E402
 from entrenar import RUNS, ambiente_de, hacer_entorno, load_agent, load_registry, run_dir  # noqa: E402
 from rocket_env import AMBIENTES, VIGENTES, AdaptadorN1, RocketLandingN2Env, clase_ambiente  # noqa: E402
 from rocket_env.rocket_landing import RocketLanding3DEnv  # noqa: E402
@@ -337,6 +340,107 @@ class PeticionEvaluacion(BaseModel):
     suite: str | None = Field(None, description="id de una suite de configs/suites (p. ej. suite-v1): fija semilla_base y viento")
     condicion: str = Field("normal", description="condición de la suite (normal, viento-15)")
     ambiente: str | None = Field(None, description="otro ambiente (nivel) distinto del de entrenamiento; un modelo de N2 juega en N3 tal cual y uno de N1 en N2 o N3 con AdaptadorN1")
+
+
+# ---------- misión en vivo: la simulación avanza paso a paso y el viento se cambia entre pasos ----------
+SESIONES = {}  # id -> estado de una misión interactiva (en memoria; caducan a los 15 min sin uso)
+SESIONES_MAX = 20
+SESION_TTL = 15 * 60
+
+
+class NuevaSesion(BaseModel):
+    run_id: str
+    ambiente: str | None = Field(None, description="otro ambiente (nivel) distinto del de entrenamiento")
+    semilla: int = Field(EVAL_SEED_BASE, ge=0, description="semilla de la meteorología y la salida")
+    viento: float | None = Field(None, ge=0, le=30, description="viento inicial a 10 m (m/s); None = sorteado por el ambiente")
+
+
+class PasoSesion(BaseModel):
+    viento: float | None = Field(None, ge=0, le=30, description="viento a 10 m (m/s) que se aplica desde este paso; None = dejarlo como está")
+    direccion_grados: float | None = Field(None, ge=-360, le=360, description="dirección hacia la que sopla, en grados desde +x; None = la actual")
+
+
+def _viento_actual(env):
+    g = env.unwrapped.atmosphere.ground_wind
+    return {"velocidad": round(float(np.hypot(g[0], g[1])), 2), "direccion_grados": round(float(np.degrees(np.arctan2(g[1], g[0]))) % 360, 1)}
+
+
+def _limpiar_sesiones():
+    ahora = time.time()
+    for sid in [k for k, s in SESIONES.items() if ahora - s["ultimo_uso"] > SESION_TTL]:
+        SESIONES.pop(sid, None)
+    while len(SESIONES) > SESIONES_MAX:
+        SESIONES.pop(min(SESIONES, key=lambda k: SESIONES[k]["ultimo_uso"]), None)
+
+
+def _vuelo_parcial(s, nombre="misión en vivo"):
+    return {**s["meta"], "agent": nombre, "epoch": None, "reason": s["resultado"] or "en vuelo", "steps": len(s["pasos"]), "reward": round(s["recompensa"], 2),
+            "duration": s["frames"][-1]["t"] if s["frames"] else 0.0, "landed": s["resultado"] == "aterrizaje",
+            "f": trajectory_columns(s["frames"]), "step_marks": s["pasos"]}
+
+
+@app.post("/sesiones", summary="Misión en vivo: crea una simulación paso a paso con el modelo congelado; el viento se cambia entre pasos")
+def crear_sesion(p: NuevaSesion):
+    _limpiar_sesiones()
+    m = manifest(p.run_id)
+    ag = agente(p.run_id)
+    if p.ambiente and p.ambiente not in AMBIENTES:
+        raise HTTPException(404, f"Ambiente desconocido: {p.ambiente}")
+    try:
+        env = hacer_entorno(m, p.ambiente)
+    except SystemExit as e:
+        raise HTTPException(422, str(e))
+    obs, info = env.reset(seed=p.semilla, options={"viento": p.viento} if p.viento is not None else None)
+    rocket = env.unwrapped
+    sid = uuid.uuid4().hex[:12]
+    SESIONES[sid] = {"env": env, "agente": ag, "obs": obs, "run_id": p.run_id, "frames": list(info["trajectory"]), "pasos": [], "recompensa": 0.0,
+                     "resultado": None, "meta": weather(env), "creada": time.time(), "ultimo_uso": time.time(), "semilla": p.semilla}
+    return {
+        "sesion": sid, "modo": "mision en vivo",
+        "modelo": {"run_id": p.run_id, "agente": m["agente"].get("nombre"), "accion": m["agente"].get("accion"), "commit": m["git"]["commit"], "mlflow": MLFLOW.get(p.run_id)},
+        "ambiente": {"id": rocket.ID, "version": rocket.VERSION, "nivel": rocket.NIVEL, "obstaculos": rocket.obstaculos(), "entrenado_en": ambiente_de(m),
+                     "adaptador": isinstance(env, AdaptadorN1), "viento_max": getattr(rocket, "VIENTO_MAX", None), "rafagas": getattr(rocket, "RAFAGAS", None),
+                     "pasos": rocket.MAX_STEPS, "altitud_salida": rocket.START_ALTITUDE, "radio_plataforma": rocket.PAD_RADIUS},
+        "semilla": p.semilla, "viento": _viento_actual(env), "vuelo": _vuelo_parcial(SESIONES[sid]), "caduca_s": SESION_TTL,
+    }
+
+
+@app.post("/sesiones/{sid}/paso", summary="Avanza un paso del agente (hasta 20 m o 2 s) con el viento indicado; devuelve los fotogramas nuevos")
+def paso_sesion(sid: str, p: PasoSesion):
+    s = SESIONES.get(sid)
+    if not s:
+        raise HTTPException(404, "La sesión no existe o caducó: crea otra con POST /sesiones")
+    if s["resultado"]:
+        raise HTTPException(409, f"La misión ya terminó: {s['resultado']}")
+    env, rocket = s["env"], s["env"].unwrapped
+    if p.viento is not None or p.direccion_grados is not None:
+        actual = _viento_actual(env)
+        v = actual["velocidad"] if p.viento is None else float(p.viento)
+        a = np.radians(actual["direccion_grados"] if p.direccion_grados is None else float(p.direccion_grados))
+        rocket.atmosphere.ground_wind = np.array([v * np.cos(a), v * np.sin(a), 0.0])  # el viento medio cambia; las ráfagas siguen su proceso
+    t0 = time.perf_counter()
+    env_action, _, etiqueta = s["agente"].act(s["obs"], greedy=True)
+    obs, reward, terminated, truncated, info = env.step(env_action)
+    nuevos = list(info["trajectory"])
+    s["frames"].extend(nuevos); s["obs"] = obs; s["recompensa"] += float(reward); s["ultimo_uso"] = time.time()
+    s["pasos"].append({"i": len(s["frames"]) - 1, "label": etiqueta, "r": round(float(reward), 2)})
+    fin = bool(terminated or truncated)
+    resumen = None
+    if fin:
+        s["resultado"] = info["outcome"]
+        s["meta"].update(summary(env, s["frames"], info["outcome"], s["recompensa"], len(s["pasos"])))
+        resumen = {k: s["meta"][k] for k in ("reason", "steps", "reward", "duration", "landed", "final_dist", "fuel_used") if k in s["meta"]}
+        EVALUACIONES.append({"fecha": time.strftime("%Y-%m-%dT%H:%M:%S"), "run_id": s["run_id"], "ambiente": rocket.ID, "nivel": rocket.NIVEL, "episodios": 1,
+                             "aterrizajes": 1.0 if info["outcome"] == "aterrizaje" else 0.0, "total_ms": 0, "por_paso_ms": 0.0,
+                             "adaptador": isinstance(env, AdaptadorN1), "suite": "mision-en-vivo"})
+    return {"paso": len(s["pasos"]), "f": trajectory_columns(nuevos), "marca": s["pasos"][-1], "recompensa": round(float(reward), 2),
+            "acumulada": round(s["recompensa"], 2), "terminado": bool(terminated), "truncado": bool(truncated), "fin": fin, "resultado": info["outcome"],
+            "viento": _viento_actual(env), "latencia_ms": round((time.perf_counter() - t0) * 1000, 1), "resumen": resumen}
+
+
+@app.delete("/sesiones/{sid}", summary="Cierra una misión en vivo")
+def cerrar_sesion(sid: str):
+    return {"cerrada": SESIONES.pop(sid, None) is not None}
 
 
 @app.get("/monitoreo", summary="Monitoreo de la operación: servicio, catálogo servido por nivel, decisiones del pipeline, evaluaciones recientes y alertas")

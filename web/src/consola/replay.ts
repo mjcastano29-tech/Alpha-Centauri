@@ -20,10 +20,18 @@ const ESCALA = (d: number) => Math.min(1, Math.log1p(d / 6) / Math.log1p(320 / 6
 const clamp01 = (x: number) => Math.max(0, Math.min(1, x))
 const conUnidad = (v: string, u: string) => (u === '°' ? `${v}°` : `${v} ${u}`)
 
-export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados' | 'evaluacion'): Promise<() => void> {
+export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados' | 'evaluacion' | 'vivo'): Promise<() => void> {
   let vuelos: Vuelo[], modo: string, nota: string
-  const ev = sesion.ultimaEvaluacion
-  if (fuente === 'evaluacion') {
+  const ev = sesion.ultimaEvaluacion, vivo = fuente === 'vivo' ? sesion.vivo : null
+  if (fuente === 'vivo') {
+    if (!vivo || vivo.modelo.run_id !== id) {
+      el.innerHTML = `<p class="error">No hay una misión en vivo de ${esc(id)} en esta sesión.</p><p><a href="#/vivo">Preparar una misión en vivo</a></p>`
+      return () => {}
+    }
+    vuelos = [vivo.vuelo]
+    modo = 'Misión en vivo'
+    nota = `la API simula paso a paso con el modelo congelado; el viento que marques abajo se aplica desde el siguiente paso del agente · semilla ${vivo.semilla}`
+  } else if (fuente === 'evaluacion') {
     if (!ev || ev.modelo.run_id !== id) {
       el.innerHTML = `<p><a href="#/ejecucion/${esc(id)}">← ejecución</a></p><p class="error">No hay una evaluación en vivo de ${esc(id)} en esta sesión. Lánzala desde la página de la ejecución.</p>`
       return () => {}
@@ -37,11 +45,11 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
     nota = 'vuelos grabados durante el entrenamiento (con exploración) y del modelo final (sin ruido)'
   }
   const c = await cargarCatalogo(), r = c.ejecuciones.find((e) => e.run_id === id)
-  const obstaculos: Obstaculo[] = fuente === 'evaluacion' ? ev!.ambiente.obstaculos : r?.obstaculos ?? []
-  const nivelVisto = fuente === 'evaluacion' ? ev!.ambiente.nivel : r?.nivel ?? 'N1'
+  const obstaculos: Obstaculo[] = vivo ? vivo.ambiente.obstaculos : fuente === 'evaluacion' ? ev!.ambiente.obstaculos : r?.obstaculos ?? []
+  const nivelVisto = vivo ? vivo.ambiente.nivel : fuente === 'evaluacion' ? ev!.ambiente.nivel : r?.nivel ?? 'N1'
   const finales = vuelos.filter((v) => !v.epoch && !v.epoca_evaluacion)
-  const etiqueta = (v: Vuelo) => v.epoch ? `Época ${entero(v.epoch)} · entrenamiento` : v.epoca_evaluacion ? `Evaluación · época ${v.epoca_evaluacion}` : `Modelo final · vuelo ${finales.indexOf(v) + 1} de ${finales.length}`
-  const amb = c.ambientes.find((a) => a.id === (fuente === 'evaluacion' ? ev!.ambiente.id : r?.ambiente_id))
+  const etiqueta = (v: Vuelo) => vivo ? 'Misión en vivo · viento manual' : v.epoch ? `Época ${entero(v.epoch)} · entrenamiento` : v.epoca_evaluacion ? `Evaluación · época ${v.epoca_evaluacion}` : `Modelo final · vuelo ${finales.indexOf(v) + 1} de ${finales.length}`
+  const amb = c.ambientes.find((a) => a.id === (vivo ? vivo.ambiente.id : fuente === 'evaluacion' ? ev!.ambiente.id : r?.ambiente_id))
   const radio = amb?.radio_plataforma ?? 10, salida = amb?.altitud_salida ?? 600, pasos = amb?.pasos ?? 50
   const obst = obstaculos.length ? (obstaculos.some((o) => o.tipo === 'pasarela') ? `pasarela y ${obstaculos.filter((o) => o.tipo !== 'pasarela').length} pilares` : `${obstaculos.length} torres`) : ''
   const etiquetas = [
@@ -60,7 +68,7 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
     <section class="consola" data-fase="preparando">
       <header class="mision">
         <div class="mision-id">
-          <span class="modo ${fuente === 'evaluacion' ? 'modo-eval' : 'modo-replay'}"><i class="vivo"></i>${esc(modo)}</span>
+          <span class="modo ${fuente === 'evaluacion' ? 'modo-eval' : fuente === 'vivo' ? 'modo-vivo' : 'modo-replay'}"><i class="vivo"></i>${esc(modo)}</span>
           <div class="mision-nombre"><span class="kicker">PROJECT ELYNDRA · misión</span><h2>${esc(id)} ${r?.estado === 'recomendado' ? pillEstado(r.estado) : ''}</h2></div>
         </div>
         <dl class="mision-datos">
@@ -123,6 +131,13 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
         </div>
         <aside class="lateral"><div class="lateral-cuerpo">
           <div class="resultado" id="rp-resultado"><span class="resultado-principal" id="hud-res"></span><span class="mono" id="hud-rec"></span></div>
+          ${vivo ? `<section class="grupo viento-vivo"><h3>${ICONO.entorno}<span>Viento manual</span><small id="vv-estado">en marcha</small></h3>
+            <label class="campo">Intensidad a 10 m <span class="deslizador"><input type="range" id="vv-vel" min="0" max="25" step="0.5" value="${vivo.viento.velocidad}"><output id="vv-vel-v">${num(vivo.viento.velocidad)} m/s</output></span></label>
+            <label class="campo">Dirección (hacia dónde sopla) <span class="deslizador"><input type="range" id="vv-dir" min="0" max="360" step="5" value="${Math.round(vivo.viento.direccion_grados)}"><output id="vv-dir-v">${Math.round(vivo.viento.direccion_grados)}°</output></span></label>
+            <p class="muted vv-nota">El cambio se aplica en el siguiente paso del agente (cada 20 m o 2 s). Las ráfagas siguen su propio proceso. Pulsa reproducir si lo pausas; la misión avanza mientras se reproduce.</p>
+            <p><span class="muted">Último paso: </span><span id="vv-ultimo" class="mono">—</span></p>
+            <p><a class="btn-consola secundario" href="#/vivo/${esc(id)}">Nueva misión</a></p>
+          </section>` : ''}
           ${grupo('Navegación', ICONO.navegacion, fila('tm-alt', 'Altitud', 'm', true) + fila('tm-vz', 'Velocidad vertical', 'm/s', true) + fila('tm-vh', 'Velocidad horizontal', 'm/s', true) + fila('tm-incl', 'Inclinación', '°', true, CRITERIO.inclinacion / 30) + fila('tm-dist', 'Distancia al objetivo', 'm', true, ESCALA(radio)))}
           ${grupo('Propulsión', ICONO.propulsion, fila('tm-motor', 'Estado del motor') + fila('tm-pot', 'Potencia (acelerador)', '%', true) + fila('tm-fuel', 'Combustible', 'kg', true) + fila('tm-temp', 'Temperatura del motor', 'K', true, MOTOR_T_MAX / 1000), `se apaga a ${MOTOR_T_MAX} K`)}
           ${grupo('Entorno', ICONO.entorno, fila('tm-viento', 'Viento', 'm/s', true) + fila('tm-aire', 'Temperatura ambiental', '°C') + fila('tm-p', 'Presión atmosférica', 'kPa'))}
@@ -144,6 +159,41 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
   const rp = new ReproductorEscena(el.querySelector<HTMLElement>('#visor3d')!, { padRadius: radio, startAltitude: salida, calidad: preferenciaCalidad() })
   rp.setObstaculos(obstaculos)
   rp.setIntensidad(intensidad)
+  let vivoActivo = false, vivoFin = false
+  if (vivo) {
+    rp.enVivo = true; vivoActivo = true
+    const vel = el.querySelector<HTMLInputElement>('#vv-vel')!, dir = el.querySelector<HTMLInputElement>('#vv-dir')!
+    const velV = el.querySelector<HTMLElement>('#vv-vel-v')!, dirV = el.querySelector<HTMLElement>('#vv-dir-v')!, ultimo = el.querySelector<HTMLElement>('#vv-ultimo')!, estadoVivo = el.querySelector<HTMLElement>('#vv-estado')!
+    let pendiente: { viento?: number; direccion_grados?: number } = {}
+    vel.addEventListener('input', () => { velV.textContent = `${num(+vel.value)} m/s`; pendiente.viento = +vel.value })
+    dir.addEventListener('input', () => { dirV.textContent = `${dir.value}°`; pendiente.direccion_grados = +dir.value })
+    let pidiendo = false
+    const avanzar = async () => {
+      if (!vivoActivo || vivoFin || pidiendo || !rp.playing) return
+      if (rp.total - rp.indice > 24) return // hay más de un paso por reproducir: no hace falta pedir todavía
+      pidiendo = true
+      try {
+        const cuerpo = pendiente; pendiente = {}
+        const p = await api.pasoSesion(vivo.sesion, cuerpo)
+        rp.anexar(p.f, p.marca)
+        scrub.max = String(rp.total - 1)
+        ultimo.textContent = `${p.paso}/${pasos} · ${p.marca.label} · ${num(p.recompensa)} pts · viento ${num(p.viento.velocidad)} m/s a ${Math.round(p.viento.direccion_grados)}° · ${num(p.latencia_ms, 0)} ms`
+        if (p.fin) {
+          vivoFin = true; rp.enVivo = false
+          vivo.vuelo.reason = p.resultado ?? 'sin pasos'; vivo.vuelo.reward = p.acumulada; vivo.vuelo.steps = p.paso; vivo.vuelo.landed = p.resultado === 'aterrizaje'
+          estadoVivo.textContent = `terminada: ${p.resultado}`
+          const color = COLOR_RESULTADO[vivo.vuelo.reason] ?? 'var(--neutral)'
+          $('#rp-resultado').style.setProperty('--c-res', color)
+          $('#hud-res').innerHTML = `<span style="color: ${color}">${esc(ICONO_RESULTADO[vivo.vuelo.reason] ?? '')}</span> ${esc(vivo.vuelo.reason)} · recompensa ${num(vivo.vuelo.reward, 0)}`
+        }
+      } catch (e) {
+        estadoVivo.textContent = `error: ${(e as Error).message}`; vivoFin = true; rp.enVivo = false
+      } finally { pidiendo = false }
+    }
+    const reloj = window.setInterval(() => { avanzar().catch(() => {}) }, 150)
+    const limpiarVivo = () => { window.clearInterval(reloj); vivoActivo = false; api.cerrarSesion(vivo.sesion) }
+    ;(el as HTMLElement & { __limpiarVivo?: () => void }).__limpiarVivo = limpiarVivo
+  }
   if (import.meta.env.DEV) (window as unknown as { __rp: Reproductor }).__rp = rp // solo en desarrollo: lo usan las pruebas con el navegador
   const $ = (s: string) => el.querySelector<HTMLElement>(s)!
   const sel = el.querySelector<HTMLSelectElement>('#rp-vuelo')!, play = el.querySelector<HTMLButtonElement>('#rp-play')!, scrub = el.querySelector<HTMLInputElement>('#rp-scrub')!
@@ -172,7 +222,7 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
     $('#mi-cond').innerHTML = condiciones(actual); $('#mi-cond').title = $('#mi-cond').textContent ?? ''
     const color = COLOR_RESULTADO[actual.reason] ?? 'var(--neutral)', n = Math.max(1, rp.total - 1)
     $('#rp-resultado').style.setProperty('--c-res', color)
-    $('#hud-res').innerHTML = `<span style="color: ${color}">${esc(ICONO_RESULTADO[actual.reason] ?? '')}</span> ${esc(actual.reason)} · recompensa ${num(actual.reward, 0)}`
+    $('#hud-res').innerHTML = vivo && !vivoFin ? '<span class="muted">misión en curso: el resultado lo decide el ambiente al terminar</span>' : `<span style="color: ${color}">${esc(ICONO_RESULTADO[actual.reason] ?? '')}</span> ${esc(actual.reason)} · recompensa ${num(actual.reward, 0)}`
     $('#rp-marcas').innerHTML = actual.step_marks.map((m, j, todas) => `<i style="left: ${((m.i / n) * 100).toFixed(2)}%${j === todas.length - 1 ? `; background: ${color}` : ''}"${j === todas.length - 1 ? ' class="final"' : ''}></i>`).join('')
     fase = null
   }
@@ -305,5 +355,5 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
   }
   window.addEventListener('keydown', teclas)
   cargar(0)
-  return () => { clearTimeout(temporizador); window.removeEventListener('keydown', teclas); rp.destruir() }
+  return () => { clearTimeout(temporizador); window.removeEventListener('keydown', teclas); (el as HTMLElement & { __limpiarVivo?: () => void }).__limpiarVivo?.(); rp.destruir() }
 }

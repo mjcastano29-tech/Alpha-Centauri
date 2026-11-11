@@ -6,7 +6,7 @@ import '@fontsource-variable/jetbrains-mono'
 import './estilos.css'
 import * as api from './api'
 import { corto, esc } from './ui'
-import { vistaCatalogo, vistaComparar, vistaEjecucion, vistaExperimentos, vistaIncidente, vistaInicio, vistaMonitoreo, vistaReplay } from './vistas'
+import { vistaCatalogo, vistaComparar, vistaEjecucion, vistaExperimentos, vistaIncidente, vistaInicio, vistaMonitoreo, vistaReplay, vistaVivo } from './vistas'
 
 const app = document.querySelector<HTMLElement>('#app')!
 const estadoApiEl = document.querySelector<HTMLDetailsElement>('#estado-api')!
@@ -52,7 +52,8 @@ async function enrutar() {
     else if (partes[0] === 'experimentos') await vistaExperimentos(app, partes[1])
     else if (partes[0] === 'incidente') await vistaIncidente(app)
     else if (partes[0] === 'monitoreo') limpiar = await vistaMonitoreo(app)
-    else if (partes[0] === 'replay' && partes[1]) limpiar = await vistaReplay(app, partes[1], partes[2] === 'evaluacion' ? 'evaluacion' : 'grabados')
+    else if (partes[0] === 'vivo') limpiar = await vistaVivo(app, partes[1])
+    else if (partes[0] === 'replay' && partes[1]) limpiar = await vistaReplay(app, partes[1], partes[2] === 'evaluacion' ? 'evaluacion' : partes[2] === 'vivo' ? 'vivo' : 'grabados')
     else app.innerHTML = `<p class="error">Ruta desconocida: ${esc(ruta)}</p><p><a href="#/">Ir al inicio</a></p>`
   } catch (e) {
     const err = e as api.ErrorApi
