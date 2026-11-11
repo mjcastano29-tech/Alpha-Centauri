@@ -3,13 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Alpha Centauri · Rocket Landing</title>
+    <meta name="theme-color" content="#10131E" />
+    <link rel="icon" type="image/svg+xml" href="/elyndra.svg" />
+    <title>PROJECT ELYNDRA · Alien Planet Landing Simulator</title>
   </head>
   <body>
     <header class="topbar">
-      <span class="marca">Alpha Centauri · Rocket Landing</span>
-      <nav><a href="/landing/">Presentación</a> · <a href="#/">Cohete</a> · <a href="#/experimentos">Experimentos</a> · <a href="#/catalogo">Catálogo</a> · <a href="#/incidente">Incidente (N3)</a> · <a href="#/monitoreo">Monitoreo</a></nav>
-      <span id="estado-api">Conectando con la API…</span>
+      <a class="marca" href="#/" aria-label="PROJECT ELYNDRA, inicio">
+        <img class="logo" src="/elyndra.svg" alt="" width="34" height="34" />
+        <span class="marca-txt"><b>PROJECT ELYNDRA</b><span>Alien Planet Landing Simulator · Alfa Centauri</span></span>
+      </a>
+      <nav class="nav" aria-label="secciones"><a href="#/">Simulador</a><a href="#/experimentos">Experimentos</a><a href="#/catalogo">Catálogo</a><a href="#/incidente">Incidente (N3)</a><a href="#/monitoreo">Monitoreo</a><a href="/landing/">Presentación</a></nav>
+      <details class="estado-api" id="estado-api">
+        <summary><i class="punto"></i><span>Conectando con la API…</span></summary>
+        <div class="estado-api-cuerpo"><p>Consultando <code>/version</code>…</p></div>
+      </details>
     </header>
     <main id="app"></main>
     <script type="module" src="/src/main.ts"></script>
