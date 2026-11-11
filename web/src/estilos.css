@@ -179,6 +179,21 @@ p.modo { text-transform: none; letter-spacing: 0; font: 500 13px/1.5 var(--font)
 .escena { position: relative; flex: none; height: clamp(440px, calc(100vh - 300px), 860px); height: clamp(440px, calc(100svh - 300px), 860px); overflow: hidden; background: #1b1d3a; }
 #visor3d { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 30%, #3a3374, #151b44 70%); }
 #visor3d canvas { display: block; width: 100% !important; height: 100% !important; }
+/* pantalla completa de la escena: con la API Fullscreen (.escena:fullscreen) o fijada a la ventana (.ampliada) */
+.btn-pantalla { position: absolute; top: 14px; right: 14px; z-index: 3; background: var(--vidrio); border-color: var(--vidrio-borde); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.escena:fullscreen, .escena.ampliada { height: 100vh; height: 100dvh; width: 100vw; }
+.escena.ampliada { position: fixed; inset: 0; z-index: 1000; }
+html.escena-ampliada { overflow: hidden; }
+.escena:fullscreen .hud-cinta, .escena.ampliada .hud-cinta { top: 72px; bottom: 150px; }
+.escena:fullscreen .hud-objetivo, .escena.ampliada .hud-objetivo { bottom: 100px; }
+.escena:fullscreen .hud-pasos, .escena.ampliada .hud-pasos { bottom: 100px; }
+.barra-fs { display: none; position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 3; align-items: center; gap: 10px; max-width: calc(100% - 28px); padding: 8px 14px; border-radius: 999px; color: var(--ink); background: var(--vidrio); border: 1px solid var(--vidrio-borde); backdrop-filter: blur(12px) saturate(130%); -webkit-backdrop-filter: blur(12px) saturate(130%); box-shadow: 0 10px 28px rgba(0, 0, 0, .3); }
+.escena:fullscreen .barra-fs, .escena.ampliada .barra-fs { display: flex; }
+.barra-fs .reloj { min-width: 84px; font-size: 12px; }
+.fs-viento { display: flex; align-items: center; gap: 8px; padding-left: 12px; border-left: 1px solid var(--vidrio-borde); font: 500 10.5px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: rgba(234, 242, 245, .72); white-space: nowrap; }
+.fs-viento input { width: 110px; accent-color: var(--accent); }
+.fs-viento output { min-width: 62px; font: 600 12px var(--mono); color: var(--ink); text-transform: none; letter-spacing: 0; }
+.fs-pista { font: 10.5px var(--mono); color: rgba(234, 242, 245, .5); white-space: nowrap; }
 /* instrumentos superpuestos: no capturan el puntero, así la cámara se sigue girando con arrastre */
 .hud { position: absolute; pointer-events: none; color: var(--ink); background: var(--vidrio); border: 1px solid var(--vidrio-borde); border-radius: 12px; backdrop-filter: blur(10px) saturate(130%); -webkit-backdrop-filter: blur(10px) saturate(130%); box-shadow: 0 10px 28px rgba(0, 0, 0, .22); }
 .hud-vuelo { top: 14px; left: 14px; display: grid; gap: 8px; min-width: 196px; padding: 11px 14px 12px; }
@@ -372,6 +387,13 @@ p.modo { text-transform: none; letter-spacing: 0; font: 500 13px/1.5 var(--font)
   .mision { grid-template-columns: 1fr; grid-template-areas: "id" "vuelo" "datos" "boton" "pie"; padding: 14px; }
   .mision > .btn-consola { justify-self: start; }
   .escena { height: clamp(360px, 62vh, 560px); height: clamp(360px, 62svh, 560px); }
+  .escena:fullscreen, .escena.ampliada { height: 100vh; height: 100dvh; }
+  .barra-fs { gap: 6px; padding: 6px 10px; flex-wrap: wrap; justify-content: center; border-radius: 18px; }
+  .barra-fs .reloj { display: none; } .fs-pista { display: none; } .fs-viento { padding-left: 0; border: 0; } .fs-viento input { width: 84px; }
+  .btn-pantalla { top: 10px; right: 10px; }
+  .escena:fullscreen .hud-objetivo, .escena.ampliada .hud-objetivo { top: 58px; bottom: auto; }
+  .escena:fullscreen .hud-pasos, .escena.ampliada .hud-pasos { bottom: 124px; }
+  .escena:fullscreen .hud-fase, .escena.ampliada .hud-fase { bottom: 176px; }
   .mision-datos { gap: 8px 20px; }
   .hud-vuelo { min-width: 0; gap: 5px; padding: 8px 10px; } .hud-v { font-size: 14px; } .hud-v.grande { font-size: 21px; }
   .hud-par { gap: 10px; }
