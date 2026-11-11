@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ficha del ambiente 0.5 (nivel 3, pasarela con viento) · Alpha Centauri</title><style>
+:root { --ink: #1d2126; --muted: #5d6572; --line: #d9d7cf; --accent: #1f6f5c; --soft: #eef3f1; }
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--ink); background: #fff; font: 11pt/1.5 "Source Sans 3", "Segoe UI", system-ui, sans-serif; }
+main { max-width: 86ch; margin: 0 auto; padding: 28px 32px 48px; }
+.portada { border-bottom: 2px solid var(--accent); margin-bottom: 22px; padding-bottom: 10px; }
+.portada .proyecto { font: 600 10pt/1.2 ui-monospace, Menlo, monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.portada h1 { margin: 6px 0 4px; font-size: 22pt; line-height: 1.15; }
+.portada .meta { color: var(--muted); font-size: 9.5pt; }
+h1, h2, h3 { line-height: 1.2; page-break-after: avoid; }
+h1 { font-size: 18pt; margin: 26px 0 10px; }
+h2 { font-size: 14pt; margin: 22px 0 8px; border-bottom: 1px solid var(--line); padding-bottom: 3px; }
+h3 { font-size: 12pt; margin: 16px 0 6px; }
+p, li { orphans: 3; widows: 3; }
+a { color: var(--accent); text-decoration: none; word-break: break-word; }
+code { font: 9.5pt ui-monospace, Menlo, Consolas, monospace; background: var(--soft); padding: 1px 4px; border-radius: 4px; }
+pre { background: var(--soft); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; overflow-x: auto; font-size: 9pt; line-height: 1.4; page-break-inside: avoid; }
+pre code { background: none; padding: 0; font-size: inherit; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0 16px; font-size: 9.5pt; page-break-inside: auto; }
+tr { page-break-inside: avoid; }
+th, td { border: 1px solid var(--line); padding: 5px 7px; vertical-align: top; text-align: left; }
+th { background: var(--soft); font-weight: 600; }
+img, svg { max-width: 100%; height: auto; }
+blockquote { margin: 10px 0; padding: 4px 14px; border-left: 3px solid var(--accent); color: var(--muted); }
+hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
+@page { size: A4; margin: 16mm 14mm 18mm; }
+@media print { main { padding: 0; max-width: none; } a { color: inherit; } }
+</style></head>
+<body><main>
+<header class="portada"><div class="proyecto">Alpha Centauri · Rocket Landing · proyecto final de MLOps</div>
+
+<div class="meta">Generado el 2026-11-11 desde <code>docs/ambiente-v0.5.md</code> · etiqueta <code>v1.1.0</code> · fuente de verdad: el Markdown del repositorio</div></header>
+<h1 id="ambiente-v05-nivel-3-v1-pasarela-con-viento-fuerte">Ambiente v0.5 · nivel 3 (v1): pasarela con viento fuerte</h1>
+<p><strong>Equipo Alpha Centauri · ficha 02 Rocket Landing · 6 de noviembre de 2026</strong></p>
+<p>El nivel 3 no añade una decisión nueva: <strong>cambia las condiciones de operación</strong> del nivel 2 con pasarela (<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/ambiente-v0.4.md">ambiente-v0.4.md</a>), igual que el ambiente 0.3 lo hacía con las torres (<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/ambiente-v0.3.md">ambiente-v0.3.md</a>, retirado). Entorno Gymnasium <code>RocketLanding3D-N3-v1</code> (<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/rocket_env/pasarela.py"><code>rocket_env/pasarela.py</code></a>), que hereda la pasarela, los pilares, la colisión, el potencial y todas las reglas de v0.4.</p>
+<h2 id="que-cambia">Qué cambia</h2>
+<table>
+<thead>
+<tr>
+<th>Constante</th>
+<th>Nivel 2 v1 (0.4)</th>
+<th>Nivel 3 v1 (0.5)</th>
+<th>Efecto</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>viento a 10 m (sorteo por época)</td>
+<td>0–10 m/s</td>
+<td><strong>0–15 m/s</strong></td>
+<td>la condición "viento-15" de la suite deja de ser una perturbación y entra en la operación normal</td>
+</tr>
+<tr>
+<td>ráfagas (desviación del proceso de Ornstein-Uhlenbeck)</td>
+<td>1,5 m/s</td>
+<td><strong>3 m/s</strong></td>
+<td>la deriva cambia más deprisa; el traslado de 30 m bajo la pasarela es la fase sensible</td>
+</tr>
+</tbody>
+</table>
+<h2 id="observaciones-y-acciones">Observaciones y acciones</h2>
+<p>Las de v0.4 (20 valores y la misma acción): <strong>misma familia de modelos</strong>. Un modelo del nivel 2 v1 juega aquí tal cual, sin adaptador, y eso mide la degradación al cambiar las condiciones (incidente). Un modelo del nivel 1 sigue necesitando <code>AdaptadorN1</code>.</p>
+<h2 id="recompensa-exito-y-fracaso">Recompensa, éxito y fracaso</h2>
+<p>Los de v0.4 sin cambios.</p>
+<h2 id="incidente-controlado-e-intervencion">Incidente controlado e intervención</h2>
+<p>Como en el ambiente 0.3: <code>python incidente.py --run &lt;recomendado de N2 v1&gt; --ambiente RocketLanding3D-N3-v1</code> mide el antes (su nivel) y el después (este), normal y con viento de 15 m/s; la intervención es reentrenar en este ambiente partiendo de sus pesos (<code>--desde</code>) por el pipeline, que decide frente a ese incidente (<code>--baseline</code>). Resultados en <code>configs/</code>, <code>resultados/incidentes/</code> y la vista <code>#/incidente</code> de la web; se resumen aquí al cerrar el experimento 6 (<code>experimento-6-pasarela-viento</code>).</p>
+<h3 id="degradacion-medida-8-de-noviembre">Degradación medida (8 de noviembre)</h3>
+<p>Los tres modelos de N2 v1 jugando en N3 v1 sin reentrenar, con la suite v1 (200 épocas por condición):</p>
+<table>
+<thead>
+<tr>
+<th>Modelo de N2 v1</th>
+<th>En N2 v1</th>
+<th>En N3 v1, normal</th>
+<th>En N3 v1, viento fijo de 15 m/s</th>
+<th>Colisiones en N3 v1</th>
+<th>Fallo principal</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ppo-pasarela-transfer-1m5-v0.4-s0</code></td>
+<td>91,5 %</td>
+<td><strong>64,5 %</strong> (−27)</td>
+<td>27,0 %</td>
+<td>39</td>
+<td>colisión con la pasarela; 23 sin pasos</td>
+</tr>
+<tr>
+<td><code>ppo-pasarela-transfer-1m5-v0.4-s1</code></td>
+<td>97,5 %</td>
+<td>85,0 % (−12,5)</td>
+<td>45,0 %</td>
+<td>19</td>
+<td>colisión</td>
+</tr>
+<tr>
+<td><code>ppo-pasarela-transfer-1m5-v0.4-s2</code>, recomendado de N2</td>
+<td>100 %</td>
+<td>93,5 % (−6,5)</td>
+<td>61,0 %</td>
+<td>7</td>
+<td>colisión y choque</td>
+</tr>
+</tbody>
+</table>
+<p>El viento empuja al cohete fuera de la abertura en la fase de entrada y lo desvía en el traslado de 30 m por debajo. La degradación depende mucho de la semilla: s2 llega a N3 casi intacta.</p>
+<h3 id="intervencion-reentrenar-en-n3-v1">Intervención: reentrenar en N3 v1</h3>
+<p>Transferencia de pesos y normalización desde un modelo de N2 v1 y 1,5 M de pasos en N3 v1, entrenado y decidido por el pipeline. Mismo criterio que en todo el proyecto: +2 puntos, no perder más de 5 con viento y no tener más colisiones.</p>
+<table>
+<thead>
+<tr>
+<th>Ejecución</th>
+<th>Parte de</th>
+<th>Aterrizajes</th>
+<th>Colisiones</th>
+<th>Con viento de 15 m/s</th>
+<th>Decisión del pipeline</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ppo-pasarela-viento-transfer-1m5-v0.5-s0</code></td>
+<td>N2-s0</td>
+<td>94,5 %</td>
+<td>6</td>
+<td>65,5 %</td>
+<td>seleccionada frente a N2-s0 en N3 (64,5 %): catálogo v12</td>
+</tr>
+<tr>
+<td><code>ppo-pasarela-viento-transfer-1m5-v0.5-s1</code></td>
+<td>N2-s0, semilla 1</td>
+<td>94,0 %</td>
+<td>8</td>
+<td>66,0 %</td>
+<td>rechazada: no mejora a s0</td>
+</tr>
+<tr>
+<td><code>ppo-pasarela-viento-transfer-1m5-v0.5-s2</code></td>
+<td>N2-s0, semilla 2</td>
+<td>92,5 %</td>
+<td>10</td>
+<td>74,5 %</td>
+<td>rechazada: no mejora a s0</td>
+</tr>
+<tr>
+<td><strong><code>ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0</code></strong></td>
+<td>N2-s2</td>
+<td><strong>97,5 %</strong></td>
+<td><strong>3</strong></td>
+<td><strong>85,5 %</strong></td>
+<td><strong>seleccionada: recomendado de N3</strong> (catálogo v15)</td>
+</tr>
+</tbody>
+</table>
+<p>Lectura:
+- <strong>Tres semillas de la receta</strong> (desde N2-s0): 93,7 ± 1,0 % de aterrizajes, 68,7 ± 5,1 % con viento y 8 ± 2 colisiones. Es mucho más estable entre semillas que el entrenamiento en N2 (96,3 ± 4,4 %): reentrenar desde un modelo que ya sabe usar la abertura reduce la variabilidad.
+- <strong>Por qué hubo una cuarta ejecución.</strong> Mientras corrían las semillas, el pipeline promovió N2-s2 (100 %) como recomendado de N2. Jugando en N3 sin reentrenar, N2-s2 da 93,5 %, a solo 1 punto del recomendado de N3 de entonces (94,5 %): con ese punto de partida, la intervención ya no se justificaba con el criterio de 2 puntos. Se repitió la receta cambiando solo el modelo de partida (N2-s2), igual que se hizo con las torres (ambiente 0.3).
+- <strong>Resultado:</strong> 97,5 % de aterrizajes, 3 colisiones y 85,5 % con viento fijo de 15 m/s, frente a 93,5 %, 7 y 61 % del mismo modelo sin reentrenar. La intervención recupera la degradación y mejora la robustez al viento máximo en 24 puntos.
+- <strong>Trazabilidad:</strong> esta ejecución está marcada con cambios sin commit (<code>*</code>). El único archivo modificado al entrenar era <code>docs/ambiente-v0.4.md</code> (documentación); el código y las configuraciones eran los del commit <code>8ab04da</code>, así que el modelo se reproduce desde ese commit.
+- Pendiente: las semillas 1 y 2 de esta última configuración (desde N2-s2), si el equipo decide que es la finalista del contraste principal de N3.</p>
+<h2 id="como-reproducir">Cómo reproducir</h2>
+<pre><code class="language-bash">python -m pytest tests/test_ambiente_pasarela.py
+python incidente.py --run &lt;run_id de N2 v1&gt; --ambiente RocketLanding3D-N3-v1
+.venv-prefect/bin/python pipelines/entrenar_publicar.py --ambiente RocketLanding3D-N3-v1 --seed 0 --run-id &lt;id&gt; --desde &lt;run_id de N2 v1&gt; \
+    --total-timesteps 1500000 --baseline &lt;run_id de N2 v1&gt; --push
+</code></pre>
+</main></body></html>

@@ -7,6 +7,26 @@ hizo, así siempre se sabe con qué reglas se entrenó un modelo.
 Regla del equipo: un cambio en las reglas o en las constantes del ambiente sube su versión (0.1 → 0.2)
 y se anota aquí. Los modelos entrenados con versiones distintas del ambiente no se comparan entre sí.
 
+## Entregas del proyecto (etiquetas de git)
+
+### v1.1.0 · 2026-11-11
+- **Viento en vivo** (`#/vivo`): la API simula paso a paso con el modelo congelado (`POST /sesiones`, `POST /sesiones/{id}/paso`,
+  `DELETE /sesiones/{id}`; sesiones en memoria, 20 como máximo, 15 minutos de vida) y la consola de misión deja cambiar la
+  intensidad y la dirección del viento con una barra mientras el cohete vuela; el cambio entra en el siguiente paso del agente.
+  No es un entrenamiento nuevo: es un modo de servicio sobre los modelos ya versionados.
+- **Pantalla completa** de la escena 3D en el simulador y en la misión en vivo (botón, tecla F, barra flotante con reproducir,
+  pasos y, en vivo, los deslizadores del viento; Esc sale). Donde no existe la API Fullscreen se fija la escena a la ventana.
+- Paquete de entregables: [entregables.md](entregables.md) (rúbrica → evidencia) y `python entregables.py`, que genera los PDF de
+  `entregables/` a partir de los Markdown del repositorio. 113 pruebas. Las reglas de los ambientes no cambian (0.1.1, 0.4, 0.5).
+
+### v1.0.0 · 2026-11-10
+- Cierre del proyecto: tres niveles (N1 0.1.1, N2 v1 0.4, N3 v1 0.5), 23 ejecuciones en 6 experimentos, pipeline Prefect de
+  8 etapas con 21 evidencias, API y web públicas, catálogo v15, monitoreo, incidente, intervención, rollback demostrado,
+  informe final, guion de la defensa y test reservado.
+
+### v0.2.0 · 2026-11-03
+- Hito 1: ambiente 0.1 con ficha, experimentos 1 (Q-learning) y 2 (PPO), MLflow, API, web y despliegue en contenedor.
+
 ## Ambiente RocketLanding3D-N3-v0 (nivel 3)
 
 ### 0.3 · 2026-11-05

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Índice de entregables · Alpha Centauri</title><style>
+:root { --ink: #1d2126; --muted: #5d6572; --line: #d9d7cf; --accent: #1f6f5c; --soft: #eef3f1; }
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--ink); background: #fff; font: 11pt/1.5 "Source Sans 3", "Segoe UI", system-ui, sans-serif; }
+main { max-width: 86ch; margin: 0 auto; padding: 28px 32px 48px; }
+.portada { border-bottom: 2px solid var(--accent); margin-bottom: 22px; padding-bottom: 10px; }
+.portada .proyecto { font: 600 10pt/1.2 ui-monospace, Menlo, monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.portada h1 { margin: 6px 0 4px; font-size: 22pt; line-height: 1.15; }
+.portada .meta { color: var(--muted); font-size: 9.5pt; }
+h1, h2, h3 { line-height: 1.2; page-break-after: avoid; }
+h1 { font-size: 18pt; margin: 26px 0 10px; }
+h2 { font-size: 14pt; margin: 22px 0 8px; border-bottom: 1px solid var(--line); padding-bottom: 3px; }
+h3 { font-size: 12pt; margin: 16px 0 6px; }
+p, li { orphans: 3; widows: 3; }
+a { color: var(--accent); text-decoration: none; word-break: break-word; }
+code { font: 9.5pt ui-monospace, Menlo, Consolas, monospace; background: var(--soft); padding: 1px 4px; border-radius: 4px; }
+pre { background: var(--soft); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; overflow-x: auto; font-size: 9pt; line-height: 1.4; page-break-inside: avoid; }
+pre code { background: none; padding: 0; font-size: inherit; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0 16px; font-size: 9.5pt; page-break-inside: auto; }
+tr { page-break-inside: avoid; }
+th, td { border: 1px solid var(--line); padding: 5px 7px; vertical-align: top; text-align: left; }
+th { background: var(--soft); font-weight: 600; }
+img, svg { max-width: 100%; height: auto; }
+blockquote { margin: 10px 0; padding: 4px 14px; border-left: 3px solid var(--accent); color: var(--muted); }
+hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
+@page { size: A4; margin: 16mm 14mm 18mm; }
+@media print { main { padding: 0; max-width: none; } a { color: inherit; } }
+</style></head>
+<body><main>
+<header class="portada"><div class="proyecto">Alpha Centauri · Rocket Landing · proyecto final de MLOps</div>
+
+<div class="meta">Generado el 2026-11-11 desde <code>docs/entregables.md</code> · etiqueta <code>v1.1.0</code> · fuente de verdad: el Markdown del repositorio</div></header>
+<h1 id="entregables-alpha-centauri-rocket-landing">Entregables · Alpha Centauri · Rocket Landing</h1>
+<p>Proyecto final del curso de MLOps · noviembre de 2026 · equipo Alpha Centauri (mjcastano29-tech, Isaías Céspedes, jhrojas02).</p>
+<p>Este documento es el índice de la entrega: qué pide cada criterio de la rúbrica, dónde está la evidencia y cómo se comprueba. Todo lo que se cita vive en el repositorio en el commit etiquetado como <code>v1.1.0</code>; los PDF de la carpeta <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/entregables"><code>entregables/</code></a> son copias de lectura generadas con <code>python entregables.py</code> a partir de estos mismos archivos.</p>
+<h2 id="donde-esta-todo">Dónde está todo</h2>
+<table>
+<thead>
+<tr>
+<th>Qué</th>
+<th>Dónde</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Repositorio (código, fichas, modelos, datos, MLflow)</td>
+<td>https://github.com/mjcastano29-tech/Alpha-Centauri · etiqueta <code>v1.1.0</code></td>
+</tr>
+<tr>
+<td>Web pública (simulador, experimentos, catálogo, incidente, monitoreo, viento en vivo, landing)</td>
+<td>https://alpha-centauri-five.vercel.app</td>
+</tr>
+<tr>
+<td>API pública</td>
+<td>https://alpha-centauri-api.onrender.com (<code>/version</code>, <code>/docs</code>)</td>
+</tr>
+<tr>
+<td>Registro de modelos MLflow</td>
+<td>https://alpha-centauri-mlflow.onrender.com</td>
+</tr>
+<tr>
+<td>Informe final</td>
+<td><a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/informe-final.md">docs/informe-final.md</a> · PDF <code>entregables/01-informe-final.pdf</code></td>
+</tr>
+<tr>
+<td>Guion de la defensa (15 min)</td>
+<td><a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/guion-defensa.md">docs/guion-defensa.md</a> · PDF <code>entregables/02-guion-defensa.pdf</code></td>
+</tr>
+<tr>
+<td>Experimentos, variables y dónde se guarda cada modelo</td>
+<td><a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/EXPERIMENTOS.md">EXPERIMENTOS.md</a> (generado por <code>python experimentos_md.py</code>)</td>
+</tr>
+<tr>
+<td>Fichas de los ambientes vigentes</td>
+<td><a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/ambiente-v0.1.md">ambiente-v0.1.md</a> (N1), <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/ambiente-v0.4.md">ambiente-v0.4.md</a> (N2 pasarela), <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/ambiente-v0.5.md">ambiente-v0.5.md</a> (N3 pasarela con viento); retirados: <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/ambiente-v0.2.md">v0.2</a>, <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/ambiente-v0.3.md">v0.3</a></td>
+</tr>
+<tr>
+<td>Pipeline</td>
+<td><a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/pipelines/README.md">pipelines/README.md</a>, código <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/pipelines/entrenar_publicar.py">pipelines/entrenar_publicar.py</a>, evidencia JSON en <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/pipelines/ejecuciones">pipelines/ejecuciones/</a>, captura <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/evidencia-prefect-flow-run.png">evidencia-prefect-flow-run.png</a></td>
+</tr>
+<tr>
+<td>Historial de versiones del ambiente, del agente y de la web</td>
+<td><a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/CHANGELOG.md">CHANGELOG.md</a></td>
+</tr>
+<tr>
+<td>Diagnóstico frente al enunciado, hito a hito</td>
+<td><a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/diagnostico-proyecto-final.md">diagnostico-proyecto-final.md</a></td>
+</tr>
+</tbody>
+</table>
+<p>Los servicios públicos están en el plan gratuito de Render: la primera petición tras 15 minutos sin uso tarda cerca de un minuto. Antes de una demostración, abrir <code>#/monitoreo</code> y pulsar <strong>Medir latencia ahora</strong>.</p>
+<h2 id="rubrica-evidencia">Rúbrica → evidencia</h2>
+<h3 id="1-versionado-30">1. Versionado (30 %)</h3>
+<table>
+<thead>
+<tr>
+<th>Qué se versiona</th>
+<th>Evidencia</th>
+<th>Cómo comprobarlo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ambiente, con contrato y versión semántica</td>
+<td><code>RocketLanding3DEnv.VERSION</code> y las clases de <code>rocket_env/</code>; <code>compatible()</code> compara mayor.menor; fichas <code>docs/ambiente-v0.*.md</code>; <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/CHANGELOG.md">CHANGELOG.md</a></td>
+<td><code>python check_env.py</code>, <code>python -m pytest tests/test_ambiente.py</code></td>
+</tr>
+<tr>
+<td>Modelos (pesos, normalizador)</td>
+<td><code>resultados/runs/&lt;run_id&gt;/modelo.zip</code> + <code>modelo_normalizador.pkl</code>, huella SHA-256 en el manifest; versión registrada en MLflow (<code>rocket-landing-ppo</code>, <code>rocket-landing-qlearning</code>)</td>
+<td><code>python cli.py verificar</code> recalcula las huellas de las 23 ejecuciones</td>
+</tr>
+<tr>
+<td>Datos de entrenamiento y evaluación</td>
+<td><code>episodios.csv</code>, <code>entrenamiento.json</code>, <code>vuelos.json.gz</code>, <code>evaluacion.json</code> por ejecución; suites en <code>suites/</code></td>
+<td>huellas en el manifest; <code>python cli.py evaluar --run &lt;id&gt;</code> reproduce la evaluación</td>
+</tr>
+<tr>
+<td>Configuración e hipótesis</td>
+<td><code>configs/&lt;run_id&gt;.json</code> (hipótesis, baseline, presupuesto, decisión con fecha); <code>manifests/&lt;run_id&gt;.json</code> con el formato de la guía (sección 11: <code>git_commit</code>, <code>config_sha256</code>, <code>model_uri</code>, <code>model_sha256</code>, <code>evaluation_suite_id</code>, <code>seed</code>, <code>parent_run_id</code>)</td>
+<td><code>python manifiestos.py</code>; <code>GET /ejecuciones/&lt;id&gt;/manifiesto</code></td>
+</tr>
+<tr>
+<td>Registro de experimentos</td>
+<td><code>mlflow.db</code> y <code>mlruns/</code> dentro del repositorio; UI pública en Render</td>
+<td>abrir una run desde la ficha del modelo en la web</td>
+</tr>
+<tr>
+<td>Catálogo de lo que se sirve</td>
+<td><code>catalogo.json</code> v15 con recomendado y anterior por nivel e historial de 15 cambios</td>
+<td><code>python catalogo.py ver</code>; <code>GET /version</code> dice qué commit y catálogo sirve la API</td>
+</tr>
+<tr>
+<td>Entregas etiquetadas</td>
+<td><code>v0.2.0</code> (hito 1), <code>v1.0.0</code> (cierre del 10 de noviembre), <code>v1.1.0</code> (viento en vivo, pantalla completa, paquete de entregables)</td>
+<td><code>git tag -l</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-diseno-experimental-25">2. Diseño experimental (25 %)</h3>
+<table>
+<thead>
+<tr>
+<th>Qué</th>
+<th>Evidencia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hipótesis, presupuesto y decisión por configuración</td>
+<td><code>configs/*.json</code>; resumen en <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/EXPERIMENTOS.md">EXPERIMENTOS.md</a>; cadena de hipótesis en la sección 3 del informe</td>
+</tr>
+<tr>
+<td>6 experimentos, 23 ejecuciones, rechazos conservados</td>
+<td><code>resultados/registro.json</code>; <code>experimentos.py</code>; vista <code>#/experimentos</code> de la web, con la progresión de complejidad y las variables de cada experimento</td>
+</tr>
+<tr>
+<td>Tres semillas de cada finalista y medias con desviación</td>
+<td>informe, sección 2 (97,8 ± 1,0 / 96,3 ± 4,4 / 93,7 ± 1,0 %)</td>
+</tr>
+<tr>
+<td>Suite de evaluación fija y test reservado de una sola vez</td>
+<td><code>suites/</code>; <code>suite_reservada.py</code> con la semilla fuera del repositorio; resultados en <code>resultados/suite-reservada/</code> (97,5 / 99,0 / 97,0 %)</td>
+</tr>
+<tr>
+<td>Incidente controlado e intervención</td>
+<td><code>incidente.py</code>, 9 medidas en <code>resultados/incidentes/</code>; vista <code>#/incidente</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="3-pipeline-despliegue-y-rollback-20">3. Pipeline, despliegue y rollback (20 %)</h3>
+<table>
+<thead>
+<tr>
+<th>Qué</th>
+<th>Evidencia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pipeline orquestado de 8 etapas con criterio de aceptación fijado antes de entrenar</td>
+<td><a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/pipelines/README.md">pipelines/README.md</a>; 21 evidencias JSON en <code>pipelines/ejecuciones/</code>; captura de Prefect</td>
+</tr>
+<tr>
+<td>Despliegue continuo</td>
+<td>push a <code>main</code> → Render (API y MLflow, <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/render.yaml">render.yaml</a>) y Vercel (web); <code>GET /version</code> confirma el commit</td>
+</tr>
+<tr>
+<td>Rollback demostrado en producción</td>
+<td><code>python catalogo.py restaurar --nivel N3</code>; evidencia <code>pipelines/ejecuciones/rollback-n3-*.json</code> con <code>comprobar_api.py</code>; sección 5 del informe</td>
+</tr>
+<tr>
+<td>Monitoreo</td>
+<td><code>GET /monitoreo</code> y vista <code>#/monitoreo</code>: servicio, modelo servido por nivel, decisiones del pipeline, latencia, alertas</td>
+</tr>
+<tr>
+<td>Servicio del modelo</td>
+<td><code>POST /evaluar</code> (evaluación con el modelo congelado), <code>POST /sesiones</code> (misión paso a paso con viento manual)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="4-contrato-del-ambiente-10">4. Contrato del ambiente (10 %)</h3>
+<table>
+<thead>
+<tr>
+<th>Qué</th>
+<th>Evidencia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ficha del ambiente (observación, acción, recompensa, terminación, versión, mapa)</td>
+<td><a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/ambiente-v0.1.md">ambiente-v0.1.md</a>, <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/ambiente-v0.4.md">ambiente-v0.4.md</a>, <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/ambiente-v0.5.md">ambiente-v0.5.md</a>; mapas SVG en <code>docs/</code></td>
+</tr>
+<tr>
+<td><code>terminated</code> frente a <code>truncated</code></td>
+<td>éxito y fallos terminan; agotar 50 pasos trunca; pruebas en <code>tests/test_ambiente.py</code></td>
+</tr>
+<tr>
+<td>Pruebas de contrato</td>
+<td><code>python -m pytest</code> (113 pruebas: ambiente, modelos, API)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="5-defensa-15">5. Defensa (15 %)</h3>
+<table>
+<thead>
+<tr>
+<th>Qué</th>
+<th>Evidencia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Guion de 15 minutos sobre la web pública, con reparto y preguntas probables</td>
+<td><a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/guion-defensa.md">guion-defensa.md</a></td>
+</tr>
+<tr>
+<td>Demostraciones en vivo</td>
+<td>replay 3D por nivel (<code>#/</code>), experimentos (<code>#/experimentos</code>), evaluación en vivo desde la ficha, viento en vivo (<code>#/vivo</code>), incidente, monitoreo y rollback</td>
+</tr>
+<tr>
+<td>Landing de presentación</td>
+<td>https://alpha-centauri-five.vercel.app/landing/</td>
+</tr>
+</tbody>
+</table>
+<h2 id="como-reproducir-desde-cero">Cómo reproducir desde cero</h2>
+<pre><code class="language-bash">git clone https://github.com/mjcastano29-tech/Alpha-Centauri &amp;&amp; cd Alpha-Centauri &amp;&amp; git checkout v1.1.0
+python -m venv .venv &amp;&amp; .venv/bin/pip install -r requirements.txt
+python -m pytest                       # 113 pruebas
+python cli.py verificar                # huellas de las 23 ejecuciones
+python cli.py evaluar --run ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0 --viento 15
+uvicorn api.main:app --port 8000       # API local; web: cd web &amp;&amp; npm ci &amp;&amp; npm run dev
+python entregables.py                  # regenera los PDF de entregables/
+</code></pre>
+<h2 id="lo-que-queda-en-manos-del-equipo">Lo que queda en manos del equipo</h2>
+<ul>
+<li>Escribir los nombres completos de los tres integrantes en la cabecera del informe (hoy figuran los usuarios de GitHub).</li>
+<li>Decidir el nombre con el que se presenta la web: la aplicación dice "PROJECT ELYNDRA · Alfa Centauri" y la landing "Alpha Centauri".</li>
+<li>Guardar la semilla del test reservado fuera del repositorio (archivo <code>.suite_reservada</code>) en la máquina que vaya a repetirlo.</li>
+<li>Ensayar el guion con la web pública despierta.</li>
+</ul>
+</main></body></html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pipeline de entrenamiento y publicación · Alpha Centauri</title><style>
+:root { --ink: #1d2126; --muted: #5d6572; --line: #d9d7cf; --accent: #1f6f5c; --soft: #eef3f1; }
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--ink); background: #fff; font: 11pt/1.5 "Source Sans 3", "Segoe UI", system-ui, sans-serif; }
+main { max-width: 86ch; margin: 0 auto; padding: 28px 32px 48px; }
+.portada { border-bottom: 2px solid var(--accent); margin-bottom: 22px; padding-bottom: 10px; }
+.portada .proyecto { font: 600 10pt/1.2 ui-monospace, Menlo, monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.portada h1 { margin: 6px 0 4px; font-size: 22pt; line-height: 1.15; }
+.portada .meta { color: var(--muted); font-size: 9.5pt; }
+h1, h2, h3 { line-height: 1.2; page-break-after: avoid; }
+h1 { font-size: 18pt; margin: 26px 0 10px; }
+h2 { font-size: 14pt; margin: 22px 0 8px; border-bottom: 1px solid var(--line); padding-bottom: 3px; }
+h3 { font-size: 12pt; margin: 16px 0 6px; }
+p, li { orphans: 3; widows: 3; }
+a { color: var(--accent); text-decoration: none; word-break: break-word; }
+code { font: 9.5pt ui-monospace, Menlo, Consolas, monospace; background: var(--soft); padding: 1px 4px; border-radius: 4px; }
+pre { background: var(--soft); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; overflow-x: auto; font-size: 9pt; line-height: 1.4; page-break-inside: avoid; }
+pre code { background: none; padding: 0; font-size: inherit; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0 16px; font-size: 9.5pt; page-break-inside: auto; }
+tr { page-break-inside: avoid; }
+th, td { border: 1px solid var(--line); padding: 5px 7px; vertical-align: top; text-align: left; }
+th { background: var(--soft); font-weight: 600; }
+img, svg { max-width: 100%; height: auto; }
+blockquote { margin: 10px 0; padding: 4px 14px; border-left: 3px solid var(--accent); color: var(--muted); }
+hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
+@page { size: A4; margin: 16mm 14mm 18mm; }
+@media print { main { padding: 0; max-width: none; } a { color: inherit; } }
+</style></head>
+<body><main>
+<header class="portada"><div class="proyecto">Alpha Centauri · Rocket Landing · proyecto final de MLOps</div>
+
+<div class="meta">Generado el 2026-11-11 desde <code>pipelines/README.md</code> · etiqueta <code>v1.1.0</code> · fuente de verdad: el Markdown del repositorio</div></header>
+<h1 id="pipeline-orquestado-prefect">Pipeline orquestado (Prefect)</h1>
+<p><code>entrenar_publicar.py</code> lleva una configuración nueva desde el entrenamiento hasta el catálogo servido, en ocho etapas
+con criterio de aceptación. Cada etapa es un comando del proyecto (los mismos que se usan a mano), ejecutado por Prefect,
+que registra el estado, la duración y los logs de cada una.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Etapa</th>
+<th>Qué hace</th>
+<th>Falla si…</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>validar</td>
+<td><code>check_env</code> del ambiente del nivel, versión y nivel, suite v1 presente, estado de git</td>
+<td>el ambiente no cumple el contrato de Gymnasium o la suite no es la esperada</td>
+</tr>
+<tr>
+<td>2</td>
+<td>probar</td>
+<td><code>pytest tests/test_ambiente.py tests/test_ambiente_n2.py</code></td>
+<td>alguna prueba del contrato falla</td>
+</tr>
+<tr>
+<td>3</td>
+<td>entrenar</td>
+<td><code>python cli.py entrenar-ppo --ambiente … --seed … --run-id …</code> (<code>--desde</code> para transferencia); con <code>--run-existente</code> se salta</td>
+<td>el entrenamiento termina con error</td>
+</tr>
+<tr>
+<td>4</td>
+<td>evaluar</td>
+<td><code>python panel.py</code>: suite v1, 200 épocas normales y 200 con viento de 15 m/s → <code>evaluacion.json</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>5</td>
+<td>registrar</td>
+<td><code>configs/&lt;id&gt;.json</code> (hipótesis, cambio, baseline, presupuesto), <code>manifests/&lt;id&gt;.json</code> (sección 11), etiquetas en MLflow, <code>cli.py verificar</code> (SHA-256)</td>
+<td>las huellas no coinciden</td>
+</tr>
+<tr>
+<td>6</td>
+<td>decidir</td>
+<td>compara con el recomendado actual del nivel: acepta si gana ≥ 2 puntos de tasa, no pierde más de 5 con viento y (nivel 2) no choca más; escribe estado y decisión en <code>configs/</code> y MLflow</td>
+<td>— (rechazar no es fallar)</td>
+</tr>
+<tr>
+<td>7</td>
+<td>publicar</td>
+<td>si se aceptó, <code>catalogo.py recomendar</code>; commit con ejecución, configs, manifests, catálogo, MLflow y evidencia; con <code>--push</code>, push (dispara Render y Vercel)</td>
+<td>git falla</td>
+</tr>
+<tr>
+<td>8</td>
+<td>comprobar</td>
+<td>con push: espera a que <code>GET /version</code> de la API pública sirva el commit, comprueba el recomendado del nivel en <code>/catalogo</code> y hace una evaluación corta; sin push: lo mismo contra la API en local</td>
+<td>la API no sirve el commit en el tiempo dado o sirve otro catálogo → rollback con <code>python catalogo.py restaurar --nivel …</code></td>
+</tr>
+</tbody>
+</table>
+<p>La evidencia de cada ejecución queda en <code>ejecuciones/&lt;run_id&gt;-&lt;fecha&gt;.json</code> (resultado de cada etapa, decisión, commit,
+id del <em>flow run</em> de Prefect) y se versiona en git. La interfaz de Prefect se abre con <code>.venv-prefect/bin/prefect server start</code>
+(http://127.0.0.1:4200; entra por la raíz y navega a <em>Runs</em>, los enlaces profundos devuelven 404) y muestra los <em>flow runs</em> con sus tareas, tiempos y logs.
+Los flujos que se ejecutan sin servidor levantan uno efímero y guardan sus runs en la misma base de datos (<code>~/.prefect</code>), así que aparecen igual.</p>
+<p><img alt="Flow run del pipeline en la interfaz de Prefect" src="../docs/evidencia-prefect-flow-run.png"></p>
+<h2 id="entorno">Entorno</h2>
+<p>Prefect 3.8 no convive con la versión de FastAPI que usa la API (0.162: quitó <code>Body(min_items=)</code>), y su interfaz necesita FastAPI ≥ 0.139 (<code>FastAPI.frontend</code>); la 0.139.1 cumple las dos. Por eso el orquestador tiene su propio entorno:</p>
+<pre><code class="language-bash">python -m venv .venv-prefect &amp;&amp; .venv-prefect/bin/pip install -r requirements-pipeline.txt
+</code></pre>
+<p>Las etapas se ejecutan con el intérprete del proyecto (<code>.venv/bin/python</code>, o la variable <code>ALPHA_PYTHON</code>).</p>
+<h2 id="uso">Uso</h2>
+<pre><code class="language-bash"># ensayo sin tocar git, con una ejecución ya entrenada (comprueba la API en local)
+.venv-prefect/bin/python pipelines/entrenar_publicar.py --run-existente ppo-n2-transfer-1m5-v0.2-s0 --sin-commit
+
+# ejecución real: entrena, decide, publica y comprueba la API pública
+.venv-prefect/bin/python pipelines/entrenar_publicar.py --ambiente RocketLanding3D-v0 --seed 1 --run-id ppo-v2-v0.1-s1 \
+    --baseline ppo-v2-v0.1-s0 --hipotesis &quot;…&quot; --cambio &quot;…&quot; --push
+
+# nivel 2 con transferencia desde el modelo del nivel 1
+.venv-prefect/bin/python pipelines/entrenar_publicar.py --ambiente RocketLanding3D-N2-v0 --seed 1 --run-id ppo-n2-transfer-1m5-v0.2-s1 \
+    --desde ppo-v2-v0.1-s0 --total-timesteps 1500000 --baseline ppo-n2-transfer-1m5-v0.2-s0 --hipotesis &quot;…&quot; --push
+</code></pre>
+<p>Variables: <code>ALPHA_API_URL</code> (API pública, por defecto https://alpha-centauri-api.onrender.com), <code>--espera-api</code> (segundos máximos
+para que el despliegue sirva el commit, 900 por defecto).</p>
+<h2 id="criterio-de-aceptacion">Criterio de aceptación</h2>
+<p>Un candidato sustituye al recomendado de su nivel solo si en la suite v1 gana al menos 2 puntos de tasa de aterrizaje, con
+viento de 15 m/s no pierde más de 5 puntos respecto al recomendado y, en el nivel 2, no tiene más colisiones. Si no lo cumple
+queda <strong>rechazado</strong> (con su evidencia versionada, igual que los aceptados). Si no hay recomendado en el nivel, se acepta.
+Las constantes están al principio de <code>entrenar_publicar.py</code>.</p>
+<h2 id="rollback">Rollback</h2>
+<p>El catálogo guarda el anterior de cada nivel. <code>python catalogo.py restaurar --nivel N1 --motivo "…"</code> + commit + push devuelve
+la versión anterior; la etapa 8 (o <code>GET /version</code>) comprueba qué commit y qué catálogo sirve la API.</p>
+</main></body></html>

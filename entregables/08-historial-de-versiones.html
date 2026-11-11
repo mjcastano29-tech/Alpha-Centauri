@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Historial de versiones · Alpha Centauri</title><style>
+:root { --ink: #1d2126; --muted: #5d6572; --line: #d9d7cf; --accent: #1f6f5c; --soft: #eef3f1; }
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--ink); background: #fff; font: 11pt/1.5 "Source Sans 3", "Segoe UI", system-ui, sans-serif; }
+main { max-width: 86ch; margin: 0 auto; padding: 28px 32px 48px; }
+.portada { border-bottom: 2px solid var(--accent); margin-bottom: 22px; padding-bottom: 10px; }
+.portada .proyecto { font: 600 10pt/1.2 ui-monospace, Menlo, monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.portada h1 { margin: 6px 0 4px; font-size: 22pt; line-height: 1.15; }
+.portada .meta { color: var(--muted); font-size: 9.5pt; }
+h1, h2, h3 { line-height: 1.2; page-break-after: avoid; }
+h1 { font-size: 18pt; margin: 26px 0 10px; }
+h2 { font-size: 14pt; margin: 22px 0 8px; border-bottom: 1px solid var(--line); padding-bottom: 3px; }
+h3 { font-size: 12pt; margin: 16px 0 6px; }
+p, li { orphans: 3; widows: 3; }
+a { color: var(--accent); text-decoration: none; word-break: break-word; }
+code { font: 9.5pt ui-monospace, Menlo, Consolas, monospace; background: var(--soft); padding: 1px 4px; border-radius: 4px; }
+pre { background: var(--soft); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; overflow-x: auto; font-size: 9pt; line-height: 1.4; page-break-inside: avoid; }
+pre code { background: none; padding: 0; font-size: inherit; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0 16px; font-size: 9.5pt; page-break-inside: auto; }
+tr { page-break-inside: avoid; }
+th, td { border: 1px solid var(--line); padding: 5px 7px; vertical-align: top; text-align: left; }
+th { background: var(--soft); font-weight: 600; }
+img, svg { max-width: 100%; height: auto; }
+blockquote { margin: 10px 0; padding: 4px 14px; border-left: 3px solid var(--accent); color: var(--muted); }
+hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
+@page { size: A4; margin: 16mm 14mm 18mm; }
+@media print { main { padding: 0; max-width: none; } a { color: inherit; } }
+</style></head>
+<body><main>
+<header class="portada"><div class="proyecto">Alpha Centauri · Rocket Landing · proyecto final de MLOps</div>
+
+<div class="meta">Generado el 2026-11-11 desde <code>docs/CHANGELOG.md</code> · etiqueta <code>v1.1.0</code> · fuente de verdad: el Markdown del repositorio</div></header>
+<h1 id="historial-de-versiones">Historial de versiones</h1>
+<p>Qué cambia en cada versión del ambiente, del agente y del formato de las ejecuciones. Cada ejecución
+de entrenamiento guarda en su <code>manifest.json</code> la versión del ambiente y el commit de git con el que se
+hizo, así siempre se sabe con qué reglas se entrenó un modelo.</p>
+<p>Regla del equipo: un cambio en las reglas o en las constantes del ambiente sube su versión (0.1 → 0.2)
+y se anota aquí. Los modelos entrenados con versiones distintas del ambiente no se comparan entre sí.</p>
+<h2 id="entregas-del-proyecto-etiquetas-de-git">Entregas del proyecto (etiquetas de git)</h2>
+<h3 id="v110-2026-11-11">v1.1.0 · 2026-11-11</h3>
+<ul>
+<li><strong>Viento en vivo</strong> (<code>#/vivo</code>): la API simula paso a paso con el modelo congelado (<code>POST /sesiones</code>, <code>POST /sesiones/{id}/paso</code>,
+  <code>DELETE /sesiones/{id}</code>; sesiones en memoria, 20 como máximo, 15 minutos de vida) y la consola de misión deja cambiar la
+  intensidad y la dirección del viento con una barra mientras el cohete vuela; el cambio entra en el siguiente paso del agente.
+  No es un entrenamiento nuevo: es un modo de servicio sobre los modelos ya versionados.</li>
+<li><strong>Pantalla completa</strong> de la escena 3D en el simulador y en la misión en vivo (botón, tecla F, barra flotante con reproducir,
+  pasos y, en vivo, los deslizadores del viento; Esc sale). Donde no existe la API Fullscreen se fija la escena a la ventana.</li>
+<li>Paquete de entregables: <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/entregables.md">entregables.md</a> (rúbrica → evidencia) y <code>python entregables.py</code>, que genera los PDF de
+  <code>entregables/</code> a partir de los Markdown del repositorio. 113 pruebas. Las reglas de los ambientes no cambian (0.1.1, 0.4, 0.5).</li>
+</ul>
+<h3 id="v100-2026-11-10">v1.0.0 · 2026-11-10</h3>
+<ul>
+<li>Cierre del proyecto: tres niveles (N1 0.1.1, N2 v1 0.4, N3 v1 0.5), 23 ejecuciones en 6 experimentos, pipeline Prefect de
+  8 etapas con 21 evidencias, API y web públicas, catálogo v15, monitoreo, incidente, intervención, rollback demostrado,
+  informe final, guion de la defensa y test reservado.</li>
+</ul>
+<h3 id="v020-2026-11-03">v0.2.0 · 2026-11-03</h3>
+<ul>
+<li>Hito 1: ambiente 0.1 con ficha, experimentos 1 (Q-learning) y 2 (PPO), MLflow, API, web y despliegue en contenedor.</li>
+</ul>
+<h2 id="ambiente-rocketlanding3d-n3-v0-nivel-3">Ambiente RocketLanding3D-N3-v0 (nivel 3)</h2>
+<h3 id="03-2026-11-05">0.3 · 2026-11-05</h3>
+<ul>
+<li>Nivel 3 = nivel 2 con condiciones de operación exigentes: viento a 10 m sorteado entre 0 y 15 m/s (antes 0–10)
+  y ráfagas de 3 m/s (antes 1,5). Ficha: <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/ambiente-v0.3.md">ambiente-v0.3.md</a>. Clase <code>RocketLandingN3Env</code> en
+  <code>rocket_env/nivel3.py</code>, hereda del nivel 2.</li>
+<li>Misma observación (25 valores) y acción que el nivel 2: misma familia de modelos. Un modelo de N2 juega en N3 sin
+  adaptador (<code>hacer_entorno</code>, <code>POST /evaluar</code> con <code>ambiente</code>), lo que mide la degradación (<code>python incidente.py</code>).</li>
+<li><code>VIENTO_MAX</code> y <code>RAFAGAS</code> pasan a ser constantes de clase de <code>RocketLanding3DEnv</code> (10 y 1,5): los niveles 1 y 2 no
+  cambian (mismas semillas, mismos sorteos, mismas evaluaciones guardadas).</li>
+</ul>
+<h2 id="ambientes-rocketlanding3d-n2-v1-y-rocketlanding3d-n3-v1-niveles-2-y-3-con-pasarela">Ambientes RocketLanding3D-N2-v1 y RocketLanding3D-N3-v1 (niveles 2 y 3 con pasarela)</h2>
+<h3 id="04-n2-v1-y-05-n3-v1-2026-11-06">0.4 (N2-v1) y 0.5 (N3-v1) · 2026-11-06</h3>
+<ul>
+<li>El equipo cambió el obstáculo de los niveles 2 y 3: en vez de tres torres, una <strong>pasarela</strong> horizontal de 90 m de radio
+  a 180 m de altura que cubre la plataforma y todo el cuadrado de salida, con una sola abertura circular de 16 m de radio
+  desplazada 30 m del centro (en (28, 12) m), sostenida por cuatro pilares en el borde. Chocar con la pasarela o con un
+  pilar es "colisión" (−100). Ficha: <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/ambiente-v0.4.md">ambiente-v0.4.md</a>; clases en <code>rocket_env/pasarela.py</code>.</li>
+<li>Decisión nueva en dos tiempos: alinearse con la abertura antes de llegar a la pasarela y, debajo, trasladarse hasta la
+  plataforma mientras se frena. Observación de 16 + 4 valores (posición relativa del objetivo de la fase: la abertura por
+  encima de la pasarela y la plataforma por debajo; altura hasta la pasarela; margen hasta el borde de la abertura):
+  familia nueva. <code>TRANSFERENCIA_ENTRADAS</code> indica cómo hereda un modelo del nivel 1 los pesos de posición para esas entradas. El potencial de la recompensa apunta a la abertura mientras el cohete está por
+  encima de la pasarela y castiga acercarse a ella fuera de la abertura (hasta 8 puntos en los 20 m previos).</li>
+<li>0.5 = 0.4 con viento de 0 a 15 m/s y ráfagas de 3 m/s (como pasaba de 0.2 a 0.3).</li>
+<li>Los ambientes con torres (0.2 y 0.3, ids <code>-v0</code>) siguen registrados: los modelos entrenados en ellos son históricos y se
+  pueden evaluar igual. <code>rocket_env.VIGENTES</code> dice el ambiente actual de cada nivel; la API lo marca con <code>vigente</code>.</li>
+<li>Dificultad medida: el recomendado del nivel 1 a ciegas (<code>AdaptadorN1</code>) baja de 99 % a 5 % (190 colisiones de 200).</li>
+</ul>
+<h2 id="ambiente-rocketlanding3d-n2-v0-nivel-2-retirado-el-2026-11-06">Ambiente RocketLanding3D-N2-v0 (nivel 2, retirado el 2026-11-06)</h2>
+<h3 id="02-2026-11-05">0.2 · 2026-11-05</h3>
+<ul>
+<li>Nivel 2 = nivel 1 + tres torres alrededor de la plataforma (a 28 m del centro, 120° entre sí, radio 7 m,
+  alturas 420/360/300 m). Chocar con una torre es el resultado nuevo "colisión" (−100). Ficha:
+  <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/ambiente-v0.2.md">ambiente-v0.2.md</a>. Clase <code>RocketLandingN2Env</code> en <code>rocket_env/nivel2.py</code>, hereda la física.</li>
+<li>Observación de 16 + 3 × 3 = 25 valores (por torre: posición relativa x, y y altura que queda por encima);
+  acción igual. Es una familia nueva de modelos: los del nivel 1 no juegan aquí salvo con <code>AdaptadorN1</code>
+  (recorta la observación a los 16 valores del nivel 1), que sirve para medir la dificultad del nivel.</li>
+<li>Potencial de la recompensa = el del nivel 1 − 8 × (1 − d/15 m) por cada torre a menos de 15 m de la
+  superficie y por debajo de su cima + 20 m. Lo demás (pasos, aterrizaje, viento, combustible) no cambia.</li>
+<li>Cada ejecución guarda en su manifest <code>ambiente.id</code>, <code>nivel</code> y <code>obstaculos</code>; la API y la CLI crean el
+  ambiente que dice el manifest. Los manifests anteriores al nivel 2 no traen <code>ambiente.id</code>: se interpretan
+  como <code>RocketLanding3D-v0</code>.</li>
+</ul>
+<h2 id="ambiente-rocketlanding3d-v0">Ambiente RocketLanding3D-v0</h2>
+<h3 id="01-2026-10-28">0.1 · 2026-10-28</h3>
+<ul>
+<li>Primera versión documentada en <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/ambiente-v0.1.md">ambiente-v0.1.md</a>.</li>
+<li>Pasos de 20 m de desplazamiento vertical (o 2 s), máximo 50 pasos por época, salida a 600 m.</li>
+<li>Zona de vuelo: cilindro de 300 m de radio y 1200 m de techo. Plataforma de 10 m de radio.</li>
+<li>Aterrizaje: |vz| ≤ 3 m/s, v_h ≤ 2 m/s, inclinación ≤ 10°, distancia ≤ 10 m. Recompensas finales +100 / −50 / −100.</li>
+<li>Observación de 16 valores (incluye inclinación); acción continua de 5 valores.</li>
+<li>Atmósfera ISA con suelo aleatorio por época; viento con ley 1/7 y ráfagas; perturbación <code>options={"viento": v}</code>.</li>
+</ul>
+<h3 id="011-2026-11-03">0.1.1 · 2026-11-03</h3>
+<ul>
+<li>"sin pasos" (agotar los 50 pasos sin tocar el suelo) se informa como <code>truncated=True</code> en vez de <code>terminated</code>,
+  como pide la guía para el límite externo de la época. La recompensa (−100) y todas las reglas son las mismas.</li>
+<li>Tercer número de versión = señales que no cambian las reglas. <code>RocketLanding3DEnv.compatible(v)</code> compara solo
+  mayor.menor: los modelos entrenados con 0.1 siguen siendo válidos y comparables en 0.1.x.</li>
+</ul>
+<h2 id="agente-q-learning">Agente Q-learning</h2>
+<h3 id="01-2026-10-28_1">0.1 · 2026-10-28</h3>
+<ul>
+<li>Dos tablas Q: motor (altitud × velocidad vertical × 6 acciones de empuje relativo al peso) y dirección
+  (deriva prevista en x × en y × 5 direcciones con inclinación lateral 0,10).</li>
+<li>ε de 1 a 0,02 en el 60 % de las épocas; α de 0,1 a 0,01; γ 0,99; evaluación cada 5 % de las épocas y
+  se conserva la mejor versión.</li>
+</ul>
+<h2 id="agente-ppo-experimento-2">Agente PPO (experimento 2)</h2>
+<h3 id="01-2026-10-28_2">0.1 · 2026-10-28</h3>
+<ul>
+<li>Red MLP 128×128 (Stable-Baselines3, PyTorch) sobre la acción relativa v2: 3 valores en [−1, 1]
+  (empuje = 1 + a₀, máximo ×1,6; inclinación = a₁, a₂ × 0,12). 600 000 pasos en 8 entornos,
+  evaluación sin ruido cada 20 000 pasos, se conserva la mejor versión.</li>
+<li>Historia: la acción cruda (<code>--accion cruda</code>) y la relativa v1 (inclinación ±0,3) no aterrizan;
+  ver docs/experimento-2.md.</li>
+</ul>
+<h2 id="formato-de-las-ejecuciones-resultadosrunsid">Formato de las ejecuciones (<code>resultados/runs/&lt;id&gt;/</code>)</h2>
+<h3 id="1-2026-10-28">1 · 2026-10-28</h3>
+<ul>
+<li><code>manifest.json</code>, <code>modelo.npz</code>, <code>entrenamiento.json</code>, <code>vuelos.json.gz</code>; índice en <code>resultados/registro.json</code>.</li>
+<li>Mismo día, ampliación compatible: <code>experimento</code>, <code>agente.clase/nombre</code> y <code>archivos.modelo</code> como lista en el
+  manifest; <code>episodios.csv</code> (dataset) y <code>evaluacion.json</code> (evaluación detallada) en cada ejecución; registro
+  en MLflow (<code>mlflow.db</code> + <code>mlruns/</code>).</li>
+<li>2026-11-05, ampliación compatible: el catálogo lleva un recomendado y un anterior por nivel (<code>niveles.N1</code>,
+  <code>niveles.N2</code>); <code>recomendado</code>/<code>anterior</code> de primer nivel siguen siendo los del nivel 1. <code>registro.json</code> y el
+  manifest guardan <code>nivel</code>; <code>ambiente.id</code> y <code>ambiente.obstaculos</code> en el manifest. <code>OUTCOMES</code> global = los del
+  nivel 2 (los cinco del nivel 1 conservan su índice en <code>entrenamiento.json</code>).</li>
+<li>2026-11-03, ampliación compatible: <code>configs/&lt;run_id&gt;.json</code> (hipótesis, cambio frente al baseline, presupuesto,
+  estado seleccionado/rechazado/referencia y decisión; también como etiquetas <code>diseno.*</code> y <code>presupuesto.*</code> de la run
+  de MLflow), <code>manifests/&lt;run_id&gt;.json</code> con el formato de la sección 11 de la guía (<code>python manifiestos.py</code>: commit
+  completo, SHA-256 del modelo, <code>model_uri</code>, suite, nivel) y suites de evaluación con nombre en <code>configs/suites/</code>
+  (<code>suite-v1</code>; la reservada no lleva semilla en el repo). Los manifests nuevos guardan el SHA completo del commit.</li>
+<li>2026-10-30, ampliación compatible: <code>sha256</code> en el manifest (huella de la configuración resuelta y de cada archivo
+  de <code>archivos</code>), comprobable con <code>python cli.py verificar</code>. Las cuatro ejecuciones anteriores recibieron sus
+  huellas ese día, con una nota que lo indica; sus copias en <code>mlruns/</code> conservan el manifest sin huellas.</li>
+</ul>
+</main></body></html>

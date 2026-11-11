@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Informe final · Alpha Centauri</title><style>
+:root { --ink: #1d2126; --muted: #5d6572; --line: #d9d7cf; --accent: #1f6f5c; --soft: #eef3f1; }
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--ink); background: #fff; font: 11pt/1.5 "Source Sans 3", "Segoe UI", system-ui, sans-serif; }
+main { max-width: 86ch; margin: 0 auto; padding: 28px 32px 48px; }
+.portada { border-bottom: 2px solid var(--accent); margin-bottom: 22px; padding-bottom: 10px; }
+.portada .proyecto { font: 600 10pt/1.2 ui-monospace, Menlo, monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.portada h1 { margin: 6px 0 4px; font-size: 22pt; line-height: 1.15; }
+.portada .meta { color: var(--muted); font-size: 9.5pt; }
+h1, h2, h3 { line-height: 1.2; page-break-after: avoid; }
+h1 { font-size: 18pt; margin: 26px 0 10px; }
+h2 { font-size: 14pt; margin: 22px 0 8px; border-bottom: 1px solid var(--line); padding-bottom: 3px; }
+h3 { font-size: 12pt; margin: 16px 0 6px; }
+p, li { orphans: 3; widows: 3; }
+a { color: var(--accent); text-decoration: none; word-break: break-word; }
+code { font: 9.5pt ui-monospace, Menlo, Consolas, monospace; background: var(--soft); padding: 1px 4px; border-radius: 4px; }
+pre { background: var(--soft); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; overflow-x: auto; font-size: 9pt; line-height: 1.4; page-break-inside: avoid; }
+pre code { background: none; padding: 0; font-size: inherit; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0 16px; font-size: 9.5pt; page-break-inside: auto; }
+tr { page-break-inside: avoid; }
+th, td { border: 1px solid var(--line); padding: 5px 7px; vertical-align: top; text-align: left; }
+th { background: var(--soft); font-weight: 600; }
+img, svg { max-width: 100%; height: auto; }
+blockquote { margin: 10px 0; padding: 4px 14px; border-left: 3px solid var(--accent); color: var(--muted); }
+hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
+@page { size: A4; margin: 16mm 14mm 18mm; }
+@media print { main { padding: 0; max-width: none; } a { color: inherit; } }
+</style></head>
+<body><main>
+<header class="portada"><div class="proyecto">Alpha Centauri · Rocket Landing · proyecto final de MLOps</div>
+
+<div class="meta">Generado el 2026-11-11 desde <code>docs/informe-final.md</code> · etiqueta <code>v1.1.0</code> · fuente de verdad: el Markdown del repositorio</div></header>
+<h1 id="informe-final-alpha-centauri-rocket-landing">Informe final · Alpha Centauri · Rocket Landing</h1>
+<p><strong>Proyecto final del curso de MLOps · Universidad Externado · noviembre de 2026 · equipo Alpha Centauri (mjcastano29-tech, Isaías Céspedes, jhrojas02; nombres completos según el acta del curso)</strong></p>
+<p>Web: https://alpha-centauri-five.vercel.app · API: https://alpha-centauri-api.onrender.com · MLflow: https://alpha-centauri-mlflow.onrender.com · Repositorio: https://github.com/mjcastano29-tech/Alpha-Centauri · Entrega: etiqueta <code>v1.1.0</code> (índice en <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/entregables.md">entregables.md</a>)</p>
+<h2 id="1-que-construimos">1. Qué construimos</h2>
+<p>Un agente de aprendizaje por refuerzo que aterriza un cohete en un mundo 3D con viento, temperatura y presión variables, combustible limitado y, en los niveles superiores, un obstáculo que obliga a decidir la ruta. Alrededor del agente, el sistema de operación que pide la guía: ambientes versionados con contrato y ficha, experimentos con hipótesis y decisión, modelos recuperables por huella, un pipeline que entrena, evalúa, decide y publica, una API que sirve el modelo recomendado de cada nivel, una web que permite al docente ver, comparar y evaluar, y un procedimiento de rollback comprobado en producción.</p>
+<table>
+<thead>
+<tr>
+<th>Pieza</th>
+<th>Dónde</th>
+<th>Cómo se comprueba</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ambientes Gymnasium (N1 0.1.1, N2 v1 0.4, N3 v1 0.5; retirados 0.2 y 0.3)</td>
+<td><code>rocket_env/</code>, fichas <code>docs/ambiente-v0.*.md</code></td>
+<td><code>python -m pytest</code> (113 pruebas de contrato, modelos y API)</td>
+</tr>
+<tr>
+<td>23 ejecuciones en 6 experimentos</td>
+<td><code>resultados/runs/</code>, <code>configs/</code>, <code>manifests/</code>, MLflow</td>
+<td><code>python cli.py verificar</code> (SHA-256 de modelos, datos y configuración)</td>
+</tr>
+<tr>
+<td>Pipeline de 8 etapas (Prefect)</td>
+<td><code>pipelines/entrenar_publicar.py</code>, evidencia en <code>pipelines/ejecuciones/</code> (21 ejecuciones)</td>
+<td>cada ejecución deja su JSON con las etapas, la decisión y el commit publicado</td>
+</tr>
+<tr>
+<td>API FastAPI</td>
+<td><code>api/main.py</code></td>
+<td><code>GET /version</code>, <code>GET /monitoreo</code>, <code>POST /evaluar</code>, <code>POST /sesiones</code> (misión en vivo paso a paso)</td>
+</tr>
+<tr>
+<td>Web Vite + TypeScript + Three.js</td>
+<td><code>web/</code></td>
+<td>portada con el cohete (pantalla completa con F), experimentos, catálogo, incidente, monitoreo, viento en vivo (<code>#/vivo</code>: barra de viento mientras el modelo congelado pilota), landing</td>
+</tr>
+<tr>
+<td>Catálogo versionado con recomendado y anterior por nivel</td>
+<td><code>catalogo.json</code> (v15, 15 cambios en el historial)</td>
+<td><code>python catalogo.py ver</code>; rollback con <code>restaurar</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="2-los-niveles-y-como-crece-la-complejidad">2. Los niveles y cómo crece la complejidad</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>N1 · misión base</th>
+<th>N2 · pasarela</th>
+<th>N3 · pasarela con viento fuerte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ambiente</td>
+<td><code>RocketLanding3D-v0</code> 0.1.1</td>
+<td><code>RocketLanding3D-N2-v1</code> 0.4</td>
+<td><code>RocketLanding3D-N3-v1</code> 0.5</td>
+</tr>
+<tr>
+<td>Qué añade</td>
+<td>plataforma, viento 0–10 m/s, atmósfera, combustible; paso = 20 m, 50 pasos</td>
+<td>una pasarela a 180 m cubre la plataforma; la única abertura (r 16 m) está desplazada 30 m: hay que entrar por ella y trasladarse por debajo; "colisión" −100</td>
+<td>viento 0–15 m/s y ráfagas dobles sobre el mismo mundo (misma familia de modelos)</td>
+</tr>
+<tr>
+<td>Observación · acción</td>
+<td>16 · 5</td>
+<td>20 · 5 (familia nueva)</td>
+<td>20 · 5</td>
+</tr>
+<tr>
+<td>Dificultad medida</td>
+<td>—</td>
+<td>el recomendado de N1 a ciegas: 99 % → 5 % (190 colisiones)</td>
+<td>el recomendado de N2 sin reentrenar: 100 % → 93,5 %</td>
+</tr>
+<tr>
+<td>Recomendado</td>
+<td><code>ppo-v2-v0.1-s1</code>: 99 % (72 % con viento)</td>
+<td><code>ppo-pasarela-transfer-1m5-v0.4-s2</code>: 100 % (68 % con viento)</td>
+<td><code>ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0</code>: 97,5 % (85,5 % con viento)</td>
+</tr>
+<tr>
+<td>Tres semillas del finalista</td>
+<td>97, 99, 97,5 % (97,8 ± 1,0)</td>
+<td>91,5, 97,5, 100 % (96,3 ± 4,4)</td>
+<td>94,5, 94, 92,5 % (93,7 ± 1,0)</td>
+</tr>
+<tr>
+<td>Test reservado (una sola vez)</td>
+<td>97,5 % (viento 72,5 %)</td>
+<td>99,0 % (viento 58,5 %)</td>
+<td>97,0 % (viento 83,5 %)</td>
+</tr>
+</tbody>
+</table>
+<p>La primera versión del nivel 2 fueron tres torres alrededor de la plataforma (ambiente 0.2, con su nivel 3 0.3). El equipo las sustituyó por la pasarela el 6 de noviembre porque obliga a una decisión más clara (entrar por la abertura y volver al centro) y se ve mejor en el replay. Los modelos de torres siguen en el catálogo como históricos y se pueden evaluar.</p>
+<h2 id="3-la-cadena-de-hipotesis">3. La cadena de hipótesis</h2>
+<p>Cada configuración tiene en <code>configs/&lt;run_id&gt;.json</code> su hipótesis, el cambio frente a su baseline, el presupuesto y la decisión con fecha; las mismas etiquetas están en MLflow. Los rechazos se conservan. Resumen por experimento (<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/EXPERIMENTOS.md">EXPERIMENTOS.md</a> tiene cada uno con sus variables):</p>
+<ol>
+<li><strong>Q-learning en N1</strong> (<code>base-v0.1-s0</code>, 78 %): referencia aprendida, con dos tablas pequeñas y el empuje expresado respecto al peso.</li>
+<li><strong>PPO en N1</strong>: la acción cruda no aprende (0 %); la acción relativa v1 frena pero llega inclinada (0 %); la <strong>v2</strong> acota la inclinación al límite de aterrizaje y aprende (97 %). Tres semillas: 97,8 ± 1,0 %. La semilla 1 (99 %) es el recomendado por el criterio del pipeline.</li>
+<li><strong>N2 con torres</strong>: desde cero, 8 %; con transferencia de pesos desde N1, 77 % con 600 000 pasos y 86 % con 1,5 M; tres semillas 88,3 ± 4,5 %.</li>
+<li><strong>N3 con torres</strong>: incidente (−11 puntos sin reentrenar) e intervención por el pipeline: 92 % partiendo del nuevo recomendado de N2; tres semillas 89,3 ± 4,2 %. Rollback demostrado en producción (catálogos v8 → v9 → v10).</li>
+<li><strong>N2 con pasarela</strong>: el primer diseño (abertura fija en la observación, transferencia simple) no aprendía (2 % a los 320 000 pasos). Con la observación "objetivo de la fase" (la abertura por encima de la pasarela, la plataforma por debajo) y la herencia de los pesos de posición, la política de partida ya aterriza el 35 % sin entrenar, y tras 1,5 M de pasos 96,3 ± 4,4 % en tres semillas.</li>
+<li><strong>N3 con pasarela</strong>: incidente para las tres semillas (−27, −12,5 y −6,5 puntos) e intervención: la receta da 93,7 ± 1,0 %; partiendo del nuevo recomendado de N2, 97,5 % y 85,5 % con viento (24 puntos más que sin reentrenar).</li>
+</ol>
+<p>Lo que aprendimos: la parametrización de la acción decide si PPO aprende; la transferencia desde el nivel anterior es lo que hace abordables los niveles 2 y 3 con 1,5 M de pasos; cuando el obstáculo cambia qué significa "objetivo", hay que dárselo al agente en la observación. Y la variabilidad entre semillas (hasta 4 puntos) es la razón de reportar medias y de que el pipeline conserve el recomendado y el anterior.</p>
+<h2 id="4-pipeline-despliegue-y-monitoreo">4. Pipeline, despliegue y monitoreo</h2>
+<p><code>pipelines/entrenar_publicar.py</code> (Prefect 3) ejecuta ocho etapas con los mismos comandos que usamos a mano: validar el ambiente, probar el contrato, entrenar, evaluar en la suite v1 (200 épocas normales y 200 con viento de 15 m/s), registrar (configs, manifiesto de la sección 11 con commit completo y SHA-256, MLflow, huellas), decidir, publicar el catálogo con commit y push, y comprobar que la API pública sirve el commit y el catálogo esperados con una evaluación corta. Criterio de aceptación, fijado antes de entrenar: un candidato sustituye al recomendado de su nivel si gana al menos 2 puntos de tasa, no pierde más de 5 con viento y no tiene más colisiones; en un nivel nuevo se compara con el modelo del nivel anterior jugando en él (<code>incidente.py</code>). 18 ejecuciones del pipeline (9 aceptadas, 7 rechazadas, 2 sin decisión) y 3 comprobaciones de rollback dejaron su evidencia versionada.</p>
+<p>Despliegue: push a <code>main</code> → Render reconstruye la API y MLflow, Vercel la web. <code>GET /version</code> dice qué commit y qué catálogo se sirven; <code>GET /monitoreo</code> y la vista <code>#/monitoreo</code> muestran el servicio, el modelo que atiende cada nivel y su comportamiento, las últimas decisiones del pipeline y los rollbacks, la latencia de las evaluaciones servidas y alertas (API recién despierta, recomendado frágil con viento, ejecución entrenada con cambios sin commit).</p>
+<h2 id="5-incidente-intervencion-y-rollback">5. Incidente, intervención y rollback</h2>
+<ul>
+<li><strong>Incidente controlado</strong>: cambiar las condiciones de operación (viento 0–15 m/s, ráfagas dobles). Medido antes y después para cada modelo con <code>incidente.py</code> (9 medidas en <code>resultados/incidentes/</code>, vista <code>#/incidente</code>).</li>
+<li><strong>Intervención</strong>: reentrenar en el nivel 3 partiendo de los pesos del modelo degradado. Se aceptó o rechazó con el criterio del pipeline; en la pasarela recupera 24 puntos con viento máximo.</li>
+<li><strong>Rollback</strong>: <code>python catalogo.py restaurar --nivel N3</code> devuelve el anterior; se demostró en producción con las torres (catálogo v9) y se volvió al recomendado (v10), comprobando la API cada vez (<code>comprobar_api.py</code>, evidencia en <code>pipelines/ejecuciones/rollback-n3-*.json</code>). El catálogo actual guarda el anterior de cada nivel para repetirlo.</li>
+</ul>
+<h2 id="6-limites-y-decisiones-honestas">6. Límites y decisiones honestas</h2>
+<ul>
+<li>8 de las 23 ejecuciones se entrenaron con cambios sin commit (marca <code>*</code>); en cada caso el archivo sin confirmar era documentación o el código del propio nivel, y la ficha lo documenta. El pipeline avisa en la etapa 1.</li>
+<li>El recomendado de cada nivel es la mejor de tres semillas según el criterio; la cifra honesta de la configuración es la media (97,8, 96,3 y 93,7 %). El test reservado confirma que la selección no sobreajustó a la suite v1 (diferencias de −1,5, −1 y −0,5 puntos).</li>
+<li>El plan gratuito de Render duerme la API y MLflow tras 15 minutos: la primera petición tarda cerca de un minuto.</li>
+<li><code>mlflow.db</code> vive en git: dos personas no pueden ejecutar el pipeline a la vez (ocurrió una vez; se descartó la copia duplicada).</li>
+<li>La pasarela se dibuja translúcida y se vuelve casi transparente cuando queda entre la cámara y el cohete; el replay es una interpolación de trayectorias grabadas, no una simulación en el navegador.</li>
+</ul>
+<h2 id="7-contribuciones">7. Contribuciones</h2>
+<p>Según el historial de commits y las pull requests del repositorio:</p>
+<ul>
+<li><strong>mjcastano29-tech</strong> (con Claude Code como asistente): ambiente y física, agentes Q-learning y PPO, experimentos 1 y 2, nivel 2 (torres y pasarela), versionado (manifiestos, configs, suites, MLflow), API, web (catálogo, experimentos, replay 3D, monitoreo), pipeline Prefect, diagnósticos e informe.</li>
+<li><strong>Isaías Céspedes</strong>: escena 3D cinematográfica original, pruebas de contrato y de modelos, huellas SHA-256 y <code>cli.py verificar</code>, dependencias fijadas, landing de presentación, consola de misión y sonido del replay.</li>
+<li><strong>jhrojas02</strong>: nivel 3 (ambientes 0.3 y 0.5), <code>incidente.py</code> e intervención, rollback en producción, <code>comprobar_api.py</code>, tres semillas de los finalistas de N3 y de la pasarela, MLflow desde cualquier máquina.</li>
+</ul>
+<h2 id="8-como-reproducir">8. Cómo reproducir</h2>
+<pre><code class="language-bash">git clone https://github.com/mjcastano29-tech/Alpha-Centauri &amp;&amp; cd Alpha-Centauri
+python -m venv .venv &amp;&amp; .venv/bin/pip install -r requirements.txt
+python -m pytest                       # 113 pruebas
+python cli.py verificar                # huellas de las 23 ejecuciones
+python cli.py evaluar --run ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0 --viento 15
+uvicorn api.main:app --port 8000       # API local; web: cd web &amp;&amp; npm install &amp;&amp; npm run dev
+python entregables.py                  # regenera los PDF de entregables/
+</code></pre>
+</main></body></html>

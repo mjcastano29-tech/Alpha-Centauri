@@ -1,0 +1,3590 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Experimentos y modelos · Alpha Centauri</title><style>
+:root { --ink: #1d2126; --muted: #5d6572; --line: #d9d7cf; --accent: #1f6f5c; --soft: #eef3f1; }
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--ink); background: #fff; font: 11pt/1.5 "Source Sans 3", "Segoe UI", system-ui, sans-serif; }
+main { max-width: 86ch; margin: 0 auto; padding: 28px 32px 48px; }
+.portada { border-bottom: 2px solid var(--accent); margin-bottom: 22px; padding-bottom: 10px; }
+.portada .proyecto { font: 600 10pt/1.2 ui-monospace, Menlo, monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.portada h1 { margin: 6px 0 4px; font-size: 22pt; line-height: 1.15; }
+.portada .meta { color: var(--muted); font-size: 9.5pt; }
+h1, h2, h3 { line-height: 1.2; page-break-after: avoid; }
+h1 { font-size: 18pt; margin: 26px 0 10px; }
+h2 { font-size: 14pt; margin: 22px 0 8px; border-bottom: 1px solid var(--line); padding-bottom: 3px; }
+h3 { font-size: 12pt; margin: 16px 0 6px; }
+p, li { orphans: 3; widows: 3; }
+a { color: var(--accent); text-decoration: none; word-break: break-word; }
+code { font: 9.5pt ui-monospace, Menlo, Consolas, monospace; background: var(--soft); padding: 1px 4px; border-radius: 4px; }
+pre { background: var(--soft); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; overflow-x: auto; font-size: 9pt; line-height: 1.4; page-break-inside: avoid; }
+pre code { background: none; padding: 0; font-size: inherit; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0 16px; font-size: 9.5pt; page-break-inside: auto; }
+tr { page-break-inside: avoid; }
+th, td { border: 1px solid var(--line); padding: 5px 7px; vertical-align: top; text-align: left; }
+th { background: var(--soft); font-weight: 600; }
+img, svg { max-width: 100%; height: auto; }
+blockquote { margin: 10px 0; padding: 4px 14px; border-left: 3px solid var(--accent); color: var(--muted); }
+hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
+@page { size: A4; margin: 16mm 14mm 18mm; }
+@media print { main { padding: 0; max-width: none; } a { color: inherit; } }
+</style></head>
+<body><main>
+<header class="portada"><div class="proyecto">Alpha Centauri · Rocket Landing · proyecto final de MLOps</div>
+
+<div class="meta">Generado el 2026-11-11 desde <code>EXPERIMENTOS.md</code> · etiqueta <code>v1.1.0</code> · fuente de verdad: el Markdown del repositorio</div></header>
+<h1 id="experimentos-y-modelos-de-alpha-centauri">Experimentos y modelos de Alpha Centauri</h1>
+<p>Generado el 2026-11-10 15:49 con <code>python experimentos_md.py</code> a partir de los archivos versionados del repositorio. 23 ejecuciones en 6 experimentos.</p>
+<h2 id="donde-se-guarda-cada-cosa">Dónde se guarda cada cosa</h2>
+<table>
+<thead>
+<tr>
+<th>Qué</th>
+<th>Dónde</th>
+<th>Cómo se identifica</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Modelo entrenado (pesos)</td>
+<td><code>resultados/runs/&lt;run_id&gt;/modelo.zip</code> (PPO: red y optimizador) o <code>modelo.npz</code> (Q-learning: tablas); PPO lleva además <code>modelo_normalizador.pkl</code> (normalización de observaciones)</td>
+<td>SHA-256 en el manifest de la ejecución y en <code>manifests/&lt;run_id&gt;.json</code>; URL al archivo en el commit exacto de GitHub (<code>model_uri</code>)</td>
+</tr>
+<tr>
+<td>Registro de modelos (MLflow)</td>
+<td><code>mlflow.db</code> + <code>mlruns/</code> dentro del repo; en línea en https://alpha-centauri-mlflow.onrender.com</td>
+<td>modelos registrados <code>rocket-landing-qlearning</code> y <code>rocket-landing-ppo</code>, una versión por ejecución; <code>mlflow.pyfunc.load_model("models:/rocket-landing-ppo/&lt;versión&gt;")</code></td>
+</tr>
+<tr>
+<td>Manifiesto de la ejecución</td>
+<td><code>resultados/runs/&lt;run_id&gt;/manifest.json</code></td>
+<td>commit de git, versión del ambiente, configuración completa, software, métricas y huellas SHA-256</td>
+</tr>
+<tr>
+<td>Manifiesto con el formato de la guía (sección 11)</td>
+<td><code>manifests/&lt;run_id&gt;.json</code></td>
+<td><code>run_id</code>, <code>level_id</code>, <code>environment_version</code>, <code>git_commit</code>, <code>config_sha256</code>, <code>model_uri</code>, <code>model_sha256</code>, <code>normalization_uri</code>, <code>runtime_ref</code>, <code>evaluation_suite_id</code>, <code>seed</code>, <code>parent_run_id</code></td>
+</tr>
+<tr>
+<td>Hipótesis, cambio, presupuesto y decisión</td>
+<td><code>configs/&lt;run_id&gt;.json</code> (y etiquetas <code>diseno.*</code> en la run de MLflow)</td>
+<td>estado <code>seleccionado</code> / <code>rechazado</code> / <code>referencia</code></td>
+</tr>
+<tr>
+<td>Datos de entrenamiento</td>
+<td><code>resultados/runs/&lt;run_id&gt;/episodios.csv</code> (una fila por época), <code>entrenamiento.json</code> (curvas), <code>vuelos.json.gz</code> (trayectorias grabadas)</td>
+<td>huellas SHA-256 en el manifest; <code>python cli.py verificar</code> las comprueba</td>
+</tr>
+<tr>
+<td>Evaluación</td>
+<td><code>resultados/runs/&lt;run_id&gt;/evaluacion.json</code>: suite v1 (<code>configs/suites/suite-v1.json</code>), 200 épocas normales y 200 con viento de 15 m/s</td>
+<td>semillas desde 10 000 000, nunca usadas al entrenar</td>
+</tr>
+<tr>
+<td>Qué modelo se sirve</td>
+<td><code>catalogo.json</code> (recomendado y anterior por nivel, con historial y commit base)</td>
+<td>la API lo lee; <code>GET /version</code> dice el commit y el catálogo servidos</td>
+</tr>
+<tr>
+<td>Ambientes</td>
+<td><code>rocket_env/</code> (<code>rocket_landing.py</code> N1 0.1.1, <code>nivel2.py</code> N2 0.2, <code>nivel3.py</code> N3 0.3) con fichas en <code>docs/ambiente-v0.*.md</code></td>
+<td>cada manifest guarda <code>ambiente.id</code> y <code>ambiente.version</code></td>
+</tr>
+<tr>
+<td>Evidencia del pipeline</td>
+<td><code>pipelines/ejecuciones/&lt;run_id&gt;-&lt;fecha&gt;.json</code></td>
+<td>resultado de las ocho etapas, decisión y commit publicado</td>
+</tr>
+</tbody>
+</table>
+<h2 id="resumen">Resumen</h2>
+<table>
+<thead>
+<tr>
+<th>Ejecución</th>
+<th>Experimento</th>
+<th>Nivel · ambiente</th>
+<th>Agente</th>
+<th>Semilla</th>
+<th>Presupuesto</th>
+<th>Aterrizajes (suite v1)</th>
+<th>Con viento 15 m/s</th>
+<th>Colisiones</th>
+<th>Estado</th>
+<th>Catálogo</th>
+<th>MLflow</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>base-v0.1-s0</code></td>
+<td>experimento-1-qlearning</td>
+<td>N1 · RocketLanding3D-v0 0.1</td>
+<td>Q-learning</td>
+<td>0</td>
+<td>5000 épocas</td>
+<td><strong>78.5 %</strong></td>
+<td>38.0 %</td>
+<td>—</td>
+<td>referencia</td>
+<td>histórico</td>
+<td>rocket-landing-qlearning v1</td>
+</tr>
+<tr>
+<td><code>ppo-v0.1-s0</code></td>
+<td>experimento-2-ppo</td>
+<td>N1 · RocketLanding3D-v0 0.1</td>
+<td>PPO (red neuronal)</td>
+<td>0</td>
+<td>400 000 pasos</td>
+<td><strong>0.0 %</strong></td>
+<td>0.0 %</td>
+<td>—</td>
+<td>rechazado</td>
+<td>histórico</td>
+<td>rocket-landing-ppo v1</td>
+</tr>
+<tr>
+<td><code>ppo-rel-v0.1-s0</code></td>
+<td>experimento-2-ppo</td>
+<td>N1 · RocketLanding3D-v0 0.1</td>
+<td>PPO (red neuronal)</td>
+<td>0</td>
+<td>600 000 pasos</td>
+<td><strong>0.0 %</strong></td>
+<td>0.0 %</td>
+<td>—</td>
+<td>rechazado</td>
+<td>histórico</td>
+<td>rocket-landing-ppo v2</td>
+</tr>
+<tr>
+<td><code>ppo-v2-v0.1-s0</code></td>
+<td>experimento-2-ppo</td>
+<td>N1 · RocketLanding3D-v0 0.1</td>
+<td>PPO (red neuronal)</td>
+<td>0</td>
+<td>600 000 pasos</td>
+<td><strong>97.0 %</strong></td>
+<td>62.5 %</td>
+<td>—</td>
+<td>referencia</td>
+<td>anterior (destino del rollback)</td>
+<td>rocket-landing-ppo v3</td>
+</tr>
+<tr>
+<td><code>ppo-n2-v0.2-s0</code></td>
+<td>experimento-3-nivel2</td>
+<td>N2 · RocketLanding3D-N2-v0 0.2</td>
+<td>PPO (red neuronal)</td>
+<td>0</td>
+<td>600 000 pasos</td>
+<td><strong>8.0 %</strong></td>
+<td>1.5 %</td>
+<td>54</td>
+<td>rechazado</td>
+<td>histórico</td>
+<td>rocket-landing-ppo v4</td>
+</tr>
+<tr>
+<td><code>ppo-n2-transfer-v0.2-s0</code></td>
+<td>experimento-3-nivel2</td>
+<td>N2 · RocketLanding3D-N2-v0 0.2</td>
+<td>PPO (red neuronal)</td>
+<td>0</td>
+<td>600 000 pasos</td>
+<td><strong>76.5 %</strong></td>
+<td>42.0 %</td>
+<td>42</td>
+<td>referencia</td>
+<td>histórico</td>
+<td>rocket-landing-ppo v5</td>
+</tr>
+<tr>
+<td><code>ppo-n2-transfer-1m5-v0.2-s0</code></td>
+<td>experimento-3-nivel2</td>
+<td>N2 · RocketLanding3D-N2-v0 0.2</td>
+<td>PPO (red neuronal)</td>
+<td>0</td>
+<td>1 500 000 pasos</td>
+<td><strong>86.0 %</strong></td>
+<td>55.5 %</td>
+<td>27</td>
+<td>seleccionado</td>
+<td>histórico</td>
+<td>rocket-landing-ppo v6</td>
+</tr>
+<tr>
+<td><code>ppo-v2-v0.1-s1</code></td>
+<td>experimento-2-ppo</td>
+<td>N1 · RocketLanding3D-v0 0.1.1</td>
+<td>PPO (red neuronal)</td>
+<td>1</td>
+<td>600 000 pasos</td>
+<td><strong>99.0 %</strong></td>
+<td>72.0 %</td>
+<td>—</td>
+<td>seleccionado</td>
+<td>recomendado (se sirve en la web)</td>
+<td>rocket-landing-ppo v7</td>
+</tr>
+<tr>
+<td><code>ppo-v2-v0.1-s2</code></td>
+<td>experimento-2-ppo</td>
+<td>N1 · RocketLanding3D-v0 0.1.1</td>
+<td>PPO (red neuronal)</td>
+<td>2</td>
+<td>600 000 pasos</td>
+<td><strong>97.5 %</strong></td>
+<td>71.5 %</td>
+<td>—</td>
+<td>rechazado</td>
+<td>histórico</td>
+<td>rocket-landing-ppo v8</td>
+</tr>
+<tr>
+<td><code>ppo-n3-transfer-v0.3-s0</code></td>
+<td>experimento-4-nivel3</td>
+<td>N3 · RocketLanding3D-N3-v0 0.3</td>
+<td>PPO (red neuronal)</td>
+<td>0</td>
+<td>600 000 pasos</td>
+<td><strong>81.5 %</strong></td>
+<td>74.5 %</td>
+<td>37</td>
+<td>rechazado</td>
+<td>histórico</td>
+<td>rocket-landing-ppo v10</td>
+</tr>
+<tr>
+<td><code>ppo-n2-transfer-1m5-v0.2-s1</code></td>
+<td>experimento-3-nivel2</td>
+<td>N2 · RocketLanding3D-N2-v0 0.2</td>
+<td>PPO (red neuronal)</td>
+<td>1</td>
+<td>1 500 000 pasos</td>
+<td><strong>93.5 %</strong></td>
+<td>63.0 %</td>
+<td>13</td>
+<td>seleccionado</td>
+<td>histórico</td>
+<td>rocket-landing-ppo v9</td>
+</tr>
+<tr>
+<td><code>ppo-n3-transfer-1m5-v0.3-s0</code></td>
+<td>experimento-4-nivel3</td>
+<td>N3 · RocketLanding3D-N3-v0 0.3</td>
+<td>PPO (red neuronal)</td>
+<td>0</td>
+<td>1 500 000 pasos</td>
+<td><strong>86.5 %</strong></td>
+<td>67.5 %</td>
+<td>24</td>
+<td>seleccionado</td>
+<td>histórico</td>
+<td>rocket-landing-ppo v11</td>
+</tr>
+<tr>
+<td><code>ppo-n3-transfer-1m5-desde-s1-v0.3-s0</code></td>
+<td>experimento-4-nivel3</td>
+<td>N3 · RocketLanding3D-N3-v0 0.3</td>
+<td>PPO (red neuronal)</td>
+<td>0</td>
+<td>1 500 000 pasos</td>
+<td><strong>92.0 %</strong></td>
+<td>79.0 %</td>
+<td>15</td>
+<td>seleccionado</td>
+<td>histórico</td>
+<td>rocket-landing-ppo v12</td>
+</tr>
+<tr>
+<td><code>ppo-n3-transfer-1m5-desde-s1-v0.3-s1</code></td>
+<td>experimento-4-nivel3</td>
+<td>N3 · RocketLanding3D-N3-v0 0.3</td>
+<td>PPO (red neuronal)</td>
+<td>1</td>
+<td>1 500 000 pasos</td>
+<td><strong>91.5 %</strong></td>
+<td>87.5 %</td>
+<td>16</td>
+<td>rechazado</td>
+<td>histórico</td>
+<td>rocket-landing-ppo v13</td>
+</tr>
+<tr>
+<td><code>ppo-n3-transfer-1m5-desde-s1-v0.3-s2</code></td>
+<td>experimento-4-nivel3</td>
+<td>N3 · RocketLanding3D-N3-v0 0.3</td>
+<td>PPO (red neuronal)</td>
+<td>2</td>
+<td>1 500 000 pasos</td>
+<td><strong>84.5 %</strong></td>
+<td>76.5 %</td>
+<td>18</td>
+<td>rechazado</td>
+<td>histórico</td>
+<td>rocket-landing-ppo v14</td>
+</tr>
+<tr>
+<td><code>ppo-n2-transfer-1m5-v0.2-s2</code></td>
+<td>experimento-3-nivel2</td>
+<td>N2 · RocketLanding3D-N2-v0 0.2</td>
+<td>PPO (red neuronal)</td>
+<td>2</td>
+<td>1 500 000 pasos</td>
+<td><strong>85.5 %</strong></td>
+<td>56.5 %</td>
+<td>24</td>
+<td>rechazado</td>
+<td>histórico</td>
+<td>rocket-landing-ppo v15</td>
+</tr>
+<tr>
+<td><code>ppo-pasarela-transfer-1m5-v0.4-s0</code></td>
+<td>experimento-5-pasarela</td>
+<td>N2 · RocketLanding3D-N2-v1 0.4</td>
+<td>PPO (red neuronal)</td>
+<td>0</td>
+<td>1 500 000 pasos</td>
+<td><strong>91.5 %</strong></td>
+<td>30.0 %</td>
+<td>14</td>
+<td>seleccionado</td>
+<td>histórico</td>
+<td>rocket-landing-ppo v16</td>
+</tr>
+<tr>
+<td><code>ppo-pasarela-viento-transfer-1m5-v0.5-s0</code></td>
+<td>experimento-6-pasarela-viento</td>
+<td>N3 · RocketLanding3D-N3-v1 0.5</td>
+<td>PPO (red neuronal)</td>
+<td>0</td>
+<td>1 500 000 pasos</td>
+<td><strong>94.5 %</strong></td>
+<td>65.5 %</td>
+<td>6</td>
+<td>seleccionado</td>
+<td>anterior (destino del rollback)</td>
+<td>rocket-landing-ppo v17</td>
+</tr>
+<tr>
+<td><code>ppo-pasarela-transfer-1m5-v0.4-s1</code></td>
+<td>experimento-5-pasarela</td>
+<td>N2 · RocketLanding3D-N2-v1 0.4</td>
+<td>PPO (red neuronal)</td>
+<td>1</td>
+<td>1 500 000 pasos</td>
+<td><strong>97.5 %</strong></td>
+<td>52.0 %</td>
+<td>4</td>
+<td>seleccionado</td>
+<td>anterior (destino del rollback)</td>
+<td>rocket-landing-ppo v18</td>
+</tr>
+<tr>
+<td><code>ppo-pasarela-transfer-1m5-v0.4-s2</code></td>
+<td>experimento-5-pasarela</td>
+<td>N2 · RocketLanding3D-N2-v1 0.4</td>
+<td>PPO (red neuronal)</td>
+<td>2</td>
+<td>1 500 000 pasos</td>
+<td><strong>100.0 %</strong></td>
+<td>68.0 %</td>
+<td>0</td>
+<td>seleccionado</td>
+<td>recomendado (se sirve en la web)</td>
+<td>rocket-landing-ppo v19</td>
+</tr>
+<tr>
+<td><code>ppo-pasarela-viento-transfer-1m5-v0.5-s1</code></td>
+<td>experimento-6-pasarela-viento</td>
+<td>N3 · RocketLanding3D-N3-v1 0.5</td>
+<td>PPO (red neuronal)</td>
+<td>1</td>
+<td>1 500 000 pasos</td>
+<td><strong>94.0 %</strong></td>
+<td>66.0 %</td>
+<td>8</td>
+<td>rechazado</td>
+<td>histórico</td>
+<td>rocket-landing-ppo v20</td>
+</tr>
+<tr>
+<td><code>ppo-pasarela-viento-transfer-1m5-v0.5-s2</code></td>
+<td>experimento-6-pasarela-viento</td>
+<td>N3 · RocketLanding3D-N3-v1 0.5</td>
+<td>PPO (red neuronal)</td>
+<td>2</td>
+<td>1 500 000 pasos</td>
+<td><strong>92.5 %</strong></td>
+<td>74.5 %</td>
+<td>10</td>
+<td>rechazado</td>
+<td>histórico</td>
+<td>rocket-landing-ppo v21</td>
+</tr>
+<tr>
+<td><code>ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0</code></td>
+<td>experimento-6-pasarela-viento</td>
+<td>N3 · RocketLanding3D-N3-v1 0.5</td>
+<td>PPO (red neuronal)</td>
+<td>0</td>
+<td>1 500 000 pasos</td>
+<td><strong>97.5 %</strong></td>
+<td>85.5 %</td>
+<td>3</td>
+<td>seleccionado</td>
+<td>recomendado (se sirve en la web)</td>
+<td>rocket-landing-ppo v22</td>
+</tr>
+</tbody>
+</table>
+<h2 id="experimento-1-q-learning-en-el-nivel-1">Experimento 1 · Q-learning en el nivel 1</h2>
+<p>Experimento de MLflow <code>experimento-1-qlearning</code> (1 ejecuciones). Las ejecuciones van en orden cronológico; cada una dice qué cambió frente a su baseline.</p>
+<p><strong>Pregunta.</strong> ¿Se puede aprender a aterrizar en el ambiente base con un modelo tabular pequeño? Fija el baseline aprendido y las métricas.</p>
+<p><strong>Variables que se mueven.</strong> épocas, tasas de aprendizaje y exploración (α, ε), descuento γ, semilla; dos tablas Q discretas (motor y dirección).</p>
+<h3 id="base-v01-s0-referencia-785"><code>base-v0.1-s0</code> · referencia · 78.5 %</h3>
+<p><strong>Hipótesis.</strong> Con el empuje expresado respecto al peso y un estado discreto pequeño (altitud, velocidad vertical y deriva prevista en cada eje), un Q-learning tabular aprende a aterrizar en menos de 5000 épocas.</p>
+<p><strong>Cambio frente a <code>—</code>.</strong> Primer modelo aprendido. Referencias no aprendidas: agente aleatorio (0/20) y controlador heurístico hecho a mano (20/20, experimento1.py).</p>
+<p><strong>Dónde está el modelo.</strong></p>
+<ul>
+<li><code>resultados/runs/base-v0.1-s0/modelo.npz</code> · SHA-256 <code>e1498f54808d1f0d1e44e37e46fc3319ab760887c1e7f05f5340468b5d337644</code></li>
+<li>En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/f8f749a4e7cc8959dce7d5bed071019456bce9c4/resultados/runs/base-v0.1-s0/modelo.npz</li>
+<li>MLflow: modelo <code>rocket-landing-qlearning</code> versión 1, run <code>41f7db7f2f4b4feb991ab9037a347c99</code> (https://alpha-centauri-mlflow.onrender.com/#/experiments/1/runs/41f7db7f2f4b4feb991ab9037a347c99)</li>
+<li>Commit de git: <code>f8f749a4e7cc</code> · manifiesto de la sección 11: <code>manifests/base-v0.1-s0.json</code></li>
+</ul>
+<p><strong>Variables.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ambiente</td>
+<td>RocketLanding3D-v0 v0.1 (N1)</td>
+</tr>
+<tr>
+<td>agente</td>
+<td>Q-learning · Q-learning con dos tablas (motor y dirección)</td>
+</tr>
+<tr>
+<td>epochs</td>
+<td>5000</td>
+</tr>
+<tr>
+<td>alpha</td>
+<td>0.1</td>
+</tr>
+<tr>
+<td>alpha_end</td>
+<td>0.01</td>
+</tr>
+<tr>
+<td>gamma</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>epsilon_end</td>
+<td>0.02</td>
+</tr>
+<tr>
+<td>epsilon_decay</td>
+<td>0.6</td>
+</tr>
+<tr>
+<td>seed</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Resultado.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Normal (suite v1)</th>
+<th>Viento 15 m/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizajes seguros</td>
+<td>78.5 %</td>
+<td>38.0 %</td>
+</tr>
+<tr>
+<td>velocidad de contacto</td>
+<td>1.95 m/s</td>
+<td>1.98 m/s</td>
+</tr>
+<tr>
+<td>error de posición</td>
+<td>5.5 m</td>
+<td>33.6 m</td>
+</tr>
+<tr>
+<td>cómo terminan</td>
+<td>aterrizaje 157, fuera de plataforma 10, choque 33</td>
+<td>aterrizaje 76, fuera de plataforma 6, choque 118</td>
+</tr>
+<tr>
+<td>primer aterrizaje / mejor época</td>
+<td>1785 / 5000</td>
+<td></td>
+</tr>
+<tr>
+<td>presupuesto</td>
+<td>epocas 5000, tiempo_s 116, maquina CPU de portátil (WSL2)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisión (2026-10-28).</strong> Aceptado como baseline aprendido del nivel 1: 157/200 aterrizajes (78 %), 38 % con viento de 15 m/s, primer aterrizaje en la época 1785. Es el modelo 'anterior' del catálogo, al que se vuelve en un rollback.</p>
+<h2 id="experimento-2-ppo-red-neuronal-en-el-nivel-1">Experimento 2 · PPO (red neuronal) en el nivel 1</h2>
+<p>Experimento de MLflow <code>experimento-2-ppo</code> (5 ejecuciones). Las ejecuciones van en orden cronológico; cada una dice qué cambió frente a su baseline.</p>
+<p><strong>Pregunta.</strong> ¿Una red neuronal entrenada con PPO supera al Q-learning en el mismo ambiente? Qué parametrización de la acción lo hace aprendible y cuánto varía entre semillas.</p>
+<p><strong>Variables que se mueven.</strong> pasos del agente, entornos en paralelo, tamaño de lote, tasa de aprendizaje, γ, λ de GAE, recorte, entropía, red, desviación inicial, acción (cruda / relativa v1 / relativa v2), semilla.</p>
+<h3 id="ppo-v01-s0-rechazado-00"><code>ppo-v0.1-s0</code> · rechazado · 0.0 %</h3>
+<p><strong>Hipótesis.</strong> Una red neuronal entrenada con PPO (Stable-Baselines3) directamente sobre la acción cruda del entorno (acelerador, encendido y dirección del empuje) supera al Q-learning con 400 000 pasos.</p>
+<p><strong>Cambio frente a <code>base-v0.1-s0</code>.</strong> Modelo tabular → red MLP 128×128; mismo ambiente, misma recompensa y misma suite. Acción: los 5 valores crudos del entorno.</p>
+<p><strong>Dónde está el modelo.</strong></p>
+<ul>
+<li><code>resultados/runs/ppo-v0.1-s0/modelo.zip</code> · SHA-256 <code>dd5d2f87be2bbb430c59a56c385678392599c68b48d81b668567948f13c3d616</code></li>
+<li><code>resultados/runs/ppo-v0.1-s0/modelo_normalizador.pkl</code> · SHA-256 <code>92c3285a0c53237138f527868c80a57b504f420c33562e65449f8b955c32aec8</code></li>
+<li>En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/25f0295769b5de65ebe39d7f42da6f0ce4e56ca8/resultados/runs/ppo-v0.1-s0/modelo.zip</li>
+<li>MLflow: modelo <code>rocket-landing-ppo</code> versión 1, run <code>abb49500ab0543f88af73c9323aa5fc2</code> (https://alpha-centauri-mlflow.onrender.com/#/experiments/2/runs/abb49500ab0543f88af73c9323aa5fc2)</li>
+<li>Commit de git: <code>25f0295769b5</code> · manifiesto de la sección 11: <code>manifests/ppo-v0.1-s0.json</code></li>
+</ul>
+<p><strong>Variables.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ambiente</td>
+<td>RocketLanding3D-v0 v0.1 (N1)</td>
+</tr>
+<tr>
+<td>agente</td>
+<td>PPO (red neuronal) · cruda: los 5 valores del entorno</td>
+</tr>
+<tr>
+<td>total_timesteps</td>
+<td>400000</td>
+</tr>
+<tr>
+<td>n_envs</td>
+<td>8</td>
+</tr>
+<tr>
+<td>n_steps</td>
+<td>256</td>
+</tr>
+<tr>
+<td>batch_size</td>
+<td>256</td>
+</tr>
+<tr>
+<td>n_epochs</td>
+<td>10</td>
+</tr>
+<tr>
+<td>learning_rate</td>
+<td>0.0003</td>
+</tr>
+<tr>
+<td>gamma</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>gae_lambda</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td>clip_range</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>ent_coef</td>
+<td>0.0</td>
+</tr>
+<tr>
+<td>net_arch</td>
+<td>128 × 128</td>
+</tr>
+<tr>
+<td>eval_every</td>
+<td>20000</td>
+</tr>
+<tr>
+<td>seed</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Diferencias de variables con <code>base-v0.1-s0</code>.</strong> acción del agente: Q-learning → cruda: los 5 valores del entorno; total_timesteps: — → 400000; n_envs: — → 8; n_steps: — → 256; batch_size: — → 256; n_epochs: — → 10; learning_rate: — → 0.0003; gae_lambda: — → 0.95; clip_range: — → 0.2; ent_coef: — → 0.0; net_arch: — → 128 × 128; eval_every: — → 20000</p>
+<p><strong>Resultado.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Normal (suite v1)</th>
+<th>Viento 15 m/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizajes seguros</td>
+<td>0.0 %</td>
+<td>0.0 %</td>
+</tr>
+<tr>
+<td>velocidad de contacto</td>
+<td>11.93 m/s</td>
+<td>9.61 m/s</td>
+</tr>
+<tr>
+<td>error de posición</td>
+<td>8.1 m</td>
+<td>12.7 m</td>
+</tr>
+<tr>
+<td>cómo terminan</td>
+<td>choque 200</td>
+<td>choque 197, sin pasos 3</td>
+</tr>
+<tr>
+<td>primer aterrizaje / mejor época</td>
+<td>nunca / 14393</td>
+<td></td>
+</tr>
+<tr>
+<td>presupuesto</td>
+<td>pasos_agente 400000, epocas 14443, tiempo_s 414, maquina CPU de portátil (WSL2), 8 entornos en paralelo</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisión (2026-10-28).</strong> Rechazado: 0/200 aterrizajes. La recompensa media sube de −115 a −49 (aprende a acercarse) pero nunca frena. Con la acción cruda el problema no es aprendible en este presupuesto. Se conserva como evidencia.</p>
+<h3 id="ppo-rel-v01-s0-rechazado-00"><code>ppo-rel-v0.1-s0</code> · rechazado · 0.0 %</h3>
+<p><strong>Hipótesis.</strong> El fallo de ppo-v0.1-s0 es la parametrización de la acción: si la red decide el empuje respecto al peso (×1,0 = flotar), como hacía el Q-learning, PPO aprende a aterrizar.</p>
+<p><strong>Cambio frente a <code>ppo-v0.1-s0</code>.</strong> Acción relativa v1: empuje/peso en [0, 1,6] e inclinación de hasta ±0,3 por eje (23°). Presupuesto ampliado a 600 000 pasos; coeficiente de entropía 0,005.</p>
+<p><strong>Dónde está el modelo.</strong></p>
+<ul>
+<li><code>resultados/runs/ppo-rel-v0.1-s0/modelo.zip</code> · SHA-256 <code>d8a53b9d266cfcc6b7e9291dc749a180a7c036bf5af7b8f89f296c3886324903</code></li>
+<li><code>resultados/runs/ppo-rel-v0.1-s0/modelo_normalizador.pkl</code> · SHA-256 <code>d50264ebbd8b3aa59c2a71ca2d947f93f3e262dd02b59e1e5903cafe5ecedb2c</code></li>
+<li>En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/5b55ff723ef5c0334ac5fa8a2e813d1e9cb3e76d/resultados/runs/ppo-rel-v0.1-s0/modelo.zip</li>
+<li>MLflow: modelo <code>rocket-landing-ppo</code> versión 2, run <code>0c465e9565574403a0957c4eb60aa1eb</code> (https://alpha-centauri-mlflow.onrender.com/#/experiments/2/runs/0c465e9565574403a0957c4eb60aa1eb)</li>
+<li>Commit de git: <code>5b55ff723ef5</code> · manifiesto de la sección 11: <code>manifests/ppo-rel-v0.1-s0.json</code></li>
+</ul>
+<p><strong>Variables.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ambiente</td>
+<td>RocketLanding3D-v0 v0.1 (N1)</td>
+</tr>
+<tr>
+<td>agente</td>
+<td>PPO (red neuronal) · relativa v1: empuje/peso en [0, 1.6] e inclinación ±0.3</td>
+</tr>
+<tr>
+<td>total_timesteps</td>
+<td>600000</td>
+</tr>
+<tr>
+<td>n_envs</td>
+<td>8</td>
+</tr>
+<tr>
+<td>n_steps</td>
+<td>256</td>
+</tr>
+<tr>
+<td>batch_size</td>
+<td>256</td>
+</tr>
+<tr>
+<td>n_epochs</td>
+<td>10</td>
+</tr>
+<tr>
+<td>learning_rate</td>
+<td>0.0003</td>
+</tr>
+<tr>
+<td>gamma</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>gae_lambda</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td>clip_range</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>ent_coef</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>net_arch</td>
+<td>128 × 128</td>
+</tr>
+<tr>
+<td>eval_every</td>
+<td>20000</td>
+</tr>
+<tr>
+<td>seed</td>
+<td>0</td>
+</tr>
+<tr>
+<td>accion</td>
+<td>relativa</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Diferencias de variables con <code>ppo-v0.1-s0</code>.</strong> acción del agente: cruda: los 5 valores del entorno → relativa v1: empuje/peso en [0, 1.6] e inclinación ±0.3; total_timesteps: 400000 → 600000; ent_coef: 0.0 → 0.005; accion: — → relativa</p>
+<p><strong>Resultado.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Normal (suite v1)</th>
+<th>Viento 15 m/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizajes seguros</td>
+<td>0.0 %</td>
+<td>0.0 %</td>
+</tr>
+<tr>
+<td>velocidad de contacto</td>
+<td>2.57 m/s</td>
+<td>7.20 m/s</td>
+</tr>
+<tr>
+<td>error de posición</td>
+<td>5.9 m</td>
+<td>6.1 m</td>
+</tr>
+<tr>
+<td>cómo terminan</td>
+<td>choque 199, sin pasos 1</td>
+<td>choque 200</td>
+</tr>
+<tr>
+<td>primer aterrizaje / mejor época</td>
+<td>15936 / 19828</td>
+<td></td>
+</tr>
+<tr>
+<td>presupuesto</td>
+<td>pasos_agente 600000, epocas 19831, tiempo_s 546, maquina CPU de portátil (WSL2), 8 entornos en paralelo</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisión (2026-10-28).</strong> Rechazado: 0/200. Frena bien (0,3 m/s al contacto) pero llega inclinado 17°, por encima del límite de 10°: el rango de la acción permitía violar la regla y la única señal correctora era el −100 final. La hipótesis se confirma a medias (el empuje relativo hace que frene) y da la siguiente.</p>
+<h3 id="ppo-v2-v01-s0-referencia-970"><code>ppo-v2-v0.1-s0</code> · referencia · 97.0 %</h3>
+<p><strong>Hipótesis.</strong> Acotar la inclinación de la acción al límite del aterrizaje (≤ 9,6° combinados) y centrar el empuje en flotar (acción 0 = ×1,0 el peso) hace aprendible el problema con el mismo presupuesto que ppo-rel-v0.1-s0.</p>
+<p><strong>Cambio frente a <code>ppo-rel-v0.1-s0</code>.</strong> Acción relativa v2: 3 valores en [−1, 1]; empuje = 1 + a₀ (máximo ×1,6), inclinación = a₁, a₂ × 0,12; desviación inicial de la política 0,6 (log_std_init −0,5). Todo lo demás igual que ppo-rel-v0.1-s0.</p>
+<p><strong>Dónde está el modelo.</strong></p>
+<ul>
+<li><code>resultados/runs/ppo-v2-v0.1-s0/modelo.zip</code> · SHA-256 <code>6f190ae32d2886b7755fb9911a282235dff7856984872242cf1afc5a064da496</code></li>
+<li><code>resultados/runs/ppo-v2-v0.1-s0/modelo_normalizador.pkl</code> · SHA-256 <code>a5534a6f5af58e2ed478417323afa9178e39155ca0b326649ee6ef2415561675</code></li>
+<li>En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/6458e2b0fbb022ac625a7bdb45f85cb1da7294a5/resultados/runs/ppo-v2-v0.1-s0/modelo.zip</li>
+<li>MLflow: modelo <code>rocket-landing-ppo</code> versión 3, run <code>08e4bde8de104dbc94869a31e622f52c</code> (https://alpha-centauri-mlflow.onrender.com/#/experiments/2/runs/08e4bde8de104dbc94869a31e622f52c)</li>
+<li>Commit de git: <code>6458e2b0fbb0</code> · manifiesto de la sección 11: <code>manifests/ppo-v2-v0.1-s0.json</code></li>
+</ul>
+<p><strong>Variables.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ambiente</td>
+<td>RocketLanding3D-v0 v0.1 (N1)</td>
+</tr>
+<tr>
+<td>agente</td>
+<td>PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12</td>
+</tr>
+<tr>
+<td>total_timesteps</td>
+<td>600000</td>
+</tr>
+<tr>
+<td>n_envs</td>
+<td>8</td>
+</tr>
+<tr>
+<td>n_steps</td>
+<td>256</td>
+</tr>
+<tr>
+<td>batch_size</td>
+<td>256</td>
+</tr>
+<tr>
+<td>n_epochs</td>
+<td>10</td>
+</tr>
+<tr>
+<td>learning_rate</td>
+<td>0.0003</td>
+</tr>
+<tr>
+<td>gamma</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>gae_lambda</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td>clip_range</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>ent_coef</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>net_arch</td>
+<td>128 × 128</td>
+</tr>
+<tr>
+<td>log_std_init</td>
+<td>-0.5</td>
+</tr>
+<tr>
+<td>eval_every</td>
+<td>20000</td>
+</tr>
+<tr>
+<td>seed</td>
+<td>0</td>
+</tr>
+<tr>
+<td>accion</td>
+<td>relativa</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Diferencias de variables con <code>ppo-rel-v0.1-s0</code>.</strong> acción del agente: relativa v1: empuje/peso en [0, 1.6] e inclinación ±0.3 → relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12; log_std_init: — → -0.5</p>
+<p><strong>Resultado.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Normal (suite v1)</th>
+<th>Viento 15 m/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizajes seguros</td>
+<td>97.0 %</td>
+<td>62.5 %</td>
+</tr>
+<tr>
+<td>velocidad de contacto</td>
+<td>1.20 m/s</td>
+<td>1.83 m/s</td>
+</tr>
+<tr>
+<td>error de posición</td>
+<td>4.9 m</td>
+<td>7.8 m</td>
+</tr>
+<tr>
+<td>cómo terminan</td>
+<td>aterrizaje 194, fuera de plataforma 2, choque 3, sin pasos 1</td>
+<td>aterrizaje 125, fuera de plataforma 23, choque 38, sin pasos 14</td>
+</tr>
+<tr>
+<td>primer aterrizaje / mejor época</td>
+<td>1970 / 14264</td>
+<td></td>
+</tr>
+<tr>
+<td>presupuesto</td>
+<td>pasos_agente 600000, epocas 15942, tiempo_s 683, maquina CPU de portátil (WSL2), 8 entornos en paralelo</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisión (2026-11-02).</strong> Seleccionado y promovido a modelo recomendado (catálogo v2): 194/200 aterrizajes (97 %) frente a 78 % del baseline; 63 % frente a 38 % con viento de 15 m/s; contacto a 1,20 m/s y 4,9 m del centro; primer aterrizaje en la época 1970. Actualización (2026-11-05): el pipeline promovió a ppo-v2-v0.1-s1 (misma configuración con semilla 1: 99 %, 72 % con viento) como recomendado del nivel 1 (catálogo v5); esta ejecución pasa a 'anterior' (destino del rollback). La diferencia entre semillas (97 % frente a 99 %) mide la variabilidad de la configuración.</p>
+<h3 id="ppo-v2-v01-s1-seleccionado-990"><code>ppo-v2-v0.1-s1</code> · seleccionado · 99.0 %</h3>
+<p><strong>Hipótesis.</strong> Con otra semilla (1), la configuración v2 del nivel 1 queda a menos de 5 puntos del 97 % de la semilla 0: el resultado no depende de la semilla (primera de las tres semillas del finalista).</p>
+<p><strong>Cambio frente a <code>ppo-v2-v0.1-s0</code>.</strong> Solo la semilla: 1 en vez de 0. Mismos hiperparámetros, ambiente y presupuesto (600 000 pasos) que ppo-v2-v0.1-s0.</p>
+<p><strong>Dónde está el modelo.</strong></p>
+<ul>
+<li><code>resultados/runs/ppo-v2-v0.1-s1/modelo.zip</code> · SHA-256 <code>b180a033bcf1c8111fd3361e4a3c065e4622666196f2ef5ba08bf14151cac97d</code></li>
+<li><code>resultados/runs/ppo-v2-v0.1-s1/modelo_normalizador.pkl</code> · SHA-256 <code>cbb62d0aa06fd956d0e584af5638f0edb183efbfb07cfe168068d19363e549d2</code></li>
+<li>En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/3f69d344e63dc1f526e718abdb1d98231f0c1611/resultados/runs/ppo-v2-v0.1-s1/modelo.zip</li>
+<li>MLflow: modelo <code>rocket-landing-ppo</code> versión 7, run <code>73ba6e508aa44c8aa47783a1a9917b7f</code> (https://alpha-centauri-mlflow.onrender.com/#/experiments/2/runs/73ba6e508aa44c8aa47783a1a9917b7f)</li>
+<li>Commit de git: <code>3f69d344e63dc1f526e718abdb1d98231f0c1611</code> (había cambios sin commit al entrenar) · manifiesto de la sección 11: <code>manifests/ppo-v2-v0.1-s1.json</code></li>
+</ul>
+<p><strong>Variables.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ambiente</td>
+<td>RocketLanding3D-v0 v0.1.1 (N1)</td>
+</tr>
+<tr>
+<td>agente</td>
+<td>PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12</td>
+</tr>
+<tr>
+<td>total_timesteps</td>
+<td>600000</td>
+</tr>
+<tr>
+<td>n_envs</td>
+<td>8</td>
+</tr>
+<tr>
+<td>n_steps</td>
+<td>256</td>
+</tr>
+<tr>
+<td>batch_size</td>
+<td>256</td>
+</tr>
+<tr>
+<td>n_epochs</td>
+<td>10</td>
+</tr>
+<tr>
+<td>learning_rate</td>
+<td>0.0003</td>
+</tr>
+<tr>
+<td>gamma</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>gae_lambda</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td>clip_range</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>ent_coef</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>net_arch</td>
+<td>128 × 128</td>
+</tr>
+<tr>
+<td>log_std_init</td>
+<td>-0.5</td>
+</tr>
+<tr>
+<td>eval_every</td>
+<td>20000</td>
+</tr>
+<tr>
+<td>seed</td>
+<td>1</td>
+</tr>
+<tr>
+<td>accion</td>
+<td>relativa</td>
+</tr>
+<tr>
+<td>desde</td>
+<td>None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Diferencias de variables con <code>ppo-v2-v0.1-s0</code>.</strong> ambiente: RocketLanding3D-v0 v0.1 → RocketLanding3D-v0 v0.1.1; seed: 0 → 1; ambiente: — → RocketLanding3D-v0</p>
+<p><strong>Resultado.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Normal (suite v1)</th>
+<th>Viento 15 m/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizajes seguros</td>
+<td>99.0 %</td>
+<td>72.0 %</td>
+</tr>
+<tr>
+<td>velocidad de contacto</td>
+<td>1.25 m/s</td>
+<td>1.76 m/s</td>
+</tr>
+<tr>
+<td>error de posición</td>
+<td>3.1 m</td>
+<td>6.5 m</td>
+</tr>
+<tr>
+<td>cómo terminan</td>
+<td>aterrizaje 198, sin pasos 2</td>
+<td>aterrizaje 144, fuera de plataforma 1, choque 6, sin pasos 49</td>
+</tr>
+<tr>
+<td>primer aterrizaje / mejor época</td>
+<td>1470 / 16422</td>
+<td></td>
+</tr>
+<tr>
+<td>presupuesto</td>
+<td>pasos_agente 600000, epocas 16423, maquina pipeline Prefect en CPU de portátil (WSL2)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisión (2026-11-05).</strong> Seleccionado por el pipeline: 99.0% de aterrizajes en la suite v1 (0 colisiones), 72.0% con viento de 15 m/s; supera al recomendado ppo-v2-v0.1-s0 con el criterio de aceptación (+2% de tasa, viento −5% como mucho).</p>
+<h3 id="ppo-v2-v01-s2-rechazado-975"><code>ppo-v2-v0.1-s2</code> · rechazado · 97.5 %</h3>
+<p><strong>Hipótesis.</strong> Tercera semilla (2) de la configuración v2 del nivel 1: queda a menos de 5 puntos de las semillas 0 (97 %) y 1 (99 %).</p>
+<p><strong>Cambio frente a <code>ppo-v2-v0.1-s1</code>.</strong> Solo la semilla: 2. Mismos hiperparámetros, ambiente y presupuesto (600 000 pasos).</p>
+<p><strong>Dónde está el modelo.</strong></p>
+<ul>
+<li><code>resultados/runs/ppo-v2-v0.1-s2/modelo.zip</code> · SHA-256 <code>3c08bf5b48d480d8d3b5f742b9f5e20cad73f272e7d9447b3446481e2f26b48d</code></li>
+<li><code>resultados/runs/ppo-v2-v0.1-s2/modelo_normalizador.pkl</code> · SHA-256 <code>f7ddb318b938aada9f797bef1d5934f15620966a05634181248c6e73c263f8a9</code></li>
+<li>En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/d298e217d87d1f70e977b0172a8e9e09e88152d6/resultados/runs/ppo-v2-v0.1-s2/modelo.zip</li>
+<li>MLflow: modelo <code>rocket-landing-ppo</code> versión 8, run <code>2cc6a8f2be6f4fa49649fb300d415205</code> (https://alpha-centauri-mlflow.onrender.com/#/experiments/2/runs/2cc6a8f2be6f4fa49649fb300d415205)</li>
+<li>Commit de git: <code>d298e217d87d1f70e977b0172a8e9e09e88152d6</code> · manifiesto de la sección 11: <code>manifests/ppo-v2-v0.1-s2.json</code></li>
+</ul>
+<p><strong>Variables.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ambiente</td>
+<td>RocketLanding3D-v0 v0.1.1 (N1)</td>
+</tr>
+<tr>
+<td>agente</td>
+<td>PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12</td>
+</tr>
+<tr>
+<td>total_timesteps</td>
+<td>600000</td>
+</tr>
+<tr>
+<td>n_envs</td>
+<td>8</td>
+</tr>
+<tr>
+<td>n_steps</td>
+<td>256</td>
+</tr>
+<tr>
+<td>batch_size</td>
+<td>256</td>
+</tr>
+<tr>
+<td>n_epochs</td>
+<td>10</td>
+</tr>
+<tr>
+<td>learning_rate</td>
+<td>0.0003</td>
+</tr>
+<tr>
+<td>gamma</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>gae_lambda</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td>clip_range</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>ent_coef</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>net_arch</td>
+<td>128 × 128</td>
+</tr>
+<tr>
+<td>log_std_init</td>
+<td>-0.5</td>
+</tr>
+<tr>
+<td>eval_every</td>
+<td>20000</td>
+</tr>
+<tr>
+<td>seed</td>
+<td>2</td>
+</tr>
+<tr>
+<td>accion</td>
+<td>relativa</td>
+</tr>
+<tr>
+<td>desde</td>
+<td>None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Diferencias de variables con <code>ppo-v2-v0.1-s1</code>.</strong> seed: 1 → 2</p>
+<p><strong>Resultado.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Normal (suite v1)</th>
+<th>Viento 15 m/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizajes seguros</td>
+<td>97.5 %</td>
+<td>71.5 %</td>
+</tr>
+<tr>
+<td>velocidad de contacto</td>
+<td>1.19 m/s</td>
+<td>1.43 m/s</td>
+</tr>
+<tr>
+<td>error de posición</td>
+<td>3.9 m</td>
+<td>8.1 m</td>
+</tr>
+<tr>
+<td>cómo terminan</td>
+<td>aterrizaje 195, fuera de plataforma 4, choque 1</td>
+<td>aterrizaje 143, fuera de plataforma 42, choque 11, sin pasos 4</td>
+</tr>
+<tr>
+<td>primer aterrizaje / mejor época</td>
+<td>1717 / 17748</td>
+<td></td>
+</tr>
+<tr>
+<td>presupuesto</td>
+<td>pasos_agente 600000, epocas 17748, maquina pipeline Prefect en CPU de portátil (WSL2)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisión (2026-11-05).</strong> Rechazado por el pipeline: 97.5% de aterrizajes en la suite v1 (0 colisiones), 71.5% con viento de 15 m/s. no mejora al recomendado ppo-v2-v0.1-s1 en al menos 2% (97.5% frente a 99.0%).</p>
+<h2 id="experimento-3-nivel-2-torres-alrededor-de-la-plataforma">Experimento 3 · Nivel 2: torres alrededor de la plataforma</h2>
+<p>Experimento de MLflow <code>experimento-3-nivel2</code> (5 ejecuciones). Las ejecuciones van en orden cronológico; cada una dice qué cambió frente a su baseline.</p>
+<p><strong>Pregunta.</strong> Con una decisión nueva (por qué hueco entrar entre tres torres), ¿aprende PPO desde cero o hace falta partir del modelo del nivel 1? Cuánto presupuesto exige y cuánto varía entre semillas.</p>
+<p><strong>Variables que se mueven.</strong> las del experimento 2 más el ambiente (observación de 25 valores), el modelo de partida (transferencia) y el presupuesto (600 000 o 1 500 000 pasos).</p>
+<h3 id="ppo-n2-v02-s0-rechazado-80"><code>ppo-n2-v0.2-s0</code> · rechazado · 8.0 %</h3>
+<p><strong>Hipótesis.</strong> La misma receta que funcionó en el nivel 1 (PPO, acción relativa v2, 600 000 pasos) aprende desde cero a entrar entre las torres y aterrizar en el nivel 2.</p>
+<p><strong>Cambio frente a <code>ppo-v2-v0.1-s0</code>.</strong> Primer modelo del nivel 2. Mismos hiperparámetros que ppo-v2-v0.1-s0; cambia el ambiente (RocketLanding3D-N2-v0: 3 torres, observación de 25 valores, colisión −100, castigo de proximidad en el potencial).</p>
+<p><strong>Dónde está el modelo.</strong></p>
+<ul>
+<li><code>resultados/runs/ppo-n2-v0.2-s0/modelo.zip</code> · SHA-256 <code>330d3cbacbc2a8ae7baa6e38edbcf852341a6333c1af8ba6f0f59982d1e34b92</code></li>
+<li><code>resultados/runs/ppo-n2-v0.2-s0/modelo_normalizador.pkl</code> · SHA-256 <code>298ec2438371973c169d46f278e7333cf87cd7db5ab6c21511a8a0dc5b1faae7</code></li>
+<li>En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/5b99fd685a66c4ae1c88dd64041fc212398e441e/resultados/runs/ppo-n2-v0.2-s0/modelo.zip</li>
+<li>MLflow: modelo <code>rocket-landing-ppo</code> versión 4, run <code>98520fc1b3fa415eacb968b66d0beb7a</code> (https://alpha-centauri-mlflow.onrender.com/#/experiments/3/runs/98520fc1b3fa415eacb968b66d0beb7a)</li>
+<li>Commit de git: <code>5b99fd685a66c4ae1c88dd64041fc212398e441e</code> (había cambios sin commit al entrenar) · manifiesto de la sección 11: <code>manifests/ppo-n2-v0.2-s0.json</code></li>
+</ul>
+<p><strong>Variables.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ambiente</td>
+<td>RocketLanding3D-N2-v0 v0.2 (N2)</td>
+</tr>
+<tr>
+<td>agente</td>
+<td>PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12</td>
+</tr>
+<tr>
+<td>total_timesteps</td>
+<td>600000</td>
+</tr>
+<tr>
+<td>n_envs</td>
+<td>8</td>
+</tr>
+<tr>
+<td>n_steps</td>
+<td>256</td>
+</tr>
+<tr>
+<td>batch_size</td>
+<td>256</td>
+</tr>
+<tr>
+<td>n_epochs</td>
+<td>10</td>
+</tr>
+<tr>
+<td>learning_rate</td>
+<td>0.0003</td>
+</tr>
+<tr>
+<td>gamma</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>gae_lambda</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td>clip_range</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>ent_coef</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>net_arch</td>
+<td>128 × 128</td>
+</tr>
+<tr>
+<td>log_std_init</td>
+<td>-0.5</td>
+</tr>
+<tr>
+<td>eval_every</td>
+<td>20000</td>
+</tr>
+<tr>
+<td>seed</td>
+<td>0</td>
+</tr>
+<tr>
+<td>accion</td>
+<td>relativa</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Diferencias de variables con <code>ppo-v2-v0.1-s0</code>.</strong> ambiente: RocketLanding3D-v0 v0.1 → RocketLanding3D-N2-v0 v0.2; ambiente: — → RocketLanding3D-N2-v0</p>
+<p><strong>Resultado.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Normal (suite v1)</th>
+<th>Viento 15 m/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizajes seguros</td>
+<td>8.0 %</td>
+<td>1.5 %</td>
+</tr>
+<tr>
+<td>velocidad de contacto</td>
+<td>2.48 m/s</td>
+<td>5.95 m/s</td>
+</tr>
+<tr>
+<td>error de posición</td>
+<td>27.8 m</td>
+<td>42.3 m</td>
+</tr>
+<tr>
+<td>cómo terminan</td>
+<td>aterrizaje 16, fuera de plataforma 97, choque 33, colisión 54</td>
+<td>aterrizaje 3, fuera de plataforma 70, choque 73, sin pasos 4, colisión 50</td>
+</tr>
+<tr>
+<td>primer aterrizaje / mejor época</td>
+<td>3501 / 20663</td>
+<td></td>
+</tr>
+<tr>
+<td>presupuesto</td>
+<td>pasos_agente 600000, epocas 21376, tiempo_s 759, maquina CPU de portátil (WSL2), 8 entornos en paralelo</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisión (2026-11-05).</strong> Rechazado: 16/200 aterrizajes (8 %). Aprende a frenar (97 contactos suaves) pero fuera de la plataforma, y sigue chocando con las torres (54 colisiones): el −100 de la colisión en el 30 % de las salidas corta las épocas antes de que el agente practique el aterrizaje, y la red trata la plataforma rodeada de torres como zona peligrosa. Peor que el modelo del nivel 1 a ciegas (72 %). Siguiente hipótesis: partir de la política del nivel 1 y aprender solo a esquivar las torres.</p>
+<h3 id="ppo-n2-transfer-v02-s0-referencia-765"><code>ppo-n2-transfer-v0.2-s0</code> · referencia · 76.5 %</h3>
+<p><strong>Hipótesis.</strong> Partir de la política del nivel 1 (ppo-v2-v0.1-s0: 72 % en el nivel 2 sin ver las torres) y aprender solo a esquivar las torres es más barato y mejor que aprender desde cero: con el mismo presupuesto de 600 000 pasos se superan el 72 % y las 53 colisiones del modelo a ciegas.</p>
+<p><strong>Cambio frente a <code>ppo-n2-v0.2-s0</code>.</strong> Transferencia: se copian los pesos de ppo-v2-v0.1-s0 y la normalización de las 16 observaciones comunes; las columnas de la primera capa para las 9 entradas nuevas (torres) empiezan en cero. Mismos hiperparámetros y ambiente que ppo-n2-v0.2-s0.</p>
+<p><strong>Dónde está el modelo.</strong></p>
+<ul>
+<li><code>resultados/runs/ppo-n2-transfer-v0.2-s0/modelo.zip</code> · SHA-256 <code>a7cd4150e5b70798848442664c5c112d4baa95b16f0fa54a90b963425e46f49d</code></li>
+<li><code>resultados/runs/ppo-n2-transfer-v0.2-s0/modelo_normalizador.pkl</code> · SHA-256 <code>7a0c6bcad898c4e1af9432aeb2184f840f1bf95ed52ff81f105a4fc85bf84a75</code></li>
+<li>En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/5b99fd685a66c4ae1c88dd64041fc212398e441e/resultados/runs/ppo-n2-transfer-v0.2-s0/modelo.zip</li>
+<li>MLflow: modelo <code>rocket-landing-ppo</code> versión 5, run <code>9ded0b0f09f24ca88ac76be37749d72b</code> (https://alpha-centauri-mlflow.onrender.com/#/experiments/3/runs/9ded0b0f09f24ca88ac76be37749d72b)</li>
+<li>Commit de git: <code>5b99fd685a66c4ae1c88dd64041fc212398e441e</code> (había cambios sin commit al entrenar) · manifiesto de la sección 11: <code>manifests/ppo-n2-transfer-v0.2-s0.json</code></li>
+<li>Parte de los pesos de <code>ppo-v2-v0.1-s0</code> (transferencia)</li>
+</ul>
+<p><strong>Variables.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ambiente</td>
+<td>RocketLanding3D-N2-v0 v0.2 (N2)</td>
+</tr>
+<tr>
+<td>agente</td>
+<td>PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12</td>
+</tr>
+<tr>
+<td>total_timesteps</td>
+<td>600000</td>
+</tr>
+<tr>
+<td>n_envs</td>
+<td>8</td>
+</tr>
+<tr>
+<td>n_steps</td>
+<td>256</td>
+</tr>
+<tr>
+<td>batch_size</td>
+<td>256</td>
+</tr>
+<tr>
+<td>n_epochs</td>
+<td>10</td>
+</tr>
+<tr>
+<td>learning_rate</td>
+<td>0.0003</td>
+</tr>
+<tr>
+<td>gamma</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>gae_lambda</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td>clip_range</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>ent_coef</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>net_arch</td>
+<td>128 × 128</td>
+</tr>
+<tr>
+<td>log_std_init</td>
+<td>-0.5</td>
+</tr>
+<tr>
+<td>eval_every</td>
+<td>20000</td>
+</tr>
+<tr>
+<td>seed</td>
+<td>0</td>
+</tr>
+<tr>
+<td>accion</td>
+<td>relativa</td>
+</tr>
+<tr>
+<td>desde</td>
+<td>ppo-v2-v0.1-s0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Diferencias de variables con <code>ppo-n2-v0.2-s0</code>.</strong> desde: — → ppo-v2-v0.1-s0</p>
+<p><strong>Resultado.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Normal (suite v1)</th>
+<th>Viento 15 m/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizajes seguros</td>
+<td>76.5 %</td>
+<td>42.0 %</td>
+</tr>
+<tr>
+<td>velocidad de contacto</td>
+<td>1.44 m/s</td>
+<td>3.60 m/s</td>
+</tr>
+<tr>
+<td>error de posición</td>
+<td>9.4 m</td>
+<td>17.3 m</td>
+</tr>
+<tr>
+<td>cómo terminan</td>
+<td>aterrizaje 153, fuera de plataforma 1, choque 4, colisión 42</td>
+<td>aterrizaje 84, fuera de plataforma 7, choque 51, colisión 58</td>
+</tr>
+<tr>
+<td>primer aterrizaje / mejor época</td>
+<td>4 / 19904</td>
+<td></td>
+</tr>
+<tr>
+<td>presupuesto</td>
+<td>pasos_agente 600000, epocas 19940, tiempo_s 832, maquina CPU de portátil (WSL2), 8 entornos en paralelo</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisión (2026-11-05).</strong> Seleccionado como recomendado del nivel 2 (catálogo v3): 153/200 aterrizajes (77 %) frente a 8 % desde cero y 72 % del modelo del nivel 1 a ciegas; aterriza en su cuarta época y la evaluación sin ruido llega a 45/50. La hipótesis se confirma solo en parte: la destreza de aterrizar se conserva, pero las colisiones bajan poco (42 frente a 53): esquivar las torres exige anticipar la ruta desde los 600 m y 600 000 pasos no bastan. Siguiente hipótesis: más presupuesto (1,5 M de pasos) con la misma transferencia. Actualización (mismo día): superado por ppo-n2-transfer-1m5-v0.2-s0 (86 %, 27 colisiones); pasa a 'anterior' del nivel 2 en el catálogo (destino del rollback).</p>
+<h3 id="ppo-n2-transfer-1m5-v02-s0-seleccionado-860"><code>ppo-n2-transfer-1m5-v0.2-s0</code> · seleccionado · 86.0 %</h3>
+<p><strong>Hipótesis.</strong> Esquivar las torres exige anticipar la ruta desde la salida y 600 000 pasos no bastan: con 1,5 M de pasos y la misma transferencia desde el nivel 1, las colisiones bajan claramente (menos de 30 en 200) y la tasa supera el 80 %.</p>
+<p><strong>Cambio frente a <code>ppo-n2-transfer-v0.2-s0</code>.</strong> Solo el presupuesto: 1 500 000 pasos en vez de 600 000. Misma transferencia desde ppo-v2-v0.1-s0, mismos hiperparámetros y ambiente que ppo-n2-transfer-v0.2-s0.</p>
+<p><strong>Dónde está el modelo.</strong></p>
+<ul>
+<li><code>resultados/runs/ppo-n2-transfer-1m5-v0.2-s0/modelo.zip</code> · SHA-256 <code>a1d482aaa151eb8819258f8512174d846231ef1c60a9ab008e5cd136805fd1db</code></li>
+<li><code>resultados/runs/ppo-n2-transfer-1m5-v0.2-s0/modelo_normalizador.pkl</code> · SHA-256 <code>0f47cb0d9ea76b116d53e6e106c96cdafed65beefd1fd5eb543564f1848b38c3</code></li>
+<li>En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/e106cda449db0da672de7f6a855a94380beb84d9/resultados/runs/ppo-n2-transfer-1m5-v0.2-s0/modelo.zip</li>
+<li>MLflow: modelo <code>rocket-landing-ppo</code> versión 6, run <code>069c285758c548059b92ae94b3d739f3</code> (https://alpha-centauri-mlflow.onrender.com/#/experiments/3/runs/069c285758c548059b92ae94b3d739f3)</li>
+<li>Commit de git: <code>e106cda449db0da672de7f6a855a94380beb84d9</code> · manifiesto de la sección 11: <code>manifests/ppo-n2-transfer-1m5-v0.2-s0.json</code></li>
+<li>Parte de los pesos de <code>ppo-v2-v0.1-s0</code> (transferencia)</li>
+</ul>
+<p><strong>Variables.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ambiente</td>
+<td>RocketLanding3D-N2-v0 v0.2 (N2)</td>
+</tr>
+<tr>
+<td>agente</td>
+<td>PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12</td>
+</tr>
+<tr>
+<td>total_timesteps</td>
+<td>1500000</td>
+</tr>
+<tr>
+<td>n_envs</td>
+<td>8</td>
+</tr>
+<tr>
+<td>n_steps</td>
+<td>256</td>
+</tr>
+<tr>
+<td>batch_size</td>
+<td>256</td>
+</tr>
+<tr>
+<td>n_epochs</td>
+<td>10</td>
+</tr>
+<tr>
+<td>learning_rate</td>
+<td>0.0003</td>
+</tr>
+<tr>
+<td>gamma</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>gae_lambda</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td>clip_range</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>ent_coef</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>net_arch</td>
+<td>128 × 128</td>
+</tr>
+<tr>
+<td>log_std_init</td>
+<td>-0.5</td>
+</tr>
+<tr>
+<td>eval_every</td>
+<td>20000</td>
+</tr>
+<tr>
+<td>seed</td>
+<td>0</td>
+</tr>
+<tr>
+<td>accion</td>
+<td>relativa</td>
+</tr>
+<tr>
+<td>desde</td>
+<td>ppo-v2-v0.1-s0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Diferencias de variables con <code>ppo-n2-transfer-v0.2-s0</code>.</strong> total_timesteps: 600000 → 1500000</p>
+<p><strong>Resultado.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Normal (suite v1)</th>
+<th>Viento 15 m/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizajes seguros</td>
+<td>86.0 %</td>
+<td>55.5 %</td>
+</tr>
+<tr>
+<td>velocidad de contacto</td>
+<td>1.31 m/s</td>
+<td>2.83 m/s</td>
+</tr>
+<tr>
+<td>error de posición</td>
+<td>7.0 m</td>
+<td>14.1 m</td>
+</tr>
+<tr>
+<td>cómo terminan</td>
+<td>aterrizaje 172, choque 1, colisión 27</td>
+<td>aterrizaje 111, fuera de plataforma 9, choque 24, sin pasos 14, colisión 42</td>
+</tr>
+<tr>
+<td>primer aterrizaje / mejor época</td>
+<td>4 / 48133</td>
+<td></td>
+</tr>
+<tr>
+<td>presupuesto</td>
+<td>pasos_agente 1500000, epocas 49460, tiempo_s 2564, maquina CPU de portátil (WSL2), 8 entornos en paralelo</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisión (2026-11-05).</strong> Seleccionado y promovido a recomendado del nivel 2 (catálogo v4): 172/200 aterrizajes (86 %) frente a 77 % con 600 000 pasos y 72 % del modelo del nivel 1 a ciegas; colisiones 27 frente a 42 y 53; contacto a 1.31 m/s y 7.0 m del centro. Confirma la hipótesis: el presupuesto era el cuello de botella. Cuesta 2,5 veces más tiempo (43 min). Queda pendiente repetirlo con tres semillas.</p>
+<h3 id="ppo-n2-transfer-1m5-v02-s1-seleccionado-935"><code>ppo-n2-transfer-1m5-v0.2-s1</code> · seleccionado · 93.5 %</h3>
+<p><strong>Hipótesis.</strong> Segunda semilla (1) del finalista del nivel 2 (transferencia desde ppo-v2-v0.1-s0, 1,5 M de pasos): queda a menos de 5 puntos del 86 % de la semilla 0.</p>
+<p><strong>Cambio frente a <code>ppo-n2-transfer-1m5-v0.2-s0</code>.</strong> Solo la semilla del entrenamiento PPO: 1. Misma transferencia, hiperparámetros, ambiente y presupuesto.</p>
+<p><strong>Dónde está el modelo.</strong></p>
+<ul>
+<li><code>resultados/runs/ppo-n2-transfer-1m5-v0.2-s1/modelo.zip</code> · SHA-256 <code>797735839f718b18198dd9a060d45bf6b23755ca8edfd0f6206d76a9129f7c06</code></li>
+<li><code>resultados/runs/ppo-n2-transfer-1m5-v0.2-s1/modelo_normalizador.pkl</code> · SHA-256 <code>c70833d925e4bbc14b980ab7c489a2c2613113cea00e440bdfc40a2fa41240b5</code></li>
+<li>En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/7443e1d9686a257eddf1c9c617988408e8df9dd2/resultados/runs/ppo-n2-transfer-1m5-v0.2-s1/modelo.zip</li>
+<li>MLflow: modelo <code>rocket-landing-ppo</code> versión 9, run <code>fba2d044e23e4cca84bac83b29b61bb0</code> (https://alpha-centauri-mlflow.onrender.com/#/experiments/3/runs/fba2d044e23e4cca84bac83b29b61bb0)</li>
+<li>Commit de git: <code>7443e1d9686a257eddf1c9c617988408e8df9dd2</code> (había cambios sin commit al entrenar) · manifiesto de la sección 11: <code>manifests/ppo-n2-transfer-1m5-v0.2-s1.json</code></li>
+<li>Parte de los pesos de <code>ppo-v2-v0.1-s0</code> (transferencia)</li>
+</ul>
+<p><strong>Variables.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ambiente</td>
+<td>RocketLanding3D-N2-v0 v0.2 (N2)</td>
+</tr>
+<tr>
+<td>agente</td>
+<td>PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12</td>
+</tr>
+<tr>
+<td>total_timesteps</td>
+<td>1500000</td>
+</tr>
+<tr>
+<td>n_envs</td>
+<td>8</td>
+</tr>
+<tr>
+<td>n_steps</td>
+<td>256</td>
+</tr>
+<tr>
+<td>batch_size</td>
+<td>256</td>
+</tr>
+<tr>
+<td>n_epochs</td>
+<td>10</td>
+</tr>
+<tr>
+<td>learning_rate</td>
+<td>0.0003</td>
+</tr>
+<tr>
+<td>gamma</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>gae_lambda</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td>clip_range</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>ent_coef</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>net_arch</td>
+<td>128 × 128</td>
+</tr>
+<tr>
+<td>log_std_init</td>
+<td>-0.5</td>
+</tr>
+<tr>
+<td>eval_every</td>
+<td>20000</td>
+</tr>
+<tr>
+<td>seed</td>
+<td>1</td>
+</tr>
+<tr>
+<td>accion</td>
+<td>relativa</td>
+</tr>
+<tr>
+<td>desde</td>
+<td>ppo-v2-v0.1-s0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Diferencias de variables con <code>ppo-n2-transfer-1m5-v0.2-s0</code>.</strong> seed: 0 → 1</p>
+<p><strong>Resultado.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Normal (suite v1)</th>
+<th>Viento 15 m/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizajes seguros</td>
+<td>93.5 %</td>
+<td>63.0 %</td>
+</tr>
+<tr>
+<td>velocidad de contacto</td>
+<td>0.79 m/s</td>
+<td>2.86 m/s</td>
+</tr>
+<tr>
+<td>error de posición</td>
+<td>5.2 m</td>
+<td>15.6 m</td>
+</tr>
+<tr>
+<td>cómo terminan</td>
+<td>aterrizaje 187, colisión 13</td>
+<td>aterrizaje 126, fuera de plataforma 1, choque 29, sin pasos 3, colisión 41</td>
+</tr>
+<tr>
+<td>primer aterrizaje / mejor época</td>
+<td>4 / 47840</td>
+<td></td>
+</tr>
+<tr>
+<td>presupuesto</td>
+<td>pasos_agente 1500000, epocas 48450, maquina pipeline Prefect en CPU de portátil (WSL2)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisión (2026-11-05).</strong> Seleccionado por el pipeline: 93.5% de aterrizajes en la suite v1 (13 colisiones), 63.0% con viento de 15 m/s; supera al recomendado ppo-n2-transfer-1m5-v0.2-s0 con el criterio de aceptación (+2% de tasa, viento −5% como mucho, no más colisiones).</p>
+<h3 id="ppo-n2-transfer-1m5-v02-s2-rechazado-855"><code>ppo-n2-transfer-1m5-v0.2-s2</code> · rechazado · 85.5 %</h3>
+<p><strong>Hipótesis.</strong> Tercera semilla (2) del finalista del nivel 2: queda a menos de 5 puntos del 86 % de la semilla 0.</p>
+<p><strong>Cambio frente a <code>ppo-n2-transfer-1m5-v0.2-s0</code>.</strong> Solo la semilla del entrenamiento PPO: 2. Misma transferencia, hiperparámetros, ambiente y presupuesto.</p>
+<p><strong>Dónde está el modelo.</strong></p>
+<ul>
+<li><code>resultados/runs/ppo-n2-transfer-1m5-v0.2-s2/modelo.zip</code> · SHA-256 <code>fb8dd6d2969df36331930e91b2ace6526690fdcd3d94c8b0a6655dd9e866d4f3</code></li>
+<li><code>resultados/runs/ppo-n2-transfer-1m5-v0.2-s2/modelo_normalizador.pkl</code> · SHA-256 <code>00de0033f9b5073f111acd4cd5ec46bc04d4a2838e25d373c1ab2b42ff179702</code></li>
+<li>En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/f61e2a500ea2e3e05ca9c60f37f1147ae619ecbf/resultados/runs/ppo-n2-transfer-1m5-v0.2-s2/modelo.zip</li>
+<li>MLflow: modelo <code>rocket-landing-ppo</code> versión 15, run <code>63855464a69c4fbeac683bf3b83c0bf4</code> (https://alpha-centauri-mlflow.onrender.com/#/experiments/3/runs/63855464a69c4fbeac683bf3b83c0bf4)</li>
+<li>Commit de git: <code>f61e2a500ea2e3e05ca9c60f37f1147ae619ecbf</code> (había cambios sin commit al entrenar) · manifiesto de la sección 11: <code>manifests/ppo-n2-transfer-1m5-v0.2-s2.json</code></li>
+<li>Parte de los pesos de <code>ppo-v2-v0.1-s0</code> (transferencia)</li>
+</ul>
+<p><strong>Variables.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ambiente</td>
+<td>RocketLanding3D-N2-v0 v0.2 (N2)</td>
+</tr>
+<tr>
+<td>agente</td>
+<td>PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12</td>
+</tr>
+<tr>
+<td>total_timesteps</td>
+<td>1500000</td>
+</tr>
+<tr>
+<td>n_envs</td>
+<td>8</td>
+</tr>
+<tr>
+<td>n_steps</td>
+<td>256</td>
+</tr>
+<tr>
+<td>batch_size</td>
+<td>256</td>
+</tr>
+<tr>
+<td>n_epochs</td>
+<td>10</td>
+</tr>
+<tr>
+<td>learning_rate</td>
+<td>0.0003</td>
+</tr>
+<tr>
+<td>gamma</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>gae_lambda</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td>clip_range</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>ent_coef</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>net_arch</td>
+<td>128 × 128</td>
+</tr>
+<tr>
+<td>log_std_init</td>
+<td>-0.5</td>
+</tr>
+<tr>
+<td>eval_every</td>
+<td>20000</td>
+</tr>
+<tr>
+<td>seed</td>
+<td>2</td>
+</tr>
+<tr>
+<td>accion</td>
+<td>relativa</td>
+</tr>
+<tr>
+<td>desde</td>
+<td>ppo-v2-v0.1-s0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Diferencias de variables con <code>ppo-n2-transfer-1m5-v0.2-s0</code>.</strong> seed: 0 → 2</p>
+<p><strong>Resultado.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Normal (suite v1)</th>
+<th>Viento 15 m/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizajes seguros</td>
+<td>85.5 %</td>
+<td>56.5 %</td>
+</tr>
+<tr>
+<td>velocidad de contacto</td>
+<td>1.51 m/s</td>
+<td>4.36 m/s</td>
+</tr>
+<tr>
+<td>error de posición</td>
+<td>6.4 m</td>
+<td>18.0 m</td>
+</tr>
+<tr>
+<td>cómo terminan</td>
+<td>aterrizaje 171, choque 5, colisión 24</td>
+<td>aterrizaje 113, choque 30, sin pasos 1, colisión 56</td>
+</tr>
+<tr>
+<td>primer aterrizaje / mejor época</td>
+<td>3 / 39576</td>
+<td></td>
+</tr>
+<tr>
+<td>presupuesto</td>
+<td>pasos_agente 1500000, epocas 47308, maquina pipeline Prefect en CPU de portátil (WSL2)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisión (2026-11-06).</strong> Rechazado por el pipeline: 85.5% de aterrizajes en la suite v1 (24 colisiones), 56.5% con viento de 15 m/s. no mejora al recomendado ppo-n2-transfer-1m5-v0.2-s1 en al menos 2% (85.5% frente a 93.5%); con viento de 15 m/s pierde más de 5% (56.5% frente a 63.0%); más colisiones que el recomendado (24 frente a 13).</p>
+<h2 id="experimento-4-nivel-3-viento-fuerte-incidente-e-intervencion">Experimento 4 · Nivel 3: viento fuerte (incidente e intervención)</h2>
+<p>Experimento de MLflow <code>experimento-4-nivel3</code> (5 ejecuciones). Las ejecuciones van en orden cronológico; cada una dice qué cambió frente a su baseline.</p>
+<p><strong>Pregunta.</strong> Cuando cambian las condiciones de operación (viento de hasta 15 m/s y ráfagas dobles), ¿cuánto se degrada el modelo del nivel 2 y lo recupera reentrenarlo en el nivel 3? Desde qué modelo conviene partir.</p>
+<p><strong>Variables que se mueven.</strong> las del experimento 3 con el ambiente N3; cambia el modelo de partida (recomendado de N2, semilla 0 o 1) y el presupuesto.</p>
+<h3 id="ppo-n3-transfer-v03-s0-rechazado-815"><code>ppo-n3-transfer-v0.3-s0</code> · rechazado · 81.5 %</h3>
+<p><strong>Hipótesis.</strong> Intervención ante el incidente de viento: reentrenar el recomendado del nivel 2 en las condiciones del nivel 3 (viento 0–15 m/s, ráfagas ×2) recupera al menos 2 puntos de aterrizajes frente a ese mismo modelo jugando en N3 (72,0 %) sin más colisiones</p>
+<p><strong>Cambio frente a <code>ppo-n2-transfer-1m5-v0.2-s0</code>.</strong> Ambiente N3 (viento hasta 15 m/s, ráfagas 3 m/s) y transferencia de pesos y normalización desde ppo-n2-transfer-1m5-v0.2-s0; 600 000 pasos</p>
+<p><strong>Dónde está el modelo.</strong></p>
+<ul>
+<li><code>resultados/runs/ppo-n3-transfer-v0.3-s0/modelo.zip</code> · SHA-256 <code>6646945f1952c26f60d8c9508c1f49e06c6e7ce6733ec1fbdeb35881ffbc8f95</code></li>
+<li><code>resultados/runs/ppo-n3-transfer-v0.3-s0/modelo_normalizador.pkl</code> · SHA-256 <code>b9441e583a56365b0d44bc9fa5c5a784e675260aae491366b6b992ffa14f20fa</code></li>
+<li>En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/388cb701eff057ef6d97d650cae31463f908508b/resultados/runs/ppo-n3-transfer-v0.3-s0/modelo.zip</li>
+<li>MLflow: modelo <code>rocket-landing-ppo</code> versión 10, run <code>f08434938a7148d3b76378d53963b434</code> (https://alpha-centauri-mlflow.onrender.com/#/experiments/4/runs/f08434938a7148d3b76378d53963b434)</li>
+<li>Commit de git: <code>388cb701eff057ef6d97d650cae31463f908508b</code> (había cambios sin commit al entrenar) · manifiesto de la sección 11: <code>manifests/ppo-n3-transfer-v0.3-s0.json</code></li>
+<li>Parte de los pesos de <code>ppo-n2-transfer-1m5-v0.2-s0</code> (transferencia)</li>
+</ul>
+<p><strong>Variables.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ambiente</td>
+<td>RocketLanding3D-N3-v0 v0.3 (N3)</td>
+</tr>
+<tr>
+<td>agente</td>
+<td>PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12</td>
+</tr>
+<tr>
+<td>total_timesteps</td>
+<td>600000</td>
+</tr>
+<tr>
+<td>n_envs</td>
+<td>8</td>
+</tr>
+<tr>
+<td>n_steps</td>
+<td>256</td>
+</tr>
+<tr>
+<td>batch_size</td>
+<td>256</td>
+</tr>
+<tr>
+<td>n_epochs</td>
+<td>10</td>
+</tr>
+<tr>
+<td>learning_rate</td>
+<td>0.0003</td>
+</tr>
+<tr>
+<td>gamma</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>gae_lambda</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td>clip_range</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>ent_coef</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>net_arch</td>
+<td>128 × 128</td>
+</tr>
+<tr>
+<td>log_std_init</td>
+<td>-0.5</td>
+</tr>
+<tr>
+<td>eval_every</td>
+<td>20000</td>
+</tr>
+<tr>
+<td>seed</td>
+<td>0</td>
+</tr>
+<tr>
+<td>accion</td>
+<td>relativa</td>
+</tr>
+<tr>
+<td>desde</td>
+<td>ppo-n2-transfer-1m5-v0.2-s0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Diferencias de variables con <code>ppo-n2-transfer-1m5-v0.2-s0</code>.</strong> ambiente: RocketLanding3D-N2-v0 v0.2 → RocketLanding3D-N3-v0 v0.3; total_timesteps: 1500000 → 600000; ambiente: RocketLanding3D-N2-v0 → RocketLanding3D-N3-v0; desde: ppo-v2-v0.1-s0 → ppo-n2-transfer-1m5-v0.2-s0</p>
+<p><strong>Resultado.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Normal (suite v1)</th>
+<th>Viento 15 m/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizajes seguros</td>
+<td>81.5 %</td>
+<td>74.5 %</td>
+</tr>
+<tr>
+<td>velocidad de contacto</td>
+<td>1.52 m/s</td>
+<td>1.89 m/s</td>
+</tr>
+<tr>
+<td>error de posición</td>
+<td>9.8 m</td>
+<td>11.1 m</td>
+</tr>
+<tr>
+<td>cómo terminan</td>
+<td>aterrizaje 163, colisión 37</td>
+<td>aterrizaje 149, fuera de plataforma 1, choque 19, colisión 31</td>
+</tr>
+<tr>
+<td>primer aterrizaje / mejor época</td>
+<td>6 / 19439</td>
+<td></td>
+</tr>
+<tr>
+<td>presupuesto</td>
+<td>pasos_agente 600000, epocas 19440, maquina pipeline Prefect en CPU de portátil (WSL2)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisión (2026-11-05).</strong> Rechazado por el pipeline: 81.5% de aterrizajes en la suite v1 (37 colisiones), 74.5% con viento de 15 m/s. más colisiones que ppo-n2-transfer-1m5-v0.2-s0 (37 frente a 35).</p>
+<h3 id="ppo-n3-transfer-1m5-v03-s0-seleccionado-865"><code>ppo-n3-transfer-1m5-v0.3-s0</code> · seleccionado · 86.5 %</h3>
+<p><strong>Hipótesis.</strong> Las colisiones de la primera intervención (37 frente a 35) son falta de presupuesto, como en el nivel 2: con 1,5 M de pasos el modelo reentrenado en N3 no tiene más colisiones que el recomendado de N2 jugando en N3 y mantiene al menos +2 puntos de aterrizajes (72,0 %)</p>
+<p><strong>Cambio frente a <code>ppo-n2-transfer-1m5-v0.2-s0</code>.</strong> Solo el presupuesto: 1 500 000 pasos en vez de 600 000 (misma transferencia desde ppo-n2-transfer-1m5-v0.2-s0, mismo ambiente N3)</p>
+<p><strong>Dónde está el modelo.</strong></p>
+<ul>
+<li><code>resultados/runs/ppo-n3-transfer-1m5-v0.3-s0/modelo.zip</code> · SHA-256 <code>6e865aa29afbdb2be507cc905bdc638930c0ef036a8b14e14dfc4d8b1262f168</code></li>
+<li><code>resultados/runs/ppo-n3-transfer-1m5-v0.3-s0/modelo_normalizador.pkl</code> · SHA-256 <code>456fce5ac622df510f54928c0594754872e8b93d27e9d30d1628827cbdc702b7</code></li>
+<li>En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/eeb0babbf79c2b4266b4bf843e856530960d8573/resultados/runs/ppo-n3-transfer-1m5-v0.3-s0/modelo.zip</li>
+<li>MLflow: modelo <code>rocket-landing-ppo</code> versión 11, run <code>44b0296d7d6a4443b72aae36456157c6</code> (https://alpha-centauri-mlflow.onrender.com/#/experiments/4/runs/44b0296d7d6a4443b72aae36456157c6)</li>
+<li>Commit de git: <code>eeb0babbf79c2b4266b4bf843e856530960d8573</code> · manifiesto de la sección 11: <code>manifests/ppo-n3-transfer-1m5-v0.3-s0.json</code></li>
+<li>Parte de los pesos de <code>ppo-n2-transfer-1m5-v0.2-s0</code> (transferencia)</li>
+</ul>
+<p><strong>Variables.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ambiente</td>
+<td>RocketLanding3D-N3-v0 v0.3 (N3)</td>
+</tr>
+<tr>
+<td>agente</td>
+<td>PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12</td>
+</tr>
+<tr>
+<td>total_timesteps</td>
+<td>1500000</td>
+</tr>
+<tr>
+<td>n_envs</td>
+<td>8</td>
+</tr>
+<tr>
+<td>n_steps</td>
+<td>256</td>
+</tr>
+<tr>
+<td>batch_size</td>
+<td>256</td>
+</tr>
+<tr>
+<td>n_epochs</td>
+<td>10</td>
+</tr>
+<tr>
+<td>learning_rate</td>
+<td>0.0003</td>
+</tr>
+<tr>
+<td>gamma</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>gae_lambda</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td>clip_range</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>ent_coef</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>net_arch</td>
+<td>128 × 128</td>
+</tr>
+<tr>
+<td>log_std_init</td>
+<td>-0.5</td>
+</tr>
+<tr>
+<td>eval_every</td>
+<td>20000</td>
+</tr>
+<tr>
+<td>seed</td>
+<td>0</td>
+</tr>
+<tr>
+<td>accion</td>
+<td>relativa</td>
+</tr>
+<tr>
+<td>desde</td>
+<td>ppo-n2-transfer-1m5-v0.2-s0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Diferencias de variables con <code>ppo-n2-transfer-1m5-v0.2-s0</code>.</strong> ambiente: RocketLanding3D-N2-v0 v0.2 → RocketLanding3D-N3-v0 v0.3; ambiente: RocketLanding3D-N2-v0 → RocketLanding3D-N3-v0; desde: ppo-v2-v0.1-s0 → ppo-n2-transfer-1m5-v0.2-s0</p>
+<p><strong>Resultado.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Normal (suite v1)</th>
+<th>Viento 15 m/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizajes seguros</td>
+<td>86.5 %</td>
+<td>67.5 %</td>
+</tr>
+<tr>
+<td>velocidad de contacto</td>
+<td>1.45 m/s</td>
+<td>2.90 m/s</td>
+</tr>
+<tr>
+<td>error de posición</td>
+<td>6.8 m</td>
+<td>14.5 m</td>
+</tr>
+<tr>
+<td>cómo terminan</td>
+<td>aterrizaje 173, choque 3, colisión 24</td>
+<td>aterrizaje 135, fuera de plataforma 4, choque 28, colisión 33</td>
+</tr>
+<tr>
+<td>primer aterrizaje / mejor época</td>
+<td>6 / 47287</td>
+<td></td>
+</tr>
+<tr>
+<td>presupuesto</td>
+<td>pasos_agente 1500000, epocas 48619, maquina pipeline Prefect en CPU de portátil (WSL2)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisión (2026-11-05).</strong> Seleccionado por el pipeline: 86.5% de aterrizajes en la suite v1 (24 colisiones), 67.5% con viento de 15 m/s; supera a ppo-n2-transfer-1m5-v0.2-s0 en este ambiente con el criterio de aceptación (+2% de tasa, viento −5% como mucho, no más colisiones).</p>
+<h3 id="ppo-n3-transfer-1m5-desde-s1-v03-s0-seleccionado-920"><code>ppo-n3-transfer-1m5-desde-s1-v0.3-s0</code> · seleccionado · 92.0 %</h3>
+<p><strong>Hipótesis.</strong> Partir del nuevo recomendado del nivel 2 (s1: 93,5 % en N2, 82,5 % y 18 colisiones jugando en N3) con la receta seleccionada en N3 (1,5 M de pasos) mejora al recomendado de N3 en al menos 2 puntos sin más colisiones</p>
+<p><strong>Cambio frente a <code>ppo-n3-transfer-1m5-v0.3-s0</code>.</strong> Solo el modelo de partida: ppo-n2-transfer-1m5-v0.2-s1 en vez de ppo-n2-transfer-1m5-v0.2-s0 (mismo ambiente N3, mismo presupuesto)</p>
+<p><strong>Dónde está el modelo.</strong></p>
+<ul>
+<li><code>resultados/runs/ppo-n3-transfer-1m5-desde-s1-v0.3-s0/modelo.zip</code> · SHA-256 <code>77f0d12b40b0711e84a3d422281b07ed5c8dbfbe801a093fadae1380f12a5de9</code></li>
+<li><code>resultados/runs/ppo-n3-transfer-1m5-desde-s1-v0.3-s0/modelo_normalizador.pkl</code> · SHA-256 <code>30eac1012c89a3cd27a6e09c9be710511ad9b40d2bb386a5263d278f71ec41c2</code></li>
+<li>En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/4d9f5c8590153df34be2c370688849c2182f837b/resultados/runs/ppo-n3-transfer-1m5-desde-s1-v0.3-s0/modelo.zip</li>
+<li>MLflow: modelo <code>rocket-landing-ppo</code> versión 12, run <code>d945f0daa90944de83e40483f6e91d8f</code> (https://alpha-centauri-mlflow.onrender.com/#/experiments/4/runs/d945f0daa90944de83e40483f6e91d8f)</li>
+<li>Commit de git: <code>4d9f5c8590153df34be2c370688849c2182f837b</code> · manifiesto de la sección 11: <code>manifests/ppo-n3-transfer-1m5-desde-s1-v0.3-s0.json</code></li>
+<li>Parte de los pesos de <code>ppo-n2-transfer-1m5-v0.2-s1</code> (transferencia)</li>
+</ul>
+<p><strong>Variables.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ambiente</td>
+<td>RocketLanding3D-N3-v0 v0.3 (N3)</td>
+</tr>
+<tr>
+<td>agente</td>
+<td>PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12</td>
+</tr>
+<tr>
+<td>total_timesteps</td>
+<td>1500000</td>
+</tr>
+<tr>
+<td>n_envs</td>
+<td>8</td>
+</tr>
+<tr>
+<td>n_steps</td>
+<td>256</td>
+</tr>
+<tr>
+<td>batch_size</td>
+<td>256</td>
+</tr>
+<tr>
+<td>n_epochs</td>
+<td>10</td>
+</tr>
+<tr>
+<td>learning_rate</td>
+<td>0.0003</td>
+</tr>
+<tr>
+<td>gamma</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>gae_lambda</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td>clip_range</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>ent_coef</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>net_arch</td>
+<td>128 × 128</td>
+</tr>
+<tr>
+<td>log_std_init</td>
+<td>-0.5</td>
+</tr>
+<tr>
+<td>eval_every</td>
+<td>20000</td>
+</tr>
+<tr>
+<td>seed</td>
+<td>0</td>
+</tr>
+<tr>
+<td>accion</td>
+<td>relativa</td>
+</tr>
+<tr>
+<td>desde</td>
+<td>ppo-n2-transfer-1m5-v0.2-s1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Diferencias de variables con <code>ppo-n3-transfer-1m5-v0.3-s0</code>.</strong> desde: ppo-n2-transfer-1m5-v0.2-s0 → ppo-n2-transfer-1m5-v0.2-s1</p>
+<p><strong>Resultado.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Normal (suite v1)</th>
+<th>Viento 15 m/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizajes seguros</td>
+<td>92.0 %</td>
+<td>79.0 %</td>
+</tr>
+<tr>
+<td>velocidad de contacto</td>
+<td>1.36 m/s</td>
+<td>1.83 m/s</td>
+</tr>
+<tr>
+<td>error de posición</td>
+<td>4.9 m</td>
+<td>9.5 m</td>
+</tr>
+<tr>
+<td>cómo terminan</td>
+<td>aterrizaje 184, choque 1, colisión 15</td>
+<td>aterrizaje 158, choque 10, colisión 32</td>
+</tr>
+<tr>
+<td>primer aterrizaje / mejor época</td>
+<td>3 / 46030</td>
+<td></td>
+</tr>
+<tr>
+<td>presupuesto</td>
+<td>pasos_agente 1500000, epocas 46065, maquina pipeline Prefect en CPU de portátil (WSL2)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisión (2026-11-05).</strong> Seleccionado por el pipeline: 92.0% de aterrizajes en la suite v1 (15 colisiones), 79.0% con viento de 15 m/s; supera al recomendado ppo-n3-transfer-1m5-v0.3-s0 con el criterio de aceptación (+2% de tasa, viento −5% como mucho, no más colisiones).</p>
+<h3 id="ppo-n3-transfer-1m5-desde-s1-v03-s1-rechazado-915"><code>ppo-n3-transfer-1m5-desde-s1-v0.3-s1</code> · rechazado · 91.5 %</h3>
+<p><strong>Hipótesis.</strong> Semilla 1 de la configuración seleccionada en N3 (transferencia desde N2-s1, 1,5 M de pasos): queda a menos de 5 puntos del 92,0 % de la semilla 0</p>
+<p><strong>Cambio frente a <code>ppo-n3-transfer-1m5-desde-s1-v0.3-s0</code>.</strong> Solo la semilla de entrenamiento: 1. Mismo modelo de partida, ambiente y presupuesto</p>
+<p><strong>Dónde está el modelo.</strong></p>
+<ul>
+<li><code>resultados/runs/ppo-n3-transfer-1m5-desde-s1-v0.3-s1/modelo.zip</code> · SHA-256 <code>97df128d04c61247ce08a549257daa023171c2027141858fd35c6589217017b9</code></li>
+<li><code>resultados/runs/ppo-n3-transfer-1m5-desde-s1-v0.3-s1/modelo_normalizador.pkl</code> · SHA-256 <code>636849d3a582390c188b799bf7f8614ade5cbd887dcf802c830773460685c686</code></li>
+<li>En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/0a994ae8f7a8a2bfad3e8797c9f1f6e605906822/resultados/runs/ppo-n3-transfer-1m5-desde-s1-v0.3-s1/modelo.zip</li>
+<li>MLflow: modelo <code>rocket-landing-ppo</code> versión 13, run <code>1cd7df609f624699bfc218b48f47ba19</code> (https://alpha-centauri-mlflow.onrender.com/#/experiments/4/runs/1cd7df609f624699bfc218b48f47ba19)</li>
+<li>Commit de git: <code>0a994ae8f7a8a2bfad3e8797c9f1f6e605906822</code> · manifiesto de la sección 11: <code>manifests/ppo-n3-transfer-1m5-desde-s1-v0.3-s1.json</code></li>
+<li>Parte de los pesos de <code>ppo-n2-transfer-1m5-v0.2-s1</code> (transferencia)</li>
+</ul>
+<p><strong>Variables.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ambiente</td>
+<td>RocketLanding3D-N3-v0 v0.3 (N3)</td>
+</tr>
+<tr>
+<td>agente</td>
+<td>PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12</td>
+</tr>
+<tr>
+<td>total_timesteps</td>
+<td>1500000</td>
+</tr>
+<tr>
+<td>n_envs</td>
+<td>8</td>
+</tr>
+<tr>
+<td>n_steps</td>
+<td>256</td>
+</tr>
+<tr>
+<td>batch_size</td>
+<td>256</td>
+</tr>
+<tr>
+<td>n_epochs</td>
+<td>10</td>
+</tr>
+<tr>
+<td>learning_rate</td>
+<td>0.0003</td>
+</tr>
+<tr>
+<td>gamma</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>gae_lambda</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td>clip_range</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>ent_coef</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>net_arch</td>
+<td>128 × 128</td>
+</tr>
+<tr>
+<td>log_std_init</td>
+<td>-0.5</td>
+</tr>
+<tr>
+<td>eval_every</td>
+<td>20000</td>
+</tr>
+<tr>
+<td>seed</td>
+<td>1</td>
+</tr>
+<tr>
+<td>accion</td>
+<td>relativa</td>
+</tr>
+<tr>
+<td>desde</td>
+<td>ppo-n2-transfer-1m5-v0.2-s1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Diferencias de variables con <code>ppo-n3-transfer-1m5-desde-s1-v0.3-s0</code>.</strong> seed: 0 → 1</p>
+<p><strong>Resultado.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Normal (suite v1)</th>
+<th>Viento 15 m/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizajes seguros</td>
+<td>91.5 %</td>
+<td>87.5 %</td>
+</tr>
+<tr>
+<td>velocidad de contacto</td>
+<td>1.36 m/s</td>
+<td>1.46 m/s</td>
+</tr>
+<tr>
+<td>error de posición</td>
+<td>4.8 m</td>
+<td>6.3 m</td>
+</tr>
+<tr>
+<td>cómo terminan</td>
+<td>aterrizaje 183, choque 1, colisión 16</td>
+<td>aterrizaje 175, colisión 25</td>
+</tr>
+<tr>
+<td>primer aterrizaje / mejor época</td>
+<td>3 / 44684</td>
+<td></td>
+</tr>
+<tr>
+<td>presupuesto</td>
+<td>pasos_agente 1500000, epocas 44720, maquina pipeline Prefect en CPU de portátil (WSL2)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisión (2026-11-05).</strong> Rechazado por el pipeline: 91.5% de aterrizajes en la suite v1 (16 colisiones), 87.5% con viento de 15 m/s. no mejora a ppo-n3-transfer-1m5-desde-s1-v0.3-s0 en al menos 2% (91.5% frente a 92.0%); más colisiones que ppo-n3-transfer-1m5-desde-s1-v0.3-s0 (16 frente a 15).</p>
+<h3 id="ppo-n3-transfer-1m5-desde-s1-v03-s2-rechazado-845"><code>ppo-n3-transfer-1m5-desde-s1-v0.3-s2</code> · rechazado · 84.5 %</h3>
+<p><strong>Hipótesis.</strong> Semilla 2 de la configuración seleccionada en N3 (transferencia desde N2-s1, 1,5 M de pasos): queda a menos de 5 puntos del 92,0 % de la semilla 0</p>
+<p><strong>Cambio frente a <code>ppo-n3-transfer-1m5-desde-s1-v0.3-s0</code>.</strong> Solo la semilla de entrenamiento: 2. Mismo modelo de partida, ambiente y presupuesto</p>
+<p><strong>Dónde está el modelo.</strong></p>
+<ul>
+<li><code>resultados/runs/ppo-n3-transfer-1m5-desde-s1-v0.3-s2/modelo.zip</code> · SHA-256 <code>477d089e7184ad9f621ca93b4bba4c0a6de0baeec8572bc5d49a0135c23012d7</code></li>
+<li><code>resultados/runs/ppo-n3-transfer-1m5-desde-s1-v0.3-s2/modelo_normalizador.pkl</code> · SHA-256 <code>8831248b5f241983f2bd9ed4e0c5464d07152d72991f052e208bd77886d77f95</code></li>
+<li>En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/d8a4f75c54a3a01ecb2abced162f5ee6f43eea37/resultados/runs/ppo-n3-transfer-1m5-desde-s1-v0.3-s2/modelo.zip</li>
+<li>MLflow: modelo <code>rocket-landing-ppo</code> versión 14, run <code>b05d3d15beb643c0828c4ba26c6593b9</code> (https://alpha-centauri-mlflow.onrender.com/#/experiments/4/runs/b05d3d15beb643c0828c4ba26c6593b9)</li>
+<li>Commit de git: <code>d8a4f75c54a3a01ecb2abced162f5ee6f43eea37</code> (había cambios sin commit al entrenar) · manifiesto de la sección 11: <code>manifests/ppo-n3-transfer-1m5-desde-s1-v0.3-s2.json</code></li>
+<li>Parte de los pesos de <code>ppo-n2-transfer-1m5-v0.2-s1</code> (transferencia)</li>
+</ul>
+<p><strong>Variables.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ambiente</td>
+<td>RocketLanding3D-N3-v0 v0.3 (N3)</td>
+</tr>
+<tr>
+<td>agente</td>
+<td>PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12</td>
+</tr>
+<tr>
+<td>total_timesteps</td>
+<td>1500000</td>
+</tr>
+<tr>
+<td>n_envs</td>
+<td>8</td>
+</tr>
+<tr>
+<td>n_steps</td>
+<td>256</td>
+</tr>
+<tr>
+<td>batch_size</td>
+<td>256</td>
+</tr>
+<tr>
+<td>n_epochs</td>
+<td>10</td>
+</tr>
+<tr>
+<td>learning_rate</td>
+<td>0.0003</td>
+</tr>
+<tr>
+<td>gamma</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>gae_lambda</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td>clip_range</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>ent_coef</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>net_arch</td>
+<td>128 × 128</td>
+</tr>
+<tr>
+<td>log_std_init</td>
+<td>-0.5</td>
+</tr>
+<tr>
+<td>eval_every</td>
+<td>20000</td>
+</tr>
+<tr>
+<td>seed</td>
+<td>2</td>
+</tr>
+<tr>
+<td>accion</td>
+<td>relativa</td>
+</tr>
+<tr>
+<td>desde</td>
+<td>ppo-n2-transfer-1m5-v0.2-s1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Diferencias de variables con <code>ppo-n3-transfer-1m5-desde-s1-v0.3-s0</code>.</strong> seed: 0 → 2</p>
+<p><strong>Resultado.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Normal (suite v1)</th>
+<th>Viento 15 m/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizajes seguros</td>
+<td>84.5 %</td>
+<td>76.5 %</td>
+</tr>
+<tr>
+<td>velocidad de contacto</td>
+<td>2.09 m/s</td>
+<td>4.25 m/s</td>
+</tr>
+<tr>
+<td>error de posición</td>
+<td>8.2 m</td>
+<td>16.4 m</td>
+</tr>
+<tr>
+<td>cómo terminan</td>
+<td>aterrizaje 169, fuera de plataforma 2, choque 11, colisión 18</td>
+<td>aterrizaje 153, fuera de plataforma 1, choque 28, colisión 18</td>
+</tr>
+<tr>
+<td>primer aterrizaje / mejor época</td>
+<td>3 / 38121</td>
+<td></td>
+</tr>
+<tr>
+<td>presupuesto</td>
+<td>pasos_agente 1500000, epocas 45671, maquina pipeline Prefect en CPU de portátil (WSL2)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisión (2026-11-05).</strong> Rechazado por el pipeline: 84.5% de aterrizajes en la suite v1 (18 colisiones), 76.5% con viento de 15 m/s. no mejora a ppo-n3-transfer-1m5-desde-s1-v0.3-s0 en al menos 2% (84.5% frente a 92.0%); más colisiones que ppo-n3-transfer-1m5-desde-s1-v0.3-s0 (18 frente a 15).</p>
+<h2 id="experimento-5-nivel-2-v1-pasarela-con-abertura-desplazada">Experimento 5 · Nivel 2 (v1): pasarela con abertura desplazada</h2>
+<p>Experimento de MLflow <code>experimento-5-pasarela</code> (3 ejecuciones). Las ejecuciones van en orden cronológico; cada una dice qué cambió frente a su baseline.</p>
+<p><strong>Pregunta.</strong> Con el obstáculo nuevo acordado por el equipo (una pasarela que cubre la plataforma y una sola abertura desplazada), ¿aprende PPO a entrar por la abertura y volver al centro partiendo del modelo del nivel 1? Las torres (ambiente 0.2) quedan como histórico.</p>
+<p><strong>Variables que se mueven.</strong> las del experimento 2 más el ambiente (observación de 20 valores), el modelo de partida (transferencia desde el nivel 1) y el presupuesto.</p>
+<h3 id="ppo-pasarela-transfer-1m5-v04-s0-seleccionado-915"><code>ppo-pasarela-transfer-1m5-v0.4-s0</code> · seleccionado · 91.5 %</h3>
+<p><strong>Hipótesis.</strong> Partir del recomendado del nivel 1 (transferencia de pesos y normalización, con los pesos de posición heredados para el objetivo de la fase) y entrenar 1,5 M de pasos bajo la pasarela supera en al menos 2 puntos al modelo del nivel 1 jugando a ciegas (5 %)</p>
+<p><strong>Cambio frente a <code>ppo-v2-v0.1-s1</code>.</strong> Ambiente N2 v1 (pasarela a 180 m con abertura desplazada 30 m; observación de 20 valores) y transferencia desde ppo-v2-v0.1-s1; 1 500 000 pasos</p>
+<p><strong>Dónde está el modelo.</strong></p>
+<ul>
+<li><code>resultados/runs/ppo-pasarela-transfer-1m5-v0.4-s0/modelo.zip</code> · SHA-256 <code>067a4280b6e65892bebc4b687a2bb7364c64feeac0984afa69c6bd92cc82c96a</code></li>
+<li><code>resultados/runs/ppo-pasarela-transfer-1m5-v0.4-s0/modelo_normalizador.pkl</code> · SHA-256 <code>a6791d12ba59bfa559bb36917ab90276f7b91e03572956bf0a5b1f3ef15f45e4</code></li>
+<li>En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/464cbd1fdb716d478ed51579cd1fbfab6cf4dcb0/resultados/runs/ppo-pasarela-transfer-1m5-v0.4-s0/modelo.zip</li>
+<li>MLflow: modelo <code>rocket-landing-ppo</code> versión 16, run <code>3b0589ed32b14f2a809a33f806856f65</code> (https://alpha-centauri-mlflow.onrender.com/#/experiments/5/runs/3b0589ed32b14f2a809a33f806856f65)</li>
+<li>Commit de git: <code>464cbd1fdb716d478ed51579cd1fbfab6cf4dcb0</code> · manifiesto de la sección 11: <code>manifests/ppo-pasarela-transfer-1m5-v0.4-s0.json</code></li>
+<li>Parte de los pesos de <code>ppo-v2-v0.1-s1</code> (transferencia)</li>
+</ul>
+<p><strong>Variables.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ambiente</td>
+<td>RocketLanding3D-N2-v1 v0.4 (N2)</td>
+</tr>
+<tr>
+<td>agente</td>
+<td>PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12</td>
+</tr>
+<tr>
+<td>total_timesteps</td>
+<td>1500000</td>
+</tr>
+<tr>
+<td>n_envs</td>
+<td>8</td>
+</tr>
+<tr>
+<td>n_steps</td>
+<td>256</td>
+</tr>
+<tr>
+<td>batch_size</td>
+<td>256</td>
+</tr>
+<tr>
+<td>n_epochs</td>
+<td>10</td>
+</tr>
+<tr>
+<td>learning_rate</td>
+<td>0.0003</td>
+</tr>
+<tr>
+<td>gamma</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>gae_lambda</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td>clip_range</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>ent_coef</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>net_arch</td>
+<td>128 × 128</td>
+</tr>
+<tr>
+<td>log_std_init</td>
+<td>-0.5</td>
+</tr>
+<tr>
+<td>eval_every</td>
+<td>20000</td>
+</tr>
+<tr>
+<td>seed</td>
+<td>0</td>
+</tr>
+<tr>
+<td>accion</td>
+<td>relativa</td>
+</tr>
+<tr>
+<td>desde</td>
+<td>ppo-v2-v0.1-s1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Diferencias de variables con <code>ppo-v2-v0.1-s1</code>.</strong> ambiente: RocketLanding3D-v0 v0.1.1 → RocketLanding3D-N2-v1 v0.4; total_timesteps: 600000 → 1500000; seed: 1 → 0; ambiente: RocketLanding3D-v0 → RocketLanding3D-N2-v1; desde: None → ppo-v2-v0.1-s1</p>
+<p><strong>Resultado.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Normal (suite v1)</th>
+<th>Viento 15 m/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizajes seguros</td>
+<td>91.5 %</td>
+<td>30.0 %</td>
+</tr>
+<tr>
+<td>velocidad de contacto</td>
+<td>1.58 m/s</td>
+<td>1.73 m/s</td>
+</tr>
+<tr>
+<td>error de posición</td>
+<td>4.8 m</td>
+<td>21.7 m</td>
+</tr>
+<tr>
+<td>cómo terminan</td>
+<td>aterrizaje 183, choque 3, colisión 14</td>
+<td>aterrizaje 60, fuera de plataforma 1, choque 6, sin pasos 30, colisión 103</td>
+</tr>
+<tr>
+<td>primer aterrizaje / mejor época</td>
+<td>13 / 26522</td>
+<td></td>
+</tr>
+<tr>
+<td>presupuesto</td>
+<td>pasos_agente 1500000, epocas 35334, maquina pipeline Prefect en CPU de portátil (WSL2)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisión (2026-11-08).</strong> Seleccionado por el pipeline: 91.5% de aterrizajes en la suite v1 (14 colisiones), 30.0% con viento de 15 m/s; supera al recomendado ppo-v2-v0.1-s1 con el criterio de aceptación (+2% de tasa, viento −5% como mucho, no más colisiones).</p>
+<h3 id="ppo-pasarela-transfer-1m5-v04-s1-seleccionado-975"><code>ppo-pasarela-transfer-1m5-v0.4-s1</code> · seleccionado · 97.5 %</h3>
+<p><strong>Hipótesis.</strong> Semilla 1 de la configuración seleccionada bajo la pasarela: queda a menos de 5 puntos del 91,5 % de la semilla 0</p>
+<p><strong>Cambio frente a <code>ppo-pasarela-transfer-1m5-v0.4-s0</code>.</strong> Solo la semilla de entrenamiento: 1. Misma transferencia desde ppo-v2-v0.1-s1, ambiente y presupuesto</p>
+<p><strong>Dónde está el modelo.</strong></p>
+<ul>
+<li><code>resultados/runs/ppo-pasarela-transfer-1m5-v0.4-s1/modelo.zip</code> · SHA-256 <code>19dee6c6bd0fa8f02261332f1a6bedfb1f63b0b563b579d543b7961054885957</code></li>
+<li><code>resultados/runs/ppo-pasarela-transfer-1m5-v0.4-s1/modelo_normalizador.pkl</code> · SHA-256 <code>1a0cb2867a24da43ec1f1947ef3a9d295654cc7495e05ad62cec66d55219f777</code></li>
+<li>En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/1aa584fdd8c90a8624d05bd39b61f6afde235504/resultados/runs/ppo-pasarela-transfer-1m5-v0.4-s1/modelo.zip</li>
+<li>MLflow: modelo <code>rocket-landing-ppo</code> versión 18, run <code>49f1e57a794c4661b1c321e0eb4773c4</code> (https://alpha-centauri-mlflow.onrender.com/#/experiments/5/runs/49f1e57a794c4661b1c321e0eb4773c4)</li>
+<li>Commit de git: <code>1aa584fdd8c90a8624d05bd39b61f6afde235504</code> · manifiesto de la sección 11: <code>manifests/ppo-pasarela-transfer-1m5-v0.4-s1.json</code></li>
+<li>Parte de los pesos de <code>ppo-v2-v0.1-s1</code> (transferencia)</li>
+</ul>
+<p><strong>Variables.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ambiente</td>
+<td>RocketLanding3D-N2-v1 v0.4 (N2)</td>
+</tr>
+<tr>
+<td>agente</td>
+<td>PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12</td>
+</tr>
+<tr>
+<td>total_timesteps</td>
+<td>1500000</td>
+</tr>
+<tr>
+<td>n_envs</td>
+<td>8</td>
+</tr>
+<tr>
+<td>n_steps</td>
+<td>256</td>
+</tr>
+<tr>
+<td>batch_size</td>
+<td>256</td>
+</tr>
+<tr>
+<td>n_epochs</td>
+<td>10</td>
+</tr>
+<tr>
+<td>learning_rate</td>
+<td>0.0003</td>
+</tr>
+<tr>
+<td>gamma</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>gae_lambda</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td>clip_range</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>ent_coef</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>net_arch</td>
+<td>128 × 128</td>
+</tr>
+<tr>
+<td>log_std_init</td>
+<td>-0.5</td>
+</tr>
+<tr>
+<td>eval_every</td>
+<td>20000</td>
+</tr>
+<tr>
+<td>seed</td>
+<td>1</td>
+</tr>
+<tr>
+<td>accion</td>
+<td>relativa</td>
+</tr>
+<tr>
+<td>desde</td>
+<td>ppo-v2-v0.1-s1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Diferencias de variables con <code>ppo-pasarela-transfer-1m5-v0.4-s0</code>.</strong> seed: 0 → 1</p>
+<p><strong>Resultado.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Normal (suite v1)</th>
+<th>Viento 15 m/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizajes seguros</td>
+<td>97.5 %</td>
+<td>52.0 %</td>
+</tr>
+<tr>
+<td>velocidad de contacto</td>
+<td>1.41 m/s</td>
+<td>1.41 m/s</td>
+</tr>
+<tr>
+<td>error de posición</td>
+<td>5.1 m</td>
+<td>15.3 m</td>
+</tr>
+<tr>
+<td>cómo terminan</td>
+<td>aterrizaje 195, sin pasos 1, colisión 4</td>
+<td>aterrizaje 104, fuera de plataforma 3, choque 2, sin pasos 3, colisión 88</td>
+</tr>
+<tr>
+<td>primer aterrizaje / mejor época</td>
+<td>10 / 24685</td>
+<td></td>
+</tr>
+<tr>
+<td>presupuesto</td>
+<td>pasos_agente 1500000, epocas 41449, maquina pipeline Prefect en CPU de portátil (WSL2)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisión (2026-11-08).</strong> Seleccionado por el pipeline: 97.5% de aterrizajes en la suite v1 (4 colisiones), 52.0% con viento de 15 m/s; supera al recomendado ppo-pasarela-transfer-1m5-v0.4-s0 con el criterio de aceptación (+2% de tasa, viento −5% como mucho, no más colisiones).</p>
+<h3 id="ppo-pasarela-transfer-1m5-v04-s2-seleccionado-1000"><code>ppo-pasarela-transfer-1m5-v0.4-s2</code> · seleccionado · 100.0 %</h3>
+<p><strong>Hipótesis.</strong> Semilla 2 de la configuración seleccionada bajo la pasarela: queda a menos de 5 puntos del 91,5 % de la semilla 0</p>
+<p><strong>Cambio frente a <code>ppo-pasarela-transfer-1m5-v0.4-s0</code>.</strong> Solo la semilla de entrenamiento: 2. Misma transferencia desde ppo-v2-v0.1-s1, ambiente y presupuesto</p>
+<p><strong>Dónde está el modelo.</strong></p>
+<ul>
+<li><code>resultados/runs/ppo-pasarela-transfer-1m5-v0.4-s2/modelo.zip</code> · SHA-256 <code>911ce2ce73ae5aec34d42f8ecb86d2b799276df19e682540899105975c237311</code></li>
+<li><code>resultados/runs/ppo-pasarela-transfer-1m5-v0.4-s2/modelo_normalizador.pkl</code> · SHA-256 <code>f7456f6b9aeb35326d747d8ce3f367b8ca061114290255746b6ed6b254fa53ef</code></li>
+<li>En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/e3db96f2ad14e2e322502e66426b687377e23f79/resultados/runs/ppo-pasarela-transfer-1m5-v0.4-s2/modelo.zip</li>
+<li>MLflow: modelo <code>rocket-landing-ppo</code> versión 19, run <code>739ea30a9db64d16b7e0a654f0418f96</code> (https://alpha-centauri-mlflow.onrender.com/#/experiments/5/runs/739ea30a9db64d16b7e0a654f0418f96)</li>
+<li>Commit de git: <code>e3db96f2ad14e2e322502e66426b687377e23f79</code> · manifiesto de la sección 11: <code>manifests/ppo-pasarela-transfer-1m5-v0.4-s2.json</code></li>
+<li>Parte de los pesos de <code>ppo-v2-v0.1-s1</code> (transferencia)</li>
+</ul>
+<p><strong>Variables.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ambiente</td>
+<td>RocketLanding3D-N2-v1 v0.4 (N2)</td>
+</tr>
+<tr>
+<td>agente</td>
+<td>PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12</td>
+</tr>
+<tr>
+<td>total_timesteps</td>
+<td>1500000</td>
+</tr>
+<tr>
+<td>n_envs</td>
+<td>8</td>
+</tr>
+<tr>
+<td>n_steps</td>
+<td>256</td>
+</tr>
+<tr>
+<td>batch_size</td>
+<td>256</td>
+</tr>
+<tr>
+<td>n_epochs</td>
+<td>10</td>
+</tr>
+<tr>
+<td>learning_rate</td>
+<td>0.0003</td>
+</tr>
+<tr>
+<td>gamma</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>gae_lambda</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td>clip_range</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>ent_coef</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>net_arch</td>
+<td>128 × 128</td>
+</tr>
+<tr>
+<td>log_std_init</td>
+<td>-0.5</td>
+</tr>
+<tr>
+<td>eval_every</td>
+<td>20000</td>
+</tr>
+<tr>
+<td>seed</td>
+<td>2</td>
+</tr>
+<tr>
+<td>accion</td>
+<td>relativa</td>
+</tr>
+<tr>
+<td>desde</td>
+<td>ppo-v2-v0.1-s1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Diferencias de variables con <code>ppo-pasarela-transfer-1m5-v0.4-s0</code>.</strong> seed: 0 → 2</p>
+<p><strong>Resultado.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Normal (suite v1)</th>
+<th>Viento 15 m/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizajes seguros</td>
+<td>100.0 %</td>
+<td>68.0 %</td>
+</tr>
+<tr>
+<td>velocidad de contacto</td>
+<td>1.25 m/s</td>
+<td>2.14 m/s</td>
+</tr>
+<tr>
+<td>error de posición</td>
+<td>2.9 m</td>
+<td>11.1 m</td>
+</tr>
+<tr>
+<td>cómo terminan</td>
+<td>aterrizaje 200</td>
+<td>aterrizaje 136, fuera de plataforma 5, choque 15, colisión 44</td>
+</tr>
+<tr>
+<td>primer aterrizaje / mejor época</td>
+<td>10 / 37760</td>
+<td></td>
+</tr>
+<tr>
+<td>presupuesto</td>
+<td>pasos_agente 1500000, epocas 37791, maquina pipeline Prefect en CPU de portátil (WSL2)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisión (2026-11-08).</strong> Seleccionado por el pipeline: 100.0% de aterrizajes en la suite v1 (0 colisiones), 68.0% con viento de 15 m/s; supera al recomendado ppo-pasarela-transfer-1m5-v0.4-s1 con el criterio de aceptación (+2% de tasa, viento −5% como mucho, no más colisiones).</p>
+<h2 id="experimento-6-nivel-3-v1-pasarela-con-viento-fuerte">Experimento 6 · Nivel 3 (v1): pasarela con viento fuerte</h2>
+<p>Experimento de MLflow <code>experimento-6-pasarela-viento</code> (4 ejecuciones). Las ejecuciones van en orden cronológico; cada una dice qué cambió frente a su baseline.</p>
+<p><strong>Pregunta.</strong> Con viento de hasta 15 m/s y ráfagas dobles, ¿cuánto se degrada el modelo de la pasarela y lo recupera reentrenarlo en esas condiciones?</p>
+<p><strong>Variables que se mueven.</strong> las del experimento 5 con el ambiente N3 v1; cambia el modelo de partida y el presupuesto.</p>
+<h3 id="ppo-pasarela-viento-transfer-1m5-v05-s0-seleccionado-945"><code>ppo-pasarela-viento-transfer-1m5-v0.5-s0</code> · seleccionado · 94.5 %</h3>
+<p><strong>Hipótesis.</strong> Intervención ante el viento bajo la pasarela: reentrenar el recomendado de N2 v1 en N3 v1 (viento 0–15 m/s, ráfagas ×2) mejora en al menos 2 puntos a ese mismo modelo jugando en N3 v1, sin más colisiones</p>
+<p><strong>Cambio frente a <code>ppo-pasarela-transfer-1m5-v0.4-s0</code>.</strong> Ambiente N3 v1 (pasarela con viento 0–15 m/s y ráfagas 3 m/s) y transferencia desde ppo-pasarela-transfer-1m5-v0.4-s0; 1 500 000 pasos</p>
+<p><strong>Dónde está el modelo.</strong></p>
+<ul>
+<li><code>resultados/runs/ppo-pasarela-viento-transfer-1m5-v0.5-s0/modelo.zip</code> · SHA-256 <code>974450458b402b3a02735a568a5c73edc2010765d56f91faf14b3e3f0e69b597</code></li>
+<li><code>resultados/runs/ppo-pasarela-viento-transfer-1m5-v0.5-s0/modelo_normalizador.pkl</code> · SHA-256 <code>0c90f04519a58efc4b978b3140836462c7f12d61acccd594a8259bd4f54d69c4</code></li>
+<li>En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/507dedc0da1dce8b8e797c1d1211c46c920da88d/resultados/runs/ppo-pasarela-viento-transfer-1m5-v0.5-s0/modelo.zip</li>
+<li>MLflow: modelo <code>rocket-landing-ppo</code> versión 17, run <code>6abaeed5156e4e0a9ef54436a1660e86</code> (https://alpha-centauri-mlflow.onrender.com/#/experiments/6/runs/6abaeed5156e4e0a9ef54436a1660e86)</li>
+<li>Commit de git: <code>507dedc0da1dce8b8e797c1d1211c46c920da88d</code> · manifiesto de la sección 11: <code>manifests/ppo-pasarela-viento-transfer-1m5-v0.5-s0.json</code></li>
+<li>Parte de los pesos de <code>ppo-pasarela-transfer-1m5-v0.4-s0</code> (transferencia)</li>
+</ul>
+<p><strong>Variables.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ambiente</td>
+<td>RocketLanding3D-N3-v1 v0.5 (N3)</td>
+</tr>
+<tr>
+<td>agente</td>
+<td>PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12</td>
+</tr>
+<tr>
+<td>total_timesteps</td>
+<td>1500000</td>
+</tr>
+<tr>
+<td>n_envs</td>
+<td>8</td>
+</tr>
+<tr>
+<td>n_steps</td>
+<td>256</td>
+</tr>
+<tr>
+<td>batch_size</td>
+<td>256</td>
+</tr>
+<tr>
+<td>n_epochs</td>
+<td>10</td>
+</tr>
+<tr>
+<td>learning_rate</td>
+<td>0.0003</td>
+</tr>
+<tr>
+<td>gamma</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>gae_lambda</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td>clip_range</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>ent_coef</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>net_arch</td>
+<td>128 × 128</td>
+</tr>
+<tr>
+<td>log_std_init</td>
+<td>-0.5</td>
+</tr>
+<tr>
+<td>eval_every</td>
+<td>20000</td>
+</tr>
+<tr>
+<td>seed</td>
+<td>0</td>
+</tr>
+<tr>
+<td>accion</td>
+<td>relativa</td>
+</tr>
+<tr>
+<td>desde</td>
+<td>ppo-pasarela-transfer-1m5-v0.4-s0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Diferencias de variables con <code>ppo-pasarela-transfer-1m5-v0.4-s0</code>.</strong> ambiente: RocketLanding3D-N2-v1 v0.4 → RocketLanding3D-N3-v1 v0.5; ambiente: RocketLanding3D-N2-v1 → RocketLanding3D-N3-v1; desde: ppo-v2-v0.1-s1 → ppo-pasarela-transfer-1m5-v0.4-s0</p>
+<p><strong>Resultado.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Normal (suite v1)</th>
+<th>Viento 15 m/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizajes seguros</td>
+<td>94.5 %</td>
+<td>65.5 %</td>
+</tr>
+<tr>
+<td>velocidad de contacto</td>
+<td>1.60 m/s</td>
+<td>1.78 m/s</td>
+</tr>
+<tr>
+<td>error de posición</td>
+<td>5.4 m</td>
+<td>11.9 m</td>
+</tr>
+<tr>
+<td>cómo terminan</td>
+<td>aterrizaje 189, choque 5, colisión 6</td>
+<td>aterrizaje 131, fuera de plataforma 2, choque 8, sin pasos 7, colisión 52</td>
+</tr>
+<tr>
+<td>primer aterrizaje / mejor época</td>
+<td>9 / 36122</td>
+<td></td>
+</tr>
+<tr>
+<td>presupuesto</td>
+<td>pasos_agente 1500000, epocas 37679, maquina pipeline Prefect en CPU de portátil (WSL2)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisión (2026-11-08).</strong> Seleccionado por el pipeline: 94.5% de aterrizajes en la suite v1 (6 colisiones), 65.5% con viento de 15 m/s; supera al recomendado ppo-pasarela-transfer-1m5-v0.4-s0 con el criterio de aceptación (+2% de tasa, viento −5% como mucho, no más colisiones).</p>
+<h3 id="ppo-pasarela-viento-transfer-1m5-v05-s1-rechazado-940"><code>ppo-pasarela-viento-transfer-1m5-v0.5-s1</code> · rechazado · 94.0 %</h3>
+<p><strong>Hipótesis.</strong> Semilla 1 de la intervención en N3 v1: queda a menos de 5 puntos de la semilla 0</p>
+<p><strong>Cambio frente a <code>ppo-pasarela-viento-transfer-1m5-v0.5-s0</code>.</strong> Solo la semilla de entrenamiento: 1. Misma transferencia desde ppo-pasarela-transfer-1m5-v0.4-s0, ambiente y presupuesto</p>
+<p><strong>Dónde está el modelo.</strong></p>
+<ul>
+<li><code>resultados/runs/ppo-pasarela-viento-transfer-1m5-v0.5-s1/modelo.zip</code> · SHA-256 <code>78571036903eae5786dfe6493a9433072e37494caaf535670e92f6892211c6c1</code></li>
+<li><code>resultados/runs/ppo-pasarela-viento-transfer-1m5-v0.5-s1/modelo_normalizador.pkl</code> · SHA-256 <code>759e9ea56be225bcf6f169ab87b3e1099b26f9990fa6bc1d72278d1539799b46</code></li>
+<li>En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/0d2b05347af9639dfc0177cce10de276e400e991/resultados/runs/ppo-pasarela-viento-transfer-1m5-v0.5-s1/modelo.zip</li>
+<li>MLflow: modelo <code>rocket-landing-ppo</code> versión 20, run <code>040c374d54854bf386c6fad5ca31b52e</code> (https://alpha-centauri-mlflow.onrender.com/#/experiments/6/runs/040c374d54854bf386c6fad5ca31b52e)</li>
+<li>Commit de git: <code>0d2b05347af9639dfc0177cce10de276e400e991</code> · manifiesto de la sección 11: <code>manifests/ppo-pasarela-viento-transfer-1m5-v0.5-s1.json</code></li>
+<li>Parte de los pesos de <code>ppo-pasarela-transfer-1m5-v0.4-s0</code> (transferencia)</li>
+</ul>
+<p><strong>Variables.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ambiente</td>
+<td>RocketLanding3D-N3-v1 v0.5 (N3)</td>
+</tr>
+<tr>
+<td>agente</td>
+<td>PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12</td>
+</tr>
+<tr>
+<td>total_timesteps</td>
+<td>1500000</td>
+</tr>
+<tr>
+<td>n_envs</td>
+<td>8</td>
+</tr>
+<tr>
+<td>n_steps</td>
+<td>256</td>
+</tr>
+<tr>
+<td>batch_size</td>
+<td>256</td>
+</tr>
+<tr>
+<td>n_epochs</td>
+<td>10</td>
+</tr>
+<tr>
+<td>learning_rate</td>
+<td>0.0003</td>
+</tr>
+<tr>
+<td>gamma</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>gae_lambda</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td>clip_range</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>ent_coef</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>net_arch</td>
+<td>128 × 128</td>
+</tr>
+<tr>
+<td>log_std_init</td>
+<td>-0.5</td>
+</tr>
+<tr>
+<td>eval_every</td>
+<td>20000</td>
+</tr>
+<tr>
+<td>seed</td>
+<td>1</td>
+</tr>
+<tr>
+<td>accion</td>
+<td>relativa</td>
+</tr>
+<tr>
+<td>desde</td>
+<td>ppo-pasarela-transfer-1m5-v0.4-s0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Diferencias de variables con <code>ppo-pasarela-viento-transfer-1m5-v0.5-s0</code>.</strong> seed: 0 → 1</p>
+<p><strong>Resultado.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Normal (suite v1)</th>
+<th>Viento 15 m/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizajes seguros</td>
+<td>94.0 %</td>
+<td>66.0 %</td>
+</tr>
+<tr>
+<td>velocidad de contacto</td>
+<td>1.69 m/s</td>
+<td>1.68 m/s</td>
+</tr>
+<tr>
+<td>error de posición</td>
+<td>4.0 m</td>
+<td>12.9 m</td>
+</tr>
+<tr>
+<td>cómo terminan</td>
+<td>aterrizaje 188, choque 4, colisión 8</td>
+<td>aterrizaje 132, choque 2, sin pasos 8, colisión 58</td>
+</tr>
+<tr>
+<td>primer aterrizaje / mejor época</td>
+<td>10 / 28745</td>
+<td></td>
+</tr>
+<tr>
+<td>presupuesto</td>
+<td>pasos_agente 1500000, epocas 36535, maquina pipeline Prefect en CPU de portátil (WSL2)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisión (2026-11-08).</strong> Rechazado por el pipeline: 94.0% de aterrizajes en la suite v1 (8 colisiones), 66.0% con viento de 15 m/s. no mejora a ppo-pasarela-viento-transfer-1m5-v0.5-s0 en al menos 2% (94.0% frente a 94.5%); más colisiones que ppo-pasarela-viento-transfer-1m5-v0.5-s0 (8 frente a 6).</p>
+<h3 id="ppo-pasarela-viento-transfer-1m5-v05-s2-rechazado-925"><code>ppo-pasarela-viento-transfer-1m5-v0.5-s2</code> · rechazado · 92.5 %</h3>
+<p><strong>Hipótesis.</strong> Semilla 2 de la intervención en N3 v1: queda a menos de 5 puntos de la semilla 0</p>
+<p><strong>Cambio frente a <code>ppo-pasarela-viento-transfer-1m5-v0.5-s0</code>.</strong> Solo la semilla de entrenamiento: 2. Misma transferencia desde ppo-pasarela-transfer-1m5-v0.4-s0, ambiente y presupuesto</p>
+<p><strong>Dónde está el modelo.</strong></p>
+<ul>
+<li><code>resultados/runs/ppo-pasarela-viento-transfer-1m5-v0.5-s2/modelo.zip</code> · SHA-256 <code>cdbe65a0d9a154cdc191d4f166763bfd7b7a1aeb27eb49375f11a59aa05ba213</code></li>
+<li><code>resultados/runs/ppo-pasarela-viento-transfer-1m5-v0.5-s2/modelo_normalizador.pkl</code> · SHA-256 <code>eb97da3ff9a904307f5a6668436e1459df131856a0aa602c496b0cd5add11252</code></li>
+<li>En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/72ad242c551acc79c7988b49e84f9552c7d67098/resultados/runs/ppo-pasarela-viento-transfer-1m5-v0.5-s2/modelo.zip</li>
+<li>MLflow: modelo <code>rocket-landing-ppo</code> versión 21, run <code>fae4ff317d274d1b82971c4895d0d08a</code> (https://alpha-centauri-mlflow.onrender.com/#/experiments/6/runs/fae4ff317d274d1b82971c4895d0d08a)</li>
+<li>Commit de git: <code>72ad242c551acc79c7988b49e84f9552c7d67098</code> · manifiesto de la sección 11: <code>manifests/ppo-pasarela-viento-transfer-1m5-v0.5-s2.json</code></li>
+<li>Parte de los pesos de <code>ppo-pasarela-transfer-1m5-v0.4-s0</code> (transferencia)</li>
+</ul>
+<p><strong>Variables.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ambiente</td>
+<td>RocketLanding3D-N3-v1 v0.5 (N3)</td>
+</tr>
+<tr>
+<td>agente</td>
+<td>PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12</td>
+</tr>
+<tr>
+<td>total_timesteps</td>
+<td>1500000</td>
+</tr>
+<tr>
+<td>n_envs</td>
+<td>8</td>
+</tr>
+<tr>
+<td>n_steps</td>
+<td>256</td>
+</tr>
+<tr>
+<td>batch_size</td>
+<td>256</td>
+</tr>
+<tr>
+<td>n_epochs</td>
+<td>10</td>
+</tr>
+<tr>
+<td>learning_rate</td>
+<td>0.0003</td>
+</tr>
+<tr>
+<td>gamma</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>gae_lambda</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td>clip_range</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>ent_coef</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>net_arch</td>
+<td>128 × 128</td>
+</tr>
+<tr>
+<td>log_std_init</td>
+<td>-0.5</td>
+</tr>
+<tr>
+<td>eval_every</td>
+<td>20000</td>
+</tr>
+<tr>
+<td>seed</td>
+<td>2</td>
+</tr>
+<tr>
+<td>accion</td>
+<td>relativa</td>
+</tr>
+<tr>
+<td>desde</td>
+<td>ppo-pasarela-transfer-1m5-v0.4-s0</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Diferencias de variables con <code>ppo-pasarela-viento-transfer-1m5-v0.5-s0</code>.</strong> seed: 0 → 2</p>
+<p><strong>Resultado.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Normal (suite v1)</th>
+<th>Viento 15 m/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizajes seguros</td>
+<td>92.5 %</td>
+<td>74.5 %</td>
+</tr>
+<tr>
+<td>velocidad de contacto</td>
+<td>1.67 m/s</td>
+<td>1.74 m/s</td>
+</tr>
+<tr>
+<td>error de posición</td>
+<td>4.7 m</td>
+<td>11.8 m</td>
+</tr>
+<tr>
+<td>cómo terminan</td>
+<td>aterrizaje 185, choque 3, sin pasos 2, colisión 10</td>
+<td>aterrizaje 149, fuera de plataforma 2, choque 3, sin pasos 3, colisión 43</td>
+</tr>
+<tr>
+<td>primer aterrizaje / mejor época</td>
+<td>6 / 32059</td>
+<td></td>
+</tr>
+<tr>
+<td>presupuesto</td>
+<td>pasos_agente 1500000, epocas 35910, maquina pipeline Prefect en CPU de portátil (WSL2)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisión (2026-11-08).</strong> Rechazado por el pipeline: 92.5% de aterrizajes en la suite v1 (10 colisiones), 74.5% con viento de 15 m/s. no mejora a ppo-pasarela-viento-transfer-1m5-v0.5-s0 en al menos 2% (92.5% frente a 94.5%); más colisiones que ppo-pasarela-viento-transfer-1m5-v0.5-s0 (10 frente a 6).</p>
+<h3 id="ppo-pasarela-viento-transfer-1m5-desde-s2-v05-s0-seleccionado-975"><code>ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0</code> · seleccionado · 97.5 %</h3>
+<p><strong>Hipótesis.</strong> Partir del nuevo recomendado de N2 v1 (s2: 100 % en N2, 93,5 % y 7 colisiones jugando en N3 v1) con la receta seleccionada en N3 v1 (1,5 M de pasos) mejora al recomendado de N3 en al menos 2 puntos sin más colisiones</p>
+<p><strong>Cambio frente a <code>ppo-pasarela-transfer-1m5-v0.4-s2</code>.</strong> Solo el modelo de partida: ppo-pasarela-transfer-1m5-v0.4-s2 en vez de -s0 (mismo ambiente N3 v1, mismo presupuesto)</p>
+<p><strong>Dónde está el modelo.</strong></p>
+<ul>
+<li><code>resultados/runs/ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0/modelo.zip</code> · SHA-256 <code>e3e91323b56ee670dcb641ddcf755a4a64a82c8f5fe84acb2da09160171e615a</code></li>
+<li><code>resultados/runs/ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0/modelo_normalizador.pkl</code> · SHA-256 <code>67e520059004fa746b18e00b221e8ab11930e715c4e7eb241aacb39bd1bf0c69</code></li>
+<li>En GitHub, en el commit de entrenamiento: https://github.com/mjcastano29-tech/Alpha-Centauri/blob/8ab04daf7c36cd8481a0fa07c7e53500f6428600/resultados/runs/ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0/modelo.zip</li>
+<li>MLflow: modelo <code>rocket-landing-ppo</code> versión 22, run <code>68b2136313c243e7b4583f86a9e3338e</code> (https://alpha-centauri-mlflow.onrender.com/#/experiments/6/runs/68b2136313c243e7b4583f86a9e3338e)</li>
+<li>Commit de git: <code>8ab04daf7c36cd8481a0fa07c7e53500f6428600</code> (había cambios sin commit al entrenar) · manifiesto de la sección 11: <code>manifests/ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0.json</code></li>
+<li>Parte de los pesos de <code>ppo-pasarela-transfer-1m5-v0.4-s2</code> (transferencia)</li>
+</ul>
+<p><strong>Variables.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ambiente</td>
+<td>RocketLanding3D-N3-v1 v0.5 (N3)</td>
+</tr>
+<tr>
+<td>agente</td>
+<td>PPO (red neuronal) · relativa v2: 3 valores en [-1, 1]; empuje = 1 + a0 (máx. 1.6), inclinación = a1, a2 × 0.12</td>
+</tr>
+<tr>
+<td>total_timesteps</td>
+<td>1500000</td>
+</tr>
+<tr>
+<td>n_envs</td>
+<td>8</td>
+</tr>
+<tr>
+<td>n_steps</td>
+<td>256</td>
+</tr>
+<tr>
+<td>batch_size</td>
+<td>256</td>
+</tr>
+<tr>
+<td>n_epochs</td>
+<td>10</td>
+</tr>
+<tr>
+<td>learning_rate</td>
+<td>0.0003</td>
+</tr>
+<tr>
+<td>gamma</td>
+<td>0.99</td>
+</tr>
+<tr>
+<td>gae_lambda</td>
+<td>0.95</td>
+</tr>
+<tr>
+<td>clip_range</td>
+<td>0.2</td>
+</tr>
+<tr>
+<td>ent_coef</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>net_arch</td>
+<td>128 × 128</td>
+</tr>
+<tr>
+<td>log_std_init</td>
+<td>-0.5</td>
+</tr>
+<tr>
+<td>eval_every</td>
+<td>20000</td>
+</tr>
+<tr>
+<td>seed</td>
+<td>0</td>
+</tr>
+<tr>
+<td>accion</td>
+<td>relativa</td>
+</tr>
+<tr>
+<td>desde</td>
+<td>ppo-pasarela-transfer-1m5-v0.4-s2</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Diferencias de variables con <code>ppo-pasarela-transfer-1m5-v0.4-s2</code>.</strong> ambiente: RocketLanding3D-N2-v1 v0.4 → RocketLanding3D-N3-v1 v0.5; seed: 2 → 0; ambiente: RocketLanding3D-N2-v1 → RocketLanding3D-N3-v1; desde: ppo-v2-v0.1-s1 → ppo-pasarela-transfer-1m5-v0.4-s2</p>
+<p><strong>Resultado.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Normal (suite v1)</th>
+<th>Viento 15 m/s</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>aterrizajes seguros</td>
+<td>97.5 %</td>
+<td>85.5 %</td>
+</tr>
+<tr>
+<td>velocidad de contacto</td>
+<td>1.47 m/s</td>
+<td>1.43 m/s</td>
+</tr>
+<tr>
+<td>error de posición</td>
+<td>4.7 m</td>
+<td>9.7 m</td>
+</tr>
+<tr>
+<td>cómo terminan</td>
+<td>aterrizaje 195, choque 2, colisión 3</td>
+<td>aterrizaje 171, choque 6, colisión 23</td>
+</tr>
+<tr>
+<td>primer aterrizaje / mejor época</td>
+<td>2 / 42570</td>
+<td></td>
+</tr>
+<tr>
+<td>presupuesto</td>
+<td>pasos_agente 1500000, epocas 42604, maquina pipeline Prefect en CPU de portátil (WSL2)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decisión (2026-11-08).</strong> Seleccionado por el pipeline: 97.5% de aterrizajes en la suite v1 (3 colisiones), 85.5% con viento de 15 m/s; supera al recomendado ppo-pasarela-viento-transfer-1m5-v0.5-s0 con el criterio de aceptación (+2% de tasa, viento −5% como mucho, no más colisiones).</p>
+</main></body></html>

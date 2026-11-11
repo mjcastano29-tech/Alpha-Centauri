@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guion de la defensa · Alpha Centauri</title><style>
+:root { --ink: #1d2126; --muted: #5d6572; --line: #d9d7cf; --accent: #1f6f5c; --soft: #eef3f1; }
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--ink); background: #fff; font: 11pt/1.5 "Source Sans 3", "Segoe UI", system-ui, sans-serif; }
+main { max-width: 86ch; margin: 0 auto; padding: 28px 32px 48px; }
+.portada { border-bottom: 2px solid var(--accent); margin-bottom: 22px; padding-bottom: 10px; }
+.portada .proyecto { font: 600 10pt/1.2 ui-monospace, Menlo, monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.portada h1 { margin: 6px 0 4px; font-size: 22pt; line-height: 1.15; }
+.portada .meta { color: var(--muted); font-size: 9.5pt; }
+h1, h2, h3 { line-height: 1.2; page-break-after: avoid; }
+h1 { font-size: 18pt; margin: 26px 0 10px; }
+h2 { font-size: 14pt; margin: 22px 0 8px; border-bottom: 1px solid var(--line); padding-bottom: 3px; }
+h3 { font-size: 12pt; margin: 16px 0 6px; }
+p, li { orphans: 3; widows: 3; }
+a { color: var(--accent); text-decoration: none; word-break: break-word; }
+code { font: 9.5pt ui-monospace, Menlo, Consolas, monospace; background: var(--soft); padding: 1px 4px; border-radius: 4px; }
+pre { background: var(--soft); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; overflow-x: auto; font-size: 9pt; line-height: 1.4; page-break-inside: avoid; }
+pre code { background: none; padding: 0; font-size: inherit; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0 16px; font-size: 9.5pt; page-break-inside: auto; }
+tr { page-break-inside: avoid; }
+th, td { border: 1px solid var(--line); padding: 5px 7px; vertical-align: top; text-align: left; }
+th { background: var(--soft); font-weight: 600; }
+img, svg { max-width: 100%; height: auto; }
+blockquote { margin: 10px 0; padding: 4px 14px; border-left: 3px solid var(--accent); color: var(--muted); }
+hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
+@page { size: A4; margin: 16mm 14mm 18mm; }
+@media print { main { padding: 0; max-width: none; } a { color: inherit; } }
+</style></head>
+<body><main>
+<header class="portada"><div class="proyecto">Alpha Centauri · Rocket Landing · proyecto final de MLOps</div>
+
+<div class="meta">Generado el 2026-11-11 desde <code>docs/guion-defensa.md</code> · etiqueta <code>v1.1.0</code> · fuente de verdad: el Markdown del repositorio</div></header>
+<h1 id="guion-de-la-defensa-15-minutos-alpha-centauri">Guion de la defensa (15 minutos) · Alpha Centauri</h1>
+<p>Antes de empezar (10 minutos antes): abrir https://alpha-centauri-five.vercel.app/#/monitoreo y pulsar <strong>Medir latencia ahora</strong> para despertar la API y cargar los tres modelos; abrir https://alpha-centauri-mlflow.onrender.com para despertar MLflow. Tener a mano el repositorio y <code>docs/informe-final.md</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Minuto</th>
+<th>Qué se muestra</th>
+<th>Qué se dice</th>
+<th>Quién</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0–1</td>
+<td><code>/landing/</code></td>
+<td>Misión de la ficha, los tres niveles, qué entregamos: ambiente, modelos, pipeline, API, web, rollback.</td>
+<td>MJ</td>
+</tr>
+<tr>
+<td>1–4</td>
+<td>Portada <code>#/</code> (cohete)</td>
+<td>Replay del recomendado de N3 bajo la pasarela con viento. Cambiar con las pestañas a N1 y a N2: cómo crece la complejidad. Modo <em>replay</em> visible; criterios de aterrizaje en la consola.</td>
+<td>Isaías</td>
+</tr>
+<tr>
+<td>4–6</td>
+<td><code>#/experimentos</code></td>
+<td>Tabla de complejidad: qué añade cada nivel, observación, obstáculos, viento, y cuánto pierde el modelo del nivel anterior sin reentrenar (99 → 5 %, 100 → 93,5 %). Pestaña del experimento 5: variables en negrita, decisiones del pipeline, tres semillas.</td>
+<td>MJ</td>
+</tr>
+<tr>
+<td>6–8</td>
+<td>Ficha de <code>ppo-pasarela-transfer-1m5-v0.4-s2</code></td>
+<td>Identidad: commit, SHA-256, manifiesto de la sección 11, versión en MLflow (abrir la run). Hipótesis y decisión. <strong>Evaluación en vivo</strong>: suite v1, 6 épocas; luego el mismo modelo en N3 v1 (misma familia): se ve la degradación.</td>
+<td>Rojas</td>
+</tr>
+<tr>
+<td>7–8</td>
+<td><code>#/vivo</code></td>
+<td><strong>Viento en vivo</strong>: lanzar una misión con el recomendado de N3 bajo la pasarela, subir el viento a 20 m/s a mitad de vuelo y ver cómo corrige; es la perturbación del nivel 3 aplicada a mano, con el modelo congelado y la API simulando paso a paso.</td>
+<td>Isaías</td>
+</tr>
+<tr>
+<td>8–10</td>
+<td><code>#/incidente</code></td>
+<td>Incidente medido para las tres semillas, intervención (cuatro ejecuciones, criterio fijado antes), recomendado de N3 con 85,5 % con viento.</td>
+<td>Rojas</td>
+</tr>
+<tr>
+<td>10–12</td>
+<td><code>#/monitoreo</code> + terminal</td>
+<td>Qué commit y catálogo se sirven, alertas, últimas decisiones del pipeline y evidencia JSON. <strong>Rollback en vivo</strong>: <code>python catalogo.py restaurar --nivel N3 --motivo "demo"</code>, commit y push; mientras despliega, enseñar la evidencia del rollback anterior; al volver la API, <code>GET /version</code> muestra el catálogo nuevo (si el tiempo no alcanza, se enseña la evidencia y se deja el comando preparado).</td>
+<td>MJ</td>
+</tr>
+<tr>
+<td>12–13</td>
+<td>Pipeline</td>
+<td><code>pipelines/README.md</code>: ocho etapas y criterio; una evidencia abierta; captura de Prefect.</td>
+<td>Rojas</td>
+</tr>
+<tr>
+<td>13–14</td>
+<td>Límites</td>
+<td>Semillas y medias, ejecuciones con <code>*</code>, plan gratuito, <code>mlflow.db</code> en git, qué haríamos después (abertura aleatoria, torque).</td>
+<td>Isaías</td>
+</tr>
+<tr>
+<td>14–15</td>
+<td>Cierre</td>
+<td>Contribuciones y preguntas.</td>
+<td>todos</td>
+</tr>
+</tbody>
+</table>
+<p>Preguntas probables y respuesta corta:</p>
+<ul>
+<li><strong>¿Por qué el recomendado no es la media?</strong> El pipeline promueve con un criterio fijo (+2 puntos, viento, colisiones) y conserva el anterior; la media de las tres semillas está en el informe y en las fichas. El test reservado da −1,5, −1 y −0,5 puntos respecto a la suite v1: no hay sobreajuste a la suite.</li>
+<li><strong>¿Qué pasa si el modelo nuevo falla en producción?</strong> <code>catalogo.py restaurar</code>, commit y push: la API sirve el anterior en unos tres minutos; <code>comprobar_api.py</code> deja evidencia. Hecho dos veces con el nivel 3.</li>
+<li><strong>¿Por qué cambiaron las torres por la pasarela?</strong> Decisión del equipo tras medir: las torres solo obligaban a desviarse en el 30 % de las salidas; la pasarela, siempre. Los modelos de torres siguen reproducibles.</li>
+<li><strong>¿<code>terminated</code> o <code>truncated</code>?</strong> Éxito y fallos de misión terminan (<code>terminated</code>); agotar los 50 pasos trunca (<code>truncated</code>) con la misma penalización. Pruebas en <code>tests/test_ambiente.py</code>.</li>
+<li><strong>¿Qué es Python o TypeScript?</strong> Python es la autoridad: ambiente, modelos y evaluación. La web solo muestra lo que devuelve la API y reproduce trayectorias grabadas.</li>
+<li><strong>¿Por qué Prefect en otro entorno?</strong> Prefect 3.8 no convive con la versión de FastAPI de la API; el orquestador tiene su <code>requirements-pipeline.txt</code> y ejecuta las etapas con el intérprete del proyecto.</li>
+</ul>
+</main></body></html>
