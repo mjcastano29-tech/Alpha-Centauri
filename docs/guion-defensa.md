@@ -2,6 +2,8 @@
 
 Antes de empezar (10 minutos antes): abrir https://alpha-centauri-five.vercel.app/#/monitoreo y pulsar **Medir latencia ahora** para despertar la API y cargar los tres modelos; abrir https://alpha-centauri-mlflow.onrender.com para despertar MLflow. Tener a mano el repositorio y `docs/informe-final.md`.
 
+Reparto: **MJ** = María Jimena Castaño Albarracín · **Isaías** = Isaías Céspedes Novoa · **Rojas** = Jorge Horacio Rojas Criollo.
+
 | Minuto | Qué se muestra | Qué se dice | Quién |
 |---|---|---|---|
 | 0–1 | `/landing/` | Misión de la ficha, los tres niveles, qué entregamos: ambiente, modelos, pipeline, API, web, rollback. | MJ |

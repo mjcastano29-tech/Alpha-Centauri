@@ -18,9 +18,9 @@ Vistas: `#/` catálogo · `#/ejecucion/<id>` detalle y evaluación en vivo · `#
 (vuelos grabados) · `#/replay/<id>/evaluacion` (la evaluación recién ejecutada). Cada vista indica el modo:
 replay o evaluación en vivo.
 
-## PROJECT ELYNDRA: identidad visual y escena 3D
+## Identidad visual y escena 3D
 
-La web se presenta como **PROJECT ELYNDRA**: el aterrizaje ocurre en Elyndra, un planeta ficticio del sistema Alfa
+La web se presenta como **Alpha Centauri** (el nombre del proyecto; el diseño nació como "Project Elyndra"): el aterrizaje ocurre en Elyndra, un planeta ficticio del sistema Alfa
 Centauri (se ven los dos soles). El rediseño es solo visual: la trayectoria sigue llegando de la API, se interpola igual
 que antes y la telemetría muestra el dato exacto de cada muestra.
 

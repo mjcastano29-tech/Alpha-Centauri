@@ -31,10 +31,10 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
 <body><main>
 <header class="portada"><div class="proyecto">Alpha Centauri · Rocket Landing · proyecto final de MLOps</div>
 
-<div class="meta">Generado el 2026-11-11 desde <code>docs/informe-final.md</code> · etiqueta <code>v1.1.0</code> · fuente de verdad: el Markdown del repositorio</div></header>
+<div class="meta">Generado el 2026-11-13 desde <code>docs/informe-final.md</code> · etiqueta <code>v1.1.1</code> · fuente de verdad: el Markdown del repositorio</div></header>
 <h1 id="informe-final-alpha-centauri-rocket-landing">Informe final · Alpha Centauri · Rocket Landing</h1>
-<p><strong>Proyecto final del curso de MLOps · Universidad Externado · noviembre de 2026 · equipo Alpha Centauri (mjcastano29-tech, Isaías Céspedes, jhrojas02; nombres completos según el acta del curso)</strong></p>
-<p>Web: https://alpha-centauri-five.vercel.app · API: https://alpha-centauri-api.onrender.com · MLflow: https://alpha-centauri-mlflow.onrender.com · Repositorio: https://github.com/mjcastano29-tech/Alpha-Centauri · Entrega: etiqueta <code>v1.1.0</code> (índice en <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/entregables.md">entregables.md</a>)</p>
+<p><strong>Proyecto final del curso de MLOps · Universidad Externado · noviembre de 2026 · equipo Alpha Centauri: María Jimena Castaño Albarracín (mjcastano29-tech), Isaías Céspedes Novoa (isaiasexternado-a11y) y Jorge Horacio Rojas Criollo (jhrojas02)</strong></p>
+<p>Web: https://alpha-centauri-five.vercel.app · API: https://alpha-centauri-api.onrender.com · MLflow: https://alpha-centauri-mlflow.onrender.com · Repositorio: https://github.com/mjcastano29-tech/Alpha-Centauri · Entrega: etiqueta <code>v1.1.1</code> (índice en <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.1/docs/entregables.md">entregables.md</a>)</p>
 <h2 id="1-que-construimos">1. Qué construimos</h2>
 <p>Un agente de aprendizaje por refuerzo que aterriza un cohete en un mundo 3D con viento, temperatura y presión variables, combustible limitado y, en los niveles superiores, un obstáculo que obliga a decidir la ruta. Alrededor del agente, el sistema de operación que pide la guía: ambientes versionados con contrato y ficha, experimentos con hipótesis y decisión, modelos recuperables por huella, un pipeline que entrena, evalúa, decide y publica, una API que sirve el modelo recomendado de cada nivel, una web que permite al docente ver, comparar y evaluar, y un procedimiento de rollback comprobado en producción.</p>
 <table>
@@ -135,7 +135,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
 </table>
 <p>La primera versión del nivel 2 fueron tres torres alrededor de la plataforma (ambiente 0.2, con su nivel 3 0.3). El equipo las sustituyó por la pasarela el 6 de noviembre porque obliga a una decisión más clara (entrar por la abertura y volver al centro) y se ve mejor en el replay. Los modelos de torres siguen en el catálogo como históricos y se pueden evaluar.</p>
 <h2 id="3-la-cadena-de-hipotesis">3. La cadena de hipótesis</h2>
-<p>Cada configuración tiene en <code>configs/&lt;run_id&gt;.json</code> su hipótesis, el cambio frente a su baseline, el presupuesto y la decisión con fecha; las mismas etiquetas están en MLflow. Los rechazos se conservan. Resumen por experimento (<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/EXPERIMENTOS.md">EXPERIMENTOS.md</a> tiene cada uno con sus variables):</p>
+<p>Cada configuración tiene en <code>configs/&lt;run_id&gt;.json</code> su hipótesis, el cambio frente a su baseline, el presupuesto y la decisión con fecha; las mismas etiquetas están en MLflow. Los rechazos se conservan. Resumen por experimento (<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.1/EXPERIMENTOS.md">EXPERIMENTOS.md</a> tiene cada uno con sus variables):</p>
 <ol>
 <li><strong>Q-learning en N1</strong> (<code>base-v0.1-s0</code>, 78 %): referencia aprendida, con dos tablas pequeñas y el empuje expresado respecto al peso.</li>
 <li><strong>PPO en N1</strong>: la acción cruda no aprende (0 %); la acción relativa v1 frena pero llega inclinada (0 %); la <strong>v2</strong> acota la inclinación al límite de aterrizaje y aprende (97 %). Tres semillas: 97,8 ± 1,0 %. La semilla 1 (99 %) es el recomendado por el criterio del pipeline.</li>
@@ -165,9 +165,9 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
 <h2 id="7-contribuciones">7. Contribuciones</h2>
 <p>Según el historial de commits y las pull requests del repositorio:</p>
 <ul>
-<li><strong>mjcastano29-tech</strong> (con Claude Code como asistente): ambiente y física, agentes Q-learning y PPO, experimentos 1 y 2, nivel 2 (torres y pasarela), versionado (manifiestos, configs, suites, MLflow), API, web (catálogo, experimentos, replay 3D, monitoreo), pipeline Prefect, diagnósticos e informe.</li>
-<li><strong>Isaías Céspedes</strong>: escena 3D cinematográfica original, pruebas de contrato y de modelos, huellas SHA-256 y <code>cli.py verificar</code>, dependencias fijadas, landing de presentación, consola de misión y sonido del replay.</li>
-<li><strong>jhrojas02</strong>: nivel 3 (ambientes 0.3 y 0.5), <code>incidente.py</code> e intervención, rollback en producción, <code>comprobar_api.py</code>, tres semillas de los finalistas de N3 y de la pasarela, MLflow desde cualquier máquina.</li>
+<li><strong>María Jimena Castaño Albarracín</strong> (mjcastano29-tech, con Claude Code como asistente): ambiente y física, agentes Q-learning y PPO, experimentos 1 y 2, nivel 2 (torres y pasarela), versionado (manifiestos, configs, suites, MLflow), API, web (catálogo, experimentos, replay 3D, monitoreo), pipeline Prefect, diagnósticos e informe.</li>
+<li><strong>Isaías Céspedes Novoa</strong> (isaiasexternado-a11y): escena 3D cinematográfica original, pruebas de contrato y de modelos, huellas SHA-256 y <code>cli.py verificar</code>, dependencias fijadas, landing de presentación, consola de misión y sonido del replay.</li>
+<li><strong>Jorge Horacio Rojas Criollo</strong> (jhrojas02): nivel 3 (ambientes 0.3 y 0.5), <code>incidente.py</code> e intervención, rollback en producción, <code>comprobar_api.py</code>, tres semillas de los finalistas de N3 y de la pasarela, MLflow desde cualquier máquina.</li>
 </ul>
 <h2 id="8-como-reproducir">8. Cómo reproducir</h2>
 <pre><code class="language-bash">git clone https://github.com/mjcastano29-tech/Alpha-Centauri &amp;&amp; cd Alpha-Centauri

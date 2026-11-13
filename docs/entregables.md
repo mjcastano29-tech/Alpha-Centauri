@@ -1,14 +1,14 @@
 # Entregables · Alpha Centauri · Rocket Landing
 
-Proyecto final del curso de MLOps · noviembre de 2026 · equipo Alpha Centauri (mjcastano29-tech, Isaías Céspedes, jhrojas02).
+Proyecto final del curso de MLOps · noviembre de 2026 · equipo Alpha Centauri: María Jimena Castaño Albarracín (mjcastano29-tech), Isaías Céspedes Novoa (isaiasexternado-a11y) y Jorge Horacio Rojas Criollo (jhrojas02).
 
-Este documento es el índice de la entrega: qué pide cada criterio de la rúbrica, dónde está la evidencia y cómo se comprueba. Todo lo que se cita vive en el repositorio en el commit etiquetado como `v1.1.0`; los PDF de la carpeta [`entregables/`](../entregables/) son copias de lectura generadas con `python entregables.py` a partir de estos mismos archivos.
+Este documento es el índice de la entrega: qué pide cada criterio de la rúbrica, dónde está la evidencia y cómo se comprueba. Todo lo que se cita vive en el repositorio en el commit etiquetado como `v1.1.1`; los PDF de la carpeta [`entregables/`](../entregables/) son copias de lectura generadas con `python entregables.py` a partir de estos mismos archivos.
 
 ## Dónde está todo
 
 | Qué | Dónde |
 |---|---|
-| Repositorio (código, fichas, modelos, datos, MLflow) | https://github.com/mjcastano29-tech/Alpha-Centauri · etiqueta `v1.1.0` |
+| Repositorio (código, fichas, modelos, datos, MLflow) | https://github.com/mjcastano29-tech/Alpha-Centauri · etiqueta `v1.1.1` |
 | Web pública (simulador, experimentos, catálogo, incidente, monitoreo, viento en vivo, landing) | https://alpha-centauri-five.vercel.app |
 | API pública | https://alpha-centauri-api.onrender.com (`/version`, `/docs`) |
 | Registro de modelos MLflow | https://alpha-centauri-mlflow.onrender.com |
@@ -34,7 +34,7 @@ Los servicios públicos están en el plan gratuito de Render: la primera petici�
 | Configuración e hipótesis | `configs/<run_id>.json` (hipótesis, baseline, presupuesto, decisión con fecha); `manifests/<run_id>.json` con el formato de la guía (sección 11: `git_commit`, `config_sha256`, `model_uri`, `model_sha256`, `evaluation_suite_id`, `seed`, `parent_run_id`) | `python manifiestos.py`; `GET /ejecuciones/<id>/manifiesto` |
 | Registro de experimentos | `mlflow.db` y `mlruns/` dentro del repositorio; UI pública en Render | abrir una run desde la ficha del modelo en la web |
 | Catálogo de lo que se sirve | `catalogo.json` v15 con recomendado y anterior por nivel e historial de 15 cambios | `python catalogo.py ver`; `GET /version` dice qué commit y catálogo sirve la API |
-| Entregas etiquetadas | `v0.2.0` (hito 1), `v1.0.0` (cierre del 10 de noviembre), `v1.1.0` (viento en vivo, pantalla completa, paquete de entregables) | `git tag -l` |
+| Entregas etiquetadas | `v0.2.0` (hito 1), `v1.0.0` (cierre del 10 de noviembre), `v1.1.0` (viento en vivo, pantalla completa, paquete de entregables), `v1.1.1` (entrega final: nombres del equipo y marca Alpha Centauri en la web) | `git tag -l` |
 
 ### 2. Diseño experimental (25 %)
 
@@ -75,7 +75,7 @@ Los servicios públicos están en el plan gratuito de Render: la primera petici�
 ## Cómo reproducir desde cero
 
 ```bash
-git clone https://github.com/mjcastano29-tech/Alpha-Centauri && cd Alpha-Centauri && git checkout v1.1.0
+git clone https://github.com/mjcastano29-tech/Alpha-Centauri && cd Alpha-Centauri && git checkout v1.1.1
 python -m venv .venv && .venv/bin/pip install -r requirements.txt
 python -m pytest                       # 113 pruebas
 python cli.py verificar                # huellas de las 23 ejecuciones
@@ -86,7 +86,5 @@ python entregables.py                  # regenera los PDF de entregables/
 
 ## Lo que queda en manos del equipo
 
-- Escribir los nombres completos de los tres integrantes en la cabecera del informe (hoy figuran los usuarios de GitHub).
-- Decidir el nombre con el que se presenta la web: la aplicación dice "PROJECT ELYNDRA · Alfa Centauri" y la landing "Alpha Centauri".
-- Guardar la semilla del test reservado fuera del repositorio (archivo `.suite_reservada`) en la máquina que vaya a repetirlo.
+- La semilla del test reservado está fuera del repositorio, en el archivo `.suite_reservada` de la máquina que lo ejecutó (ignorado por git); su huella SHA-256 figura en `resultados/suite-reservada/*.json`. Conviene guardar una copia en un lugar privado del equipo.
 - Ensayar el guion con la web pública despierta.

@@ -1,8 +1,8 @@
 # Informe final · Alpha Centauri · Rocket Landing
 
-**Proyecto final del curso de MLOps · Universidad Externado · noviembre de 2026 · equipo Alpha Centauri (mjcastano29-tech, Isaías Céspedes, jhrojas02; nombres completos según el acta del curso)**
+**Proyecto final del curso de MLOps · Universidad Externado · noviembre de 2026 · equipo Alpha Centauri: María Jimena Castaño Albarracín (mjcastano29-tech), Isaías Céspedes Novoa (isaiasexternado-a11y) y Jorge Horacio Rojas Criollo (jhrojas02)**
 
-Web: https://alpha-centauri-five.vercel.app · API: https://alpha-centauri-api.onrender.com · MLflow: https://alpha-centauri-mlflow.onrender.com · Repositorio: https://github.com/mjcastano29-tech/Alpha-Centauri · Entrega: etiqueta `v1.1.0` (índice en [entregables.md](entregables.md))
+Web: https://alpha-centauri-five.vercel.app · API: https://alpha-centauri-api.onrender.com · MLflow: https://alpha-centauri-mlflow.onrender.com · Repositorio: https://github.com/mjcastano29-tech/Alpha-Centauri · Entrega: etiqueta `v1.1.1` (índice en [entregables.md](entregables.md))
 
 ## 1. Qué construimos
 
@@ -68,9 +68,9 @@ Despliegue: push a `main` → Render reconstruye la API y MLflow, Vercel la web.
 
 Según el historial de commits y las pull requests del repositorio:
 
-- **mjcastano29-tech** (con Claude Code como asistente): ambiente y física, agentes Q-learning y PPO, experimentos 1 y 2, nivel 2 (torres y pasarela), versionado (manifiestos, configs, suites, MLflow), API, web (catálogo, experimentos, replay 3D, monitoreo), pipeline Prefect, diagnósticos e informe.
-- **Isaías Céspedes**: escena 3D cinematográfica original, pruebas de contrato y de modelos, huellas SHA-256 y `cli.py verificar`, dependencias fijadas, landing de presentación, consola de misión y sonido del replay.
-- **jhrojas02**: nivel 3 (ambientes 0.3 y 0.5), `incidente.py` e intervención, rollback en producción, `comprobar_api.py`, tres semillas de los finalistas de N3 y de la pasarela, MLflow desde cualquier máquina.
+- **María Jimena Castaño Albarracín** (mjcastano29-tech, con Claude Code como asistente): ambiente y física, agentes Q-learning y PPO, experimentos 1 y 2, nivel 2 (torres y pasarela), versionado (manifiestos, configs, suites, MLflow), API, web (catálogo, experimentos, replay 3D, monitoreo), pipeline Prefect, diagnósticos e informe.
+- **Isaías Céspedes Novoa** (isaiasexternado-a11y): escena 3D cinematográfica original, pruebas de contrato y de modelos, huellas SHA-256 y `cli.py verificar`, dependencias fijadas, landing de presentación, consola de misión y sonido del replay.
+- **Jorge Horacio Rojas Criollo** (jhrojas02): nivel 3 (ambientes 0.3 y 0.5), `incidente.py` e intervención, rollback en producción, `comprobar_api.py`, tres semillas de los finalistas de N3 y de la pasarela, MLflow desde cualquier máquina.
 
 ## 8. Cómo reproducir
 

@@ -200,7 +200,7 @@ El orquestador tiene su propio entorno (`requirements-pipeline.txt`, carpeta `.v
 
 ## Entregables
 
-[docs/entregables.md](docs/entregables.md) es el índice de la entrega: cada criterio de la rúbrica (versionado, diseño experimental, pipeline y rollback, contrato del ambiente, defensa) con su evidencia y cómo comprobarla. `python entregables.py` genera en [entregables/](entregables/) los PDF de lectura (informe, guion, experimentos, fichas, pipeline, historial) a partir de los Markdown del repositorio; la etiqueta de la entrega es `v1.1.0`.
+[docs/entregables.md](docs/entregables.md) es el índice de la entrega: cada criterio de la rúbrica (versionado, diseño experimental, pipeline y rollback, contrato del ambiente, defensa) con su evidencia y cómo comprobarla. `python entregables.py` genera en [entregables/](entregables/) los PDF de lectura (informe, guion, experimentos, fichas, pipeline, historial) a partir de los Markdown del repositorio; la etiqueta de la entrega es `v1.1.1`.
 
 ## Informe, defensa y test reservado
 

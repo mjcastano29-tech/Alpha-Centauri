@@ -1,4 +1,4 @@
-// PROJECT ELYNDRA (Alpha Centauri · Rocket Landing): catálogo de experimentos, modelos históricos, evaluación en vivo y replay 3D.
+// Alpha Centauri · Rocket Landing: catálogo de experimentos, modelos históricos, evaluación en vivo y replay 3D.
 // Rutas por hash: #/ (cohete) · #/inicio/<experimento>[/<run>] · #/catalogo · #/experimentos[/<id>] · #/ejecucion/<id> · #/comparar/<a,b> · #/replay/<id> · #/replay/<id>/evaluacion · #/incidente
 import '@fontsource-variable/inter'
 import '@fontsource-variable/space-grotesk'

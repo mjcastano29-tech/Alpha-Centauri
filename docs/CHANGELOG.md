@@ -9,6 +9,10 @@ y se anota aquí. Los modelos entrenados con versiones distintas del ambiente no
 
 ## Entregas del proyecto (etiquetas de git)
 
+### v1.1.1 · 2026-11-13
+- Entrega final: nombres completos del equipo en el informe y en el índice de entregables; la web se presenta como **Alpha Centauri**
+  (antes "PROJECT ELYNDRA"; Elyndra sigue siendo el nombre del planeta ficticio de la escena). PDF regenerados con enlaces a `v1.1.1`.
+
 ### v1.1.0 · 2026-11-11
 - **Viento en vivo** (`#/vivo`): la API simula paso a paso con el modelo congelado (`POST /sesiones`, `POST /sesiones/{id}/paso`,
   `DELETE /sesiones/{id}`; sesiones en memoria, 20 como máximo, 15 minutos de vida) y la consola de misión deja cambiar la
