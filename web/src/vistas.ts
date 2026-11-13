@@ -16,36 +16,32 @@ function presupuesto(p: Record<string, string | number> | null | undefined) {
 }
 
 // ---------- misión en vivo: elegir modelo, ambiente y viento inicial; la consola hace el resto ----------
+// `#/vivo[/<run>]` es un atajo: el viento en vivo es un modo del simulador (`#/inicio/<exp>/<run>/vivo`)
 export async function vistaVivo(el: HTMLElement, runId?: string): Promise<() => void> {
   const c = await cargarCatalogo()
   const recomendados = Object.values(c.catalogo.niveles).map((v) => c.ejecuciones.find((r) => r.run_id === v.recomendado)).filter((r): r is Resumen => !!r)
-  const porDefecto = runId ?? (recomendados.find((r) => r.nivel === 'N3') ?? recomendados[recomendados.length - 1])?.run_id
-  const opciones = [...recomendados, ...c.ejecuciones.filter((r) => !recomendados.includes(r) && r.diseno?.estado !== 'rechazado')]
-  el.innerHTML = `
-    <h1>Viento en vivo</h1>
-    <p>Una misión paso a paso: la API simula con el modelo congelado y tú cambias el viento con una barra mientras vuela; el agente sigue decidiendo cada paso con lo que observa. Es la perturbación del nivel 3 (viento de hasta 15 m/s y más) aplicada a mano, sobre la pasarela, para ver cómo reacciona el cohete.</p>
-    <form id="form-vivo" class="fila card">
-      <label>modelo <select id="vv-modelo">${opciones.map((r) => `<option value="${esc(r.run_id)}"${r.run_id === porDefecto ? ' selected' : ''}>${esc(r.nivel)} · ${esc(r.run_id)} · ${pct(r.evaluacion.aterrizajes)}${r.estado === 'recomendado' ? ' · recomendado' : ''}</option>`).join('')}</select></label>
-      <label>ambiente <select id="vv-ambiente"><option value="">el de entrenamiento</option>${c.ambientes.filter((a) => a.vigente !== false).map((a) => `<option value="${esc(a.id)}">${esc(a.nivel)} · ${esc(a.id)}</option>`).join('')}</select></label>
-      <label>semilla <input type="number" id="vv-semilla" value="10000000" min="0"></label>
-      <label>viento inicial (m/s) <input type="number" id="vv-viento0" value="5" min="0" max="25" step="0.5"></label>
-      <button type="submit" class="btn primario">Lanzar misión</button>
-      <span id="vv-msg" class="muted"></span>
-    </form>
-    <p class="muted">Durante la misión, la barra de viento está en el panel lateral de la consola. Los modelos del nivel 2 con pasarela se entrenaron con viento de 0 a 10 m/s; los del nivel 3, de 0 a 15. Por encima verás cómo se degradan.</p>`
-  const form = el.querySelector<HTMLFormElement>('#form-vivo')!
-  form.addEventListener('submit', async (ev) => {
-    ev.preventDefault()
-    const msg = el.querySelector<HTMLElement>('#vv-msg')!
-    msg.textContent = 'creando la misión en la API…'
-    try {
-      const run_id = el.querySelector<HTMLSelectElement>('#vv-modelo')!.value, ambiente = el.querySelector<HTMLSelectElement>('#vv-ambiente')!.value || null
-      const semilla = +el.querySelector<HTMLInputElement>('#vv-semilla')!.value, viento = +el.querySelector<HTMLInputElement>('#vv-viento0')!.value
-      sesion.vivo = await api.crearSesion({ run_id, ambiente, semilla, viento })
-      location.hash = `#/replay/${encodeURIComponent(run_id)}/vivo`
-    } catch (e) { msg.textContent = `error: ${(e as Error).message}` }
-  })
+  const run = c.ejecuciones.find((r) => r.run_id === runId) ?? recomendados.find((r) => r.nivel === 'N3') ?? recomendados[recomendados.length - 1]
+  if (!run) { el.innerHTML = '<p class="error">No hay modelos en el catálogo.</p>'; return () => {} }
+  if (sesion.vivo) { api.cerrarSesion(sesion.vivo.sesion); sesion.vivo = null } // "Nueva misión": se parte del formulario
+  location.replace(`#/inicio/${encodeURIComponent(run.experimento ?? '')}/${encodeURIComponent(run.run_id)}/vivo`)
   return () => {}
+}
+
+// formulario de la misión en vivo (modo "Viento en vivo" del simulador): el modelo es el elegido con las fichas
+function formularioVivo(run: Resumen, ambientes: Ambiente[]) {
+  return `
+    <section class="card form-vivo">
+      <h2>Viento en vivo · ${esc(run.run_id)}</h2>
+      <p>Una misión paso a paso: la API simula con este modelo congelado y tú cambias el viento con una barra mientras vuela; el agente sigue decidiendo cada paso con lo que observa. Es la perturbación del nivel 3 (viento de hasta 15 m/s y más) aplicada a mano, para ver cómo reacciona el cohete.</p>
+      <form id="form-vivo" class="fila">
+        <label>ambiente <select id="vv-ambiente"><option value="">el de entrenamiento (${esc(run.ambiente_id)})</option>${ambientes.filter((a) => a.vigente !== false && a.id !== run.ambiente_id).map((a) => `<option value="${esc(a.id)}">${esc(a.nivel)} · ${esc(a.id)}</option>`).join('')}</select></label>
+        <label>semilla <input type="number" id="vv-semilla" value="10000000" min="0"></label>
+        <label>viento inicial (m/s) <input type="number" id="vv-viento0" value="5" min="0" max="25" step="0.5"></label>
+        <button type="submit" class="btn primario">Lanzar misión</button>
+        <span id="vv-msg" class="muted"></span>
+      </form>
+      <p class="muted">Durante la misión, la barra de viento está en el panel lateral de la consola y en la barra de pantalla completa. Los modelos del nivel 2 con pasarela se entrenaron con viento de 0 a 10 m/s; los del nivel 3, de 0 a 15. Por encima verás cómo se degradan. Los modelos del nivel 1 no ven la pasarela: solo pueden volar en su propio ambiente.</p>
+    </section>`
 }
 
 // ---------- monitoreo de la operación ----------
@@ -171,8 +167,10 @@ export async function vistaIncidente(el: HTMLElement) {
 }
 
 // ---------- inicio: el cohete en 3D, con pestañas para cambiar de experimento y de modelo ----------
-export async function vistaInicio(el: HTMLElement, expId?: string, runId?: string): Promise<() => void> {
+export async function vistaInicio(el: HTMLElement, expId?: string, runId?: string, modo?: string): Promise<() => void> {
   const c = await cargarCatalogo()
+  const vivo = modo === 'vivo', sufijo = vivo ? '/vivo' : ''
+  if (runId === '-') runId = undefined // marcador de "el modelo por defecto" (las pestañas conservan el modo)
   const experimentos = c.experimentos ?? []
   // sin experimento elegido, el último que ya tenga ejecuciones (los recién creados empiezan vacíos)
   const actual = experimentos.find((e) => e.id === expId) ?? [...experimentos].reverse().find((e) => c.ejecuciones.some((r) => r.experimento === e.id)) ?? experimentos[experimentos.length - 1]
@@ -180,7 +178,7 @@ export async function vistaInicio(el: HTMLElement, expId?: string, runId?: strin
   const run = runs.find((r) => r.run_id === runId) ?? runs.find((r) => r.estado === 'recomendado') ?? runs.find((r) => r.diseno?.estado === 'seleccionado') ?? runs[runs.length - 1]
   if (!run) { // experimento recién creado: se mantienen las pestañas para poder volver a otro
     el.innerHTML = `<section class="selector-mision" aria-label="elegir misión"><span class="kicker">Experimento</span>
-      <nav class="tabs" aria-label="experimentos">${experimentos.map((e) => `<a href="#/inicio/${esc(e.id)}" class="tab${e.id === actual?.id ? ' activa' : ''}">${e.numero} · ${esc(e.titulo)}<br><span class="muted">${esc(e.nivel)} · ${c.ejecuciones.filter((r) => r.experimento === e.id).length} ejecuciones</span></a>`).join('')}</nav></section>
+      <nav class="tabs" aria-label="experimentos">${experimentos.map((e) => `<a href="#/inicio/${esc(e.id)}${sufijo ? '/-' + sufijo : ''}" class="tab${e.id === actual?.id ? ' activa' : ''}">${e.numero} · ${esc(e.titulo)}<br><span class="muted">${esc(e.nivel)} · ${c.ejecuciones.filter((r) => r.experimento === e.id).length} ejecuciones</span></a>`).join('')}</nav></section>
       <section class="card"><h2>${actual ? `${actual.numero} · ${esc(actual.titulo)}` : 'Sin experimentos'}</h2><p class="muted">Este experimento todavía no tiene ejecuciones en el catálogo: no hay vuelos que reproducir.</p>${actual ? `<p><a class="btn" href="#/experimentos/${esc(actual.id)}">Ver el experimento ${actual.numero}</a></p>` : ''}</section>`
     return () => {}
   }
@@ -188,9 +186,14 @@ export async function vistaInicio(el: HTMLElement, expId?: string, runId?: strin
   el.innerHTML = `
     <section class="selector-mision" aria-label="elegir misión">
     <span class="kicker">Experimento</span>
-    <nav class="tabs" aria-label="experimentos">${experimentos.map((e) => `<a href="#/inicio/${esc(e.id)}" class="tab${e.id === actual.id ? ' activa' : ''}">${e.numero} · ${esc(e.titulo)}<br><span class="muted">${esc(e.nivel)} · ${c.ejecuciones.filter((r) => r.experimento === e.id).length} ejecuciones</span></a>`).join('')}</nav>
+    <nav class="tabs" aria-label="experimentos">${experimentos.map((e) => `<a href="#/inicio/${esc(e.id)}${sufijo ? '/-' + sufijo : ''}" class="tab${e.id === actual.id ? ' activa' : ''}">${e.numero} · ${esc(e.titulo)}<br><span class="muted">${esc(e.nivel)} · ${c.ejecuciones.filter((r) => r.experimento === e.id).length} ejecuciones</span></a>`).join('')}</nav>
     <span class="kicker">Modelo</span>
-    <div class="chips" aria-label="modelos del experimento">${runs.map((r) => `<a href="#/inicio/${esc(actual.id)}/${esc(r.run_id)}" class="chip${r.run_id === run.run_id ? ' activa' : ''}">${esc(r.run_id)} <b>${pct(r.evaluacion.aterrizajes)}</b> ${r.estado === 'recomendado' ? pillEstado(r.estado) : pillDiseno(r.diseno?.estado)}</a>`).join('')}</div>
+    <div class="chips" aria-label="modelos del experimento">${runs.map((r) => `<a href="#/inicio/${esc(actual.id)}/${esc(r.run_id)}${sufijo}" class="chip${r.run_id === run.run_id ? ' activa' : ''}">${esc(r.run_id)} <b>${pct(r.evaluacion.aterrizajes)}</b> ${r.estado === 'recomendado' ? pillEstado(r.estado) : pillDiseno(r.diseno?.estado)}</a>`).join('')}</div>
+    <span class="kicker">Modo</span>
+    <div class="chips modo-mision" role="tablist" aria-label="modo del simulador">
+      <a href="#/inicio/${esc(actual.id)}/${esc(run.run_id)}" class="chip${vivo ? '' : ' activa'}" role="tab" aria-selected="${!vivo}">Replay grabado <span class="muted">vuelos de la evaluación</span></a>
+      <a href="#/inicio/${esc(actual.id)}/${esc(run.run_id)}/vivo" class="chip${vivo ? ' activa' : ''}" role="tab" aria-selected="${vivo}">Viento en vivo <span class="muted">tú mueves el viento, el modelo pilota</span></a>
+    </div>
     </section>
     <div id="visor-inicio"></div>
     <section class="card ficha-mision">
@@ -200,7 +203,25 @@ export async function vistaInicio(el: HTMLElement, expId?: string, runId?: strin
       <p><b>${pct(run.evaluacion.aterrizajes)}</b> aterrizajes en la suite v1 ${barraResultados(run.evaluacion.resultados, c.outcomes)} · ${run.perturbado ? `${pct(run.perturbado.aterrizajes)} con viento de 15 m/s` : ''} · ${num(run.evaluacion.velocidad_contacto, 2)} m/s al contacto · ${num(run.evaluacion.error_posicion)} m del centro</p>
       <p><a class="btn" href="#/ejecucion/${esc(run.run_id)}">Ficha, variables y evaluación en vivo</a> <a class="btn" href="#/experimentos/${esc(actual.id)}">Experimento ${actual.numero}: variables y comparación</a> <a class="btn" href="#/comparar/${runs.map((r) => esc(r.run_id)).join(',')}">Comparar las ${runs.length} del experimento</a></p>
     </section>`
-  return vistaReplay(el.querySelector<HTMLElement>('#visor-inicio')!, run.run_id, 'grabados')
+  const visor = el.querySelector<HTMLElement>('#visor-inicio')!
+  if (!vivo) return vistaReplay(visor, run.run_id, 'grabados')
+  // modo "Viento en vivo": formulario en el lugar del visor; al lanzar, la consola en vivo se monta ahí mismo
+  let limpiarConsola: (() => void) | null = null
+  visor.innerHTML = formularioVivo(run, c.ambientes)
+  visor.querySelector<HTMLFormElement>('#form-vivo')!.addEventListener('submit', async (ev) => {
+    ev.preventDefault()
+    const msg = visor.querySelector<HTMLElement>('#vv-msg')!, boton = visor.querySelector<HTMLButtonElement>('#form-vivo button')!
+    msg.textContent = 'creando la misión en la API…'; boton.disabled = true
+    try {
+      const ambiente = visor.querySelector<HTMLSelectElement>('#vv-ambiente')!.value || null
+      const semilla = +visor.querySelector<HTMLInputElement>('#vv-semilla')!.value, viento = +visor.querySelector<HTMLInputElement>('#vv-viento0')!.value
+      sesion.vivo = await api.crearSesion({ run_id: run.run_id, ambiente, semilla, viento })
+      if (!el.contains(visor)) return // se cambió de vista mientras la API respondía
+      limpiarConsola = await vistaReplay(visor, run.run_id, 'vivo')
+      visor.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    } catch (e) { msg.textContent = `error: ${(e as Error).message}`; boton.disabled = false }
+  })
+  return () => { limpiarConsola?.(); sesion.vivo = null }
 }
 
 // ---------- experimentos: progresión de complejidad y variables de cada configuración ----------

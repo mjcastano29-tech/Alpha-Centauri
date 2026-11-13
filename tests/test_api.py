@@ -104,6 +104,13 @@ def test_monitoreo_resume_la_operacion():
     assert m2["servicio"]["evaluaciones_servidas"] == antes + 1 and m2["evaluaciones"][-1]["run_id"] == EJECUCIONES[0]
 
 
+def test_cors_permite_cerrar_la_sesion_desde_el_navegador():
+    # el navegador hace un preflight OPTIONS antes del DELETE /sesiones/{id}; si no se acepta, las sesiones quedan abiertas hasta caducar
+    r = cliente.options("/sesiones/abc", headers={"Origin": "https://alpha-centauri-five.vercel.app", "Access-Control-Request-Method": "DELETE"})
+    assert r.status_code == 200, r.text
+    assert "DELETE" in r.headers.get("access-control-allow-methods", "")
+
+
 def test_mision_en_vivo_avanza_paso_a_paso_y_el_viento_se_aplica():
     rec = cliente.get("/version").json()["catalogo"]["recomendado"]
     s = cliente.post("/sesiones", json={"run_id": rec, "semilla": 10_000_000, "viento": 3.0}).json()

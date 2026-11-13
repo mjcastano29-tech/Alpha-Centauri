@@ -85,7 +85,7 @@ app = FastAPI(
     description="Catálogo de ejecuciones, carga de modelos históricos y evaluación con el ambiente RocketLanding3D-v0.",
 )
 origenes = [o.strip() for o in os.environ.get("CORS_ORIGENES", "*").split(",") if o.strip()]
-app.add_middleware(CORSMiddleware, allow_origins=origenes, allow_methods=["GET", "POST"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=origenes, allow_methods=["GET", "POST", "DELETE"], allow_headers=["*"])
 
 
 # ---------- datos de las ejecuciones ----------

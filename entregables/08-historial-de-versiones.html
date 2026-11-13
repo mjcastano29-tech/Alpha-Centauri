@@ -31,7 +31,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
 <body><main>
 <header class="portada"><div class="proyecto">Alpha Centauri · Rocket Landing · proyecto final de MLOps</div>
 
-<div class="meta">Generado el 2026-11-13 desde <code>docs/CHANGELOG.md</code> · etiqueta <code>v1.1.1</code> · fuente de verdad: el Markdown del repositorio</div></header>
+<div class="meta">Generado el 2026-11-13 desde <code>docs/CHANGELOG.md</code> · etiqueta <code>main</code> · fuente de verdad: el Markdown del repositorio</div></header>
 <h1 id="historial-de-versiones">Historial de versiones</h1>
 <p>Qué cambia en cada versión del ambiente, del agente y del formato de las ejecuciones. Cada ejecución
 de entrenamiento guarda en su <code>manifest.json</code> la versión del ambiente y el commit de git con el que se
@@ -43,6 +43,8 @@ y se anota aquí. Los modelos entrenados con versiones distintas del ambiente no
 <ul>
 <li>Entrega final: nombres completos del equipo en el informe y en el índice de entregables; la web se presenta como <strong>Alpha Centauri</strong>
   (antes "PROJECT ELYNDRA"; Elyndra sigue siendo el nombre del planeta ficticio de la escena). PDF regenerados con enlaces a <code>v1.1.1</code>.</li>
+<li>El viento en vivo pasa a ser un <strong>modo del simulador</strong> (selector "Replay grabado / Viento en vivo" bajo las fichas de modelo;
+  <code>#/vivo</code> redirige allí) y desaparece del menú. La API acepta <code>DELETE</code> en CORS para que el navegador cierre la sesión.</li>
 </ul>
 <h3 id="v110-2026-11-11">v1.1.0 · 2026-11-11</h3>
 <ul>
@@ -52,7 +54,7 @@ y se anota aquí. Los modelos entrenados con versiones distintas del ambiente no
   No es un entrenamiento nuevo: es un modo de servicio sobre los modelos ya versionados.</li>
 <li><strong>Pantalla completa</strong> de la escena 3D en el simulador y en la misión en vivo (botón, tecla F, barra flotante con reproducir,
   pasos y, en vivo, los deslizadores del viento; Esc sale). Donde no existe la API Fullscreen se fija la escena a la ventana.</li>
-<li>Paquete de entregables: <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.1/docs/entregables.md">entregables.md</a> (rúbrica → evidencia) y <code>python entregables.py</code>, que genera los PDF de
+<li>Paquete de entregables: <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/main/docs/entregables.md">entregables.md</a> (rúbrica → evidencia) y <code>python entregables.py</code>, que genera los PDF de
   <code>entregables/</code> a partir de los Markdown del repositorio. 113 pruebas. Las reglas de los ambientes no cambian (0.1.1, 0.4, 0.5).</li>
 </ul>
 <h3 id="v100-2026-11-10">v1.0.0 · 2026-11-10</h3>
@@ -69,7 +71,7 @@ y se anota aquí. Los modelos entrenados con versiones distintas del ambiente no
 <h3 id="03-2026-11-05">0.3 · 2026-11-05</h3>
 <ul>
 <li>Nivel 3 = nivel 2 con condiciones de operación exigentes: viento a 10 m sorteado entre 0 y 15 m/s (antes 0–10)
-  y ráfagas de 3 m/s (antes 1,5). Ficha: <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.1/docs/ambiente-v0.3.md">ambiente-v0.3.md</a>. Clase <code>RocketLandingN3Env</code> en
+  y ráfagas de 3 m/s (antes 1,5). Ficha: <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/main/docs/ambiente-v0.3.md">ambiente-v0.3.md</a>. Clase <code>RocketLandingN3Env</code> en
   <code>rocket_env/nivel3.py</code>, hereda del nivel 2.</li>
 <li>Misma observación (25 valores) y acción que el nivel 2: misma familia de modelos. Un modelo de N2 juega en N3 sin
   adaptador (<code>hacer_entorno</code>, <code>POST /evaluar</code> con <code>ambiente</code>), lo que mide la degradación (<code>python incidente.py</code>).</li>
@@ -82,7 +84,7 @@ y se anota aquí. Los modelos entrenados con versiones distintas del ambiente no
 <li>El equipo cambió el obstáculo de los niveles 2 y 3: en vez de tres torres, una <strong>pasarela</strong> horizontal de 90 m de radio
   a 180 m de altura que cubre la plataforma y todo el cuadrado de salida, con una sola abertura circular de 16 m de radio
   desplazada 30 m del centro (en (28, 12) m), sostenida por cuatro pilares en el borde. Chocar con la pasarela o con un
-  pilar es "colisión" (−100). Ficha: <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.1/docs/ambiente-v0.4.md">ambiente-v0.4.md</a>; clases en <code>rocket_env/pasarela.py</code>.</li>
+  pilar es "colisión" (−100). Ficha: <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/main/docs/ambiente-v0.4.md">ambiente-v0.4.md</a>; clases en <code>rocket_env/pasarela.py</code>.</li>
 <li>Decisión nueva en dos tiempos: alinearse con la abertura antes de llegar a la pasarela y, debajo, trasladarse hasta la
   plataforma mientras se frena. Observación de 16 + 4 valores (posición relativa del objetivo de la fase: la abertura por
   encima de la pasarela y la plataforma por debajo; altura hasta la pasarela; margen hasta el borde de la abertura):
@@ -98,7 +100,7 @@ y se anota aquí. Los modelos entrenados con versiones distintas del ambiente no
 <ul>
 <li>Nivel 2 = nivel 1 + tres torres alrededor de la plataforma (a 28 m del centro, 120° entre sí, radio 7 m,
   alturas 420/360/300 m). Chocar con una torre es el resultado nuevo "colisión" (−100). Ficha:
-  <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.1/docs/ambiente-v0.2.md">ambiente-v0.2.md</a>. Clase <code>RocketLandingN2Env</code> en <code>rocket_env/nivel2.py</code>, hereda la física.</li>
+  <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/main/docs/ambiente-v0.2.md">ambiente-v0.2.md</a>. Clase <code>RocketLandingN2Env</code> en <code>rocket_env/nivel2.py</code>, hereda la física.</li>
 <li>Observación de 16 + 3 × 3 = 25 valores (por torre: posición relativa x, y y altura que queda por encima);
   acción igual. Es una familia nueva de modelos: los del nivel 1 no juegan aquí salvo con <code>AdaptadorN1</code>
   (recorta la observación a los 16 valores del nivel 1), que sirve para medir la dificultad del nivel.</li>
@@ -111,7 +113,7 @@ y se anota aquí. Los modelos entrenados con versiones distintas del ambiente no
 <h2 id="ambiente-rocketlanding3d-v0">Ambiente RocketLanding3D-v0</h2>
 <h3 id="01-2026-10-28">0.1 · 2026-10-28</h3>
 <ul>
-<li>Primera versión documentada en <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.1/docs/ambiente-v0.1.md">ambiente-v0.1.md</a>.</li>
+<li>Primera versión documentada en <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/main/docs/ambiente-v0.1.md">ambiente-v0.1.md</a>.</li>
 <li>Pasos de 20 m de desplazamiento vertical (o 2 s), máximo 50 pasos por época, salida a 600 m.</li>
 <li>Zona de vuelo: cilindro de 300 m de radio y 1200 m de techo. Plataforma de 10 m de radio.</li>
 <li>Aterrizaje: |vz| ≤ 3 m/s, v_h ≤ 2 m/s, inclinación ≤ 10°, distancia ≤ 10 m. Recompensas finales +100 / −50 / −100.</li>

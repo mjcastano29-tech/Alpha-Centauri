@@ -31,11 +31,11 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
 <body><main>
 <header class="portada"><div class="proyecto">Alpha Centauri · Rocket Landing · proyecto final de MLOps</div>
 
-<div class="meta">Generado el 2026-11-13 desde <code>docs/ambiente-v0.1.md</code> · etiqueta <code>v1.1.1</code> · fuente de verdad: el Markdown del repositorio</div></header>
+<div class="meta">Generado el 2026-11-13 desde <code>docs/ambiente-v0.1.md</code> · etiqueta <code>main</code> · fuente de verdad: el Markdown del repositorio</div></header>
 <h1 id="ambiente-v01">Ambiente v0.1</h1>
 <p><strong>Equipo Alpha Centauri · ficha 02 Rocket Landing · 28 de octubre de 2026</strong></p>
 <p>Misión de la ficha: <em>aterrizar en una plataforma con velocidad e inclinación seguras y combustible limitado.</em></p>
-<p>Esta ficha describe el ambiente tal como está implementado en <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.1/rocket_env"><code>rocket_env/</code></a> (entorno Gymnasium <code>RocketLanding3D-v0</code>) y el agente de referencia con el que comprobamos que se puede aprender (<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.1/agente_qlearning.py"><code>agente_qlearning.py</code></a>). Todos los números salen del código; cuando un valor es una propuesta por calibrar, lo decimos. Las decisiones que dejamos abiertas están al final.</p>
+<p>Esta ficha describe el ambiente tal como está implementado en <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/main/rocket_env"><code>rocket_env/</code></a> (entorno Gymnasium <code>RocketLanding3D-v0</code>) y el agente de referencia con el que comprobamos que se puede aprender (<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/main/agente_qlearning.py"><code>agente_qlearning.py</code></a>). Todos los números salen del código; cuando un valor es una propuesta por calibrar, lo decimos. Las decisiones que dejamos abiertas están al final.</p>
 <h2 id="mision-y-mapa">Mision y mapa</h2>
 <p><img alt="Mapa del ambiente: vista lateral y cenital a escala" src="../docs/mapa-ambiente-v0.1.svg"></p>
 <p>El mundo es un cilindro de aire sobre un suelo plano. El eje z apunta hacia arriba y la plataforma está en el origen. Unidades SI en todo el ambiente: metros, segundos, kilogramos, newtons, kelvin, pascales.</p>
