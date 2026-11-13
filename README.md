@@ -207,6 +207,7 @@ El orquestador tiene su propio entorno (`requirements-pipeline.txt`, carpeta `.v
 - [docs/informe-final.md](docs/informe-final.md): qué construimos, los niveles y su complejidad, la cadena de hipótesis, pipeline, incidente, intervención, rollback, límites y contribuciones.
 - [docs/guion-defensa.md](docs/guion-defensa.md): guion de 15 minutos sobre la web pública, con preguntas probables.
 - [docs/guia-variables-y-experimentos.md](docs/guia-variables-y-experimentos.md): guía de estudio para la defensa: cómo se modela cada variable, observación y acción, recompensa, `terminated` frente a `truncated`, qué cambia entre versiones del ambiente y entre experimentos, hiperparámetros, criterio de decisión y chuleta de números.
+- [docs/historia-del-proyecto.md](docs/historia-del-proyecto.md): la historia del proyecto contada en orden: qué hicimos cada semana, qué salió mal, qué cambiamos y por qué, y qué significa cada pieza para un negocio.
 - [docs/diagnostico-proyecto-final.md](docs/diagnostico-proyecto-final.md): diagnóstico frente al enunciado, actualizado en cada hito.
 - `python suite_reservada.py`: test final reservado (misma estructura que la suite v1, semilla guardada por el equipo fuera del repo en `.suite_reservada` o `SUITE_RESERVADA_SEMILLA`); resultados sin la semilla en `resultados/suite-reservada/`.
 

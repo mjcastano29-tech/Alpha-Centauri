@@ -15,6 +15,7 @@ Este documento es el índice de la entrega: qué pide cada criterio de la rúbri
 | Informe final | [docs/informe-final.md](informe-final.md) · PDF `entregables/01-informe-final.pdf` |
 | Guion de la defensa (15 min) | [docs/guion-defensa.md](guion-defensa.md) · PDF `entregables/02-guion-defensa.pdf` |
 | Guía de estudio para la defensa (variables, modelo, recompensa, truncamiento, experimentos) | [docs/guia-variables-y-experimentos.md](guia-variables-y-experimentos.md) · PDF `entregables/10-guia-variables-y-experimentos.pdf` |
+| Historia del proyecto (proceso de creación, qué cambiamos y aprendimos, aplicabilidad al negocio) | [docs/historia-del-proyecto.md](historia-del-proyecto.md) · PDF `entregables/11-historia-del-proyecto.pdf` |
 | Experimentos, variables y dónde se guarda cada modelo | [EXPERIMENTOS.md](../EXPERIMENTOS.md) (generado por `python experimentos_md.py`) |
 | Fichas de los ambientes vigentes | [ambiente-v0.1.md](ambiente-v0.1.md) (N1), [ambiente-v0.4.md](ambiente-v0.4.md) (N2 pasarela), [ambiente-v0.5.md](ambiente-v0.5.md) (N3 pasarela con viento); retirados: [v0.2](ambiente-v0.2.md), [v0.3](ambiente-v0.3.md) |
 | Pipeline | [pipelines/README.md](../pipelines/README.md), código [pipelines/entrenar_publicar.py](../pipelines/entrenar_publicar.py), evidencia JSON en [pipelines/ejecuciones/](../pipelines/ejecuciones/), captura [evidencia-prefect-flow-run.png](evidencia-prefect-flow-run.png) |
