@@ -34,6 +34,7 @@ DOCUMENTOS = [
     ("docs/ambiente-v0.5.md", "06-ficha-ambiente-v0.5-N3", "Ficha del ambiente 0.5 (nivel 3, pasarela con viento)"),
     ("pipelines/README.md", "07-pipeline", "Pipeline de entrenamiento y publicación"),
     ("docs/CHANGELOG.md", "08-historial-de-versiones", "Historial de versiones"),
+    ("docs/guia-variables-y-experimentos.md", "10-guia-variables-y-experimentos", "Guía de estudio: variables, modelo y experimentos"),
 ]
 
 ESTILO = """
