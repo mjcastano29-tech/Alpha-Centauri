@@ -40,12 +40,12 @@ async function enrutar() {
   estadoApiEl.open = false
   const ruta = location.hash.replace(/^#\/?/, '')
   const partes = ruta.split('/').map(decodeURIComponent)
-  const seccion = !ruta || ['inicio', 'replay'].includes(partes[0]) ? '#/' : ['ejecucion', 'comparar'].includes(partes[0]) ? '#/catalogo' : `#/${partes[0]}`
+  const seccion = !ruta || ['inicio', 'replay', 'vivo'].includes(partes[0]) ? '#/' : ['ejecucion', 'comparar'].includes(partes[0]) ? '#/catalogo' : `#/${partes[0]}`
   document.querySelectorAll<HTMLAnchorElement>('.nav a').forEach((a) => { if (a.getAttribute('href') === seccion) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current') })
   app.innerHTML = '<p class="estado">Cargando…</p>'
   try {
     if (!ruta) limpiar = await vistaInicio(app)
-    else if (partes[0] === 'inicio') limpiar = await vistaInicio(app, partes[1], partes[2])
+    else if (partes[0] === 'inicio') limpiar = await vistaInicio(app, partes[1], partes[2], partes[3])
     else if (partes[0] === 'catalogo') await vistaCatalogo(app)
     else if (partes[0] === 'ejecucion' && partes[1]) await vistaEjecucion(app, partes[1])
     else if (partes[0] === 'comparar' && partes[1]) await vistaComparar(app, partes[1].split(','))

@@ -14,7 +14,7 @@ Un agente de aprendizaje por refuerzo que aterriza un cohete en un mundo 3D con 
 | 23 ejecuciones en 6 experimentos | `resultados/runs/`, `configs/`, `manifests/`, MLflow | `python cli.py verificar` (SHA-256 de modelos, datos y configuración) |
 | Pipeline de 8 etapas (Prefect) | `pipelines/entrenar_publicar.py`, evidencia en `pipelines/ejecuciones/` (21 ejecuciones) | cada ejecución deja su JSON con las etapas, la decisión y el commit publicado |
 | API FastAPI | `api/main.py` | `GET /version`, `GET /monitoreo`, `POST /evaluar`, `POST /sesiones` (misión en vivo paso a paso) |
-| Web Vite + TypeScript + Three.js | `web/` | portada con el cohete (pantalla completa con F), experimentos, catálogo, incidente, monitoreo, viento en vivo (`#/vivo`: barra de viento mientras el modelo congelado pilota), landing |
+| Web Vite + TypeScript + Three.js | `web/` | simulador con dos modos: replay grabado y viento en vivo (barra de viento mientras el modelo congelado pilota), pantalla completa con F; experimentos, catálogo, incidente, monitoreo, landing |
 | Catálogo versionado con recomendado y anterior por nivel | `catalogo.json` (v15, 15 cambios en el historial) | `python catalogo.py ver`; rollback con `restaurar` |
 
 ## 2. Los niveles y cómo crece la complejidad

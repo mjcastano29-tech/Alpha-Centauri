@@ -9,7 +9,7 @@ Este documento es el índice de la entrega: qué pide cada criterio de la rúbri
 | Qué | Dónde |
 |---|---|
 | Repositorio (código, fichas, modelos, datos, MLflow) | https://github.com/mjcastano29-tech/Alpha-Centauri · etiqueta `v1.1.1` |
-| Web pública (simulador, experimentos, catálogo, incidente, monitoreo, viento en vivo, landing) | https://alpha-centauri-five.vercel.app |
+| Web pública (simulador con replay y viento en vivo, experimentos, catálogo, incidente, monitoreo, landing) | https://alpha-centauri-five.vercel.app |
 | API pública | https://alpha-centauri-api.onrender.com (`/version`, `/docs`) |
 | Registro de modelos MLflow | https://alpha-centauri-mlflow.onrender.com |
 | Informe final | [docs/informe-final.md](informe-final.md) · PDF `entregables/01-informe-final.pdf` |
@@ -69,7 +69,7 @@ Los servicios públicos están en el plan gratuito de Render: la primera petici�
 | Qué | Evidencia |
 |---|---|
 | Guion de 15 minutos sobre la web pública, con reparto y preguntas probables | [guion-defensa.md](guion-defensa.md) |
-| Demostraciones en vivo | replay 3D por nivel (`#/`), experimentos (`#/experimentos`), evaluación en vivo desde la ficha, viento en vivo (`#/vivo`), incidente, monitoreo y rollback |
+| Demostraciones en vivo | replay 3D por nivel y modo viento en vivo en el simulador (`#/`), experimentos (`#/experimentos`), evaluación en vivo desde la ficha, incidente, monitoreo y rollback |
 | Landing de presentación | https://alpha-centauri-five.vercel.app/landing/ |
 
 ## Cómo reproducir desde cero

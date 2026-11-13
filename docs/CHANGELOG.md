@@ -12,6 +12,8 @@ y se anota aquí. Los modelos entrenados con versiones distintas del ambiente no
 ### v1.1.1 · 2026-11-13
 - Entrega final: nombres completos del equipo en el informe y en el índice de entregables; la web se presenta como **Alpha Centauri**
   (antes "PROJECT ELYNDRA"; Elyndra sigue siendo el nombre del planeta ficticio de la escena). PDF regenerados con enlaces a `v1.1.1`.
+- El viento en vivo pasa a ser un **modo del simulador** (selector "Replay grabado / Viento en vivo" bajo las fichas de modelo;
+  `#/vivo` redirige allí) y desaparece del menú. La API acepta `DELETE` en CORS para que el navegador cierre la sesión.
 
 ### v1.1.0 · 2026-11-11
 - **Viento en vivo** (`#/vivo`): la API simula paso a paso con el modelo congelado (`POST /sesiones`, `POST /sesiones/{id}/paso`,
