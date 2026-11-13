@@ -30,7 +30,7 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
     }
     vuelos = [vivo.vuelo]
     modo = 'Misión en vivo'
-    nota = `la API simula paso a paso con el modelo congelado; el viento que marques abajo se aplica desde el siguiente paso del agente · semilla ${vivo.semilla}`
+    nota = `simulación paso a paso con el modelo congelado · semilla ${vivo.semilla}`
   } else if (fuente === 'evaluacion') {
     if (!ev || ev.modelo.run_id !== id) {
       el.innerHTML = `<p><a href="#/ejecucion/${esc(id)}">← ejecución</a></p><p class="error">No hay una evaluación en vivo de ${esc(id)} en esta sesión. Lánzala desde la página de la ejecución.</p>`
@@ -144,7 +144,7 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
           ${vivo ? `<section class="grupo viento-vivo"><h3>${ICONO.entorno}<span>Viento manual</span><small id="vv-estado">en marcha</small></h3>
             <label class="campo">Intensidad a 10 m <span class="deslizador"><input type="range" id="vv-vel" min="0" max="25" step="0.5" value="${vivo.viento.velocidad}"><output id="vv-vel-v">${num(vivo.viento.velocidad)} m/s</output></span></label>
             <label class="campo">Dirección (hacia dónde sopla) <span class="deslizador"><input type="range" id="vv-dir" min="0" max="360" step="5" value="${Math.round(vivo.viento.direccion_grados)}"><output id="vv-dir-v">${Math.round(vivo.viento.direccion_grados)}°</output></span></label>
-            <p class="muted vv-nota">El cambio se aplica en el siguiente paso del agente (cada 20 m o 2 s). Las ráfagas siguen su propio proceso. Pulsa reproducir si lo pausas; la misión avanza mientras se reproduce.</p>
+            <p class="muted vv-nota">Se aplica en el siguiente paso del agente.</p>
             <p><span class="muted">Último paso: </span><span id="vv-ultimo" class="mono">—</span></p>
             <p><a class="btn-consola secundario" href="#/vivo/${esc(id)}">Nueva misión</a></p>
           </section>` : ''}
