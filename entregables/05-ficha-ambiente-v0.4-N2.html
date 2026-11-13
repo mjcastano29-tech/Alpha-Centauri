@@ -31,11 +31,11 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
 <body><main>
 <header class="portada"><div class="proyecto">Alpha Centauri · Rocket Landing · proyecto final de MLOps</div>
 
-<div class="meta">Generado el 2026-11-11 desde <code>docs/ambiente-v0.4.md</code> · etiqueta <code>v1.1.0</code> · fuente de verdad: el Markdown del repositorio</div></header>
+<div class="meta">Generado el 2026-11-13 desde <code>docs/ambiente-v0.4.md</code> · etiqueta <code>v1.1.1</code> · fuente de verdad: el Markdown del repositorio</div></header>
 <h1 id="ambiente-v04-nivel-2-v1-pasarela-con-abertura-desplazada">Ambiente v0.4 · nivel 2 (v1): pasarela con abertura desplazada</h1>
 <p><strong>Equipo Alpha Centauri · ficha 02 Rocket Landing · 6 de noviembre de 2026</strong></p>
 <p>Misión de la ficha: <em>aterrizar en una plataforma con velocidad e inclinación seguras y combustible limitado.</em> El nivel 2 añade <strong>una decisión de ruta en dos tiempos</strong>: una pasarela cubre la plataforma y hay que entrar por su única abertura, desplazada del centro, y después trasladarse por debajo hasta la plataforma.</p>
-<p>Esta ficha describe lo que cambia respecto al nivel 1 (<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/ambiente-v0.1.md">ambiente-v0.1.md</a>): el entorno Gymnasium <code>RocketLanding3D-N2-v1</code> (<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/rocket_env/pasarela.py"><code>rocket_env/pasarela.py</code></a>) hereda la física, la atmósfera, el viento, el combustible, los pasos y las reglas de aterrizaje del nivel 1 sin tocar un número. Sustituye al ambiente 0.2 con torres (<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/ambiente-v0.2.md">ambiente-v0.2.md</a>), que queda retirado: el equipo decidió el 6 de noviembre cambiar el obstáculo por uno que obligue a una decisión más clara, y los modelos de 0.2 siguen siendo reproducibles como históricos.</p>
+<p>Esta ficha describe lo que cambia respecto al nivel 1 (<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.1/docs/ambiente-v0.1.md">ambiente-v0.1.md</a>): el entorno Gymnasium <code>RocketLanding3D-N2-v1</code> (<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.1/rocket_env/pasarela.py"><code>rocket_env/pasarela.py</code></a>) hereda la física, la atmósfera, el viento, el combustible, los pasos y las reglas de aterrizaje del nivel 1 sin tocar un número. Sustituye al ambiente 0.2 con torres (<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.1/docs/ambiente-v0.2.md">ambiente-v0.2.md</a>), que queda retirado: el equipo decidió el 6 de noviembre cambiar el obstáculo por uno que obligue a una decisión más clara, y los modelos de 0.2 siguen siendo reproducibles como históricos.</p>
 <h2 id="mision-y-mapa">Mision y mapa</h2>
 <p><img alt="Mapa del nivel 2 v1: pasarela con abertura desplazada, vista cenital y lateral" src="../docs/mapa-ambiente-v0.4.svg"></p>
 <table>
@@ -170,7 +170,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
 </tbody>
 </table>
 <p>Los 10 aterrizajes a ciegas son salidas que caen sobre la abertura por casualidad. Con las torres de 0.2, el mismo modelo conservaba el 72 %: la pasarela es un nivel mucho más exigente.</p>
-<p><strong>Incidente / perturbación:</strong> el mismo viento de 15 m/s de v0.1; el nivel 3 (v1) lo convierte en operación normal (<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/ambiente-v0.5.md">ambiente-v0.5.md</a>).</p>
+<p><strong>Incidente / perturbación:</strong> el mismo viento de 15 m/s de v0.1; el nivel 3 (v1) lo convierte en operación normal (<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.1/docs/ambiente-v0.5.md">ambiente-v0.5.md</a>).</p>
 <h2 id="cinco-transiciones">Cinco transiciones</h2>
 <p>Cinco pasos consecutivos del recomendado del nivel 2 v1 (<code>ppo-pasarela-transfer-1m5-v0.4-s2</code>) en la época de evaluación con semilla 10 000 000 (<code>python cli.py transiciones --run ppo-pasarela-transfer-1m5-v0.4-s2</code>). La columna "obstáculos" son las cuatro entradas nuevas: <code>o_x − x</code>, <code>o_y − y</code> (objetivo de la fase: aquí la abertura), <code>H − z</code> (altura hasta la pasarela, negativa por encima) y <code>r_a − d_a</code> (margen hasta el borde de la abertura, positivo dentro). La salida de esta época cae casi sobre la abertura (a 4 m), así que la primera fase es mantenerse en ella mientras baja 420 m.</p>
 <table>
@@ -292,7 +292,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
 <p>Lectura:
 - La pasarela se aprende: de 5 % a ciegas a 96 % de media. La herencia de los pesos de posición es lo que lo hizo posible (el intento sin ella seguía en 2 %).
 - La variabilidad entre semillas es grande, sobre todo con viento (30 % a 68 %). Las semillas se entrenaron como réplicas, pero el pipeline las compara con el recomendado vigente y promueve a la que mejora en 2 puntos, así que el recomendado es la mejor de tres (100 %). Lo esperable de la receta es ~96 %.
-- La fragilidad con viento fijo de 15 m/s (50 % de media, con la colisión con la pasarela como fallo principal) es el incidente que el nivel 3 v1 convierte en operación normal (<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.0/docs/ambiente-v0.5.md">ambiente-v0.5.md</a>).
+- La fragilidad con viento fijo de 15 m/s (50 % de media, con la colisión con la pasarela como fallo principal) es el incidente que el nivel 3 v1 convierte en operación normal (<a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.1.1/docs/ambiente-v0.5.md">ambiente-v0.5.md</a>).
 - Cada cambio de recomendado queda en el historial de <code>catalogo.json</code>. El anterior de N2 es ahora s1; el modelo de torres (<code>ppo-n2-transfer-1m5-v0.2-s1</code>) salió del catálogo al promover s1, aunque sigue reproducible como histórico.</p>
 <h2 id="anexo-como-reproducir">Anexo: cómo reproducir</h2>
 <pre><code class="language-bash">python -m pytest tests/test_ambiente_pasarela.py                                   # contrato del nivel 2 v1 (y 3 v1)

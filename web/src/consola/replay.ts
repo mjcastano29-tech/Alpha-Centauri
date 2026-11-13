@@ -1,4 +1,4 @@
-// Consola de misión de PROJECT ELYNDRA para el replay 3D: cabecera de misión, escena con instrumentos superpuestos,
+// Consola de misión de Alpha Centauri para el replay 3D: cabecera de misión, escena con instrumentos superpuestos,
 // controles de reproducción, telemetría por grupos, criterios de aterrizaje y resumen al terminar. Todo lo que muestra
 // sale de la trayectoria grabada por el ambiente (Python); aquí no hay física ni reglas propias.
 import * as api from '../api'
@@ -69,7 +69,7 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
       <header class="mision">
         <div class="mision-id">
           <span class="modo ${fuente === 'evaluacion' ? 'modo-eval' : fuente === 'vivo' ? 'modo-vivo' : 'modo-replay'}"><i class="vivo"></i>${esc(modo)}</span>
-          <div class="mision-nombre"><span class="kicker">PROJECT ELYNDRA · misión</span><h2>${esc(id)} ${r?.estado === 'recomendado' ? pillEstado(r.estado) : ''}</h2></div>
+          <div class="mision-nombre"><span class="kicker">Alpha Centauri · misión</span><h2>${esc(id)} ${r?.estado === 'recomendado' ? pillEstado(r.estado) : ''}</h2></div>
         </div>
         <dl class="mision-datos">
           <div><dt>Estado</dt><dd><span class="fase" id="mi-fase">${TEXTO_FASE.preparando}</span></dd></div>
@@ -245,7 +245,7 @@ export async function vistaReplay(el: HTMLElement, id: string, fuente: 'grabados
     resumenEl.innerHTML = `
       <div class="resumen-tarjeta ${rs.exito ? 'exito' : 'fallo'}" role="dialog" aria-label="${rs.exito ? 'Misión completada' : 'Misión fallida'}">
         <button type="button" class="resumen-cerrar" aria-label="Cerrar el resumen">${ICONO.cerrar}</button>
-        <span class="kicker">PROJECT ELYNDRA · ${esc(etiqueta(actual))}</span>
+        <span class="kicker">Alpha Centauri · ${esc(etiqueta(actual))}</span>
         <h3>${rs.exito ? 'Mission completed' : 'Mission failed'}</h3>
         <p class="resumen-res"><span style="color: ${color}">${esc(ICONO_RESULTADO[rs.resultado] ?? '')}</span> ${rs.exito ? 'Aterrizaje suave dentro de la plataforma' : `Resultado del ambiente: ${esc(rs.resultado)}`}</p>
         <dl class="resumen-datos">
