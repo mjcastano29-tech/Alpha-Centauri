@@ -35,6 +35,7 @@ DOCUMENTOS = [
     ("pipelines/README.md", "07-pipeline", "Pipeline de entrenamiento y publicación"),
     ("docs/CHANGELOG.md", "08-historial-de-versiones", "Historial de versiones"),
     ("docs/guia-variables-y-experimentos.md", "10-guia-variables-y-experimentos", "Guía de estudio: variables, modelo y experimentos"),
+    ("docs/historia-del-proyecto.md", "11-historia-del-proyecto", "La historia del proyecto: proceso, cambios y aprendizajes"),
 ]
 
 ESTILO = """
