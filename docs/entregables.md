@@ -2,18 +2,18 @@
 
 Proyecto final del curso de MLOps · noviembre de 2026 · equipo Alpha Centauri: María Jimena Castaño Albarracín (mjcastano29-tech), Isaías Céspedes Novoa (isaiasexternado-a11y) y Jorge Horacio Rojas Criollo (jhrojas02).
 
-Este documento es el índice de la entrega: qué pide cada criterio de la rúbrica, dónde está la evidencia y cómo se comprueba. Todo lo que se cita vive en el repositorio en el commit etiquetado como `v1.1.1`; los PDF de la carpeta [`entregables/`](../entregables/) son copias de lectura generadas con `python entregables.py` a partir de estos mismos archivos.
+Este documento es el índice de la entrega: qué pide cada criterio de la rúbrica, dónde está la evidencia y cómo se comprueba. Todo lo que se cita vive en el repositorio en el commit etiquetado como `v1.2.0`; los PDF de la carpeta [`entregables/`](../entregables/) son copias de lectura generadas con `python entregables.py` a partir de estos mismos archivos.
 
 ## Dónde está todo
 
 | Qué | Dónde |
 |---|---|
-| Repositorio (código, fichas, modelos, datos, MLflow) | https://github.com/mjcastano29-tech/Alpha-Centauri · etiqueta `v1.1.1` |
+| Repositorio (código, fichas, modelos, datos, MLflow) | https://github.com/mjcastano29-tech/Alpha-Centauri · etiqueta `v1.2.0` |
 | Web pública (simulador con replay y viento en vivo, experimentos, catálogo, incidente, monitoreo, landing) | https://alpha-centauri-five.vercel.app |
 | API pública | https://alpha-centauri-api.onrender.com (`/version`, `/docs`) |
 | Registro de modelos MLflow | https://alpha-centauri-mlflow.onrender.com |
 | Informe final | [docs/informe-final.md](informe-final.md) · PDF `entregables/01-informe-final.pdf` |
-| Guion de la defensa (15 min) | [docs/guion-defensa.md](guion-defensa.md) · PDF `entregables/02-guion-defensa.pdf` |
+| Guion de la defensa (10 min) | [docs/guion-defensa.md](guion-defensa.md) · PDF `entregables/02-guion-defensa.pdf` |
 | Guía de estudio para la defensa (variables, modelo, recompensa, truncamiento, experimentos) | [docs/guia-variables-y-experimentos.md](guia-variables-y-experimentos.md) · PDF `entregables/10-guia-variables-y-experimentos.pdf` |
 | Historia del proyecto (proceso de creación, qué cambiamos y aprendimos, aplicabilidad al negocio) | [docs/historia-del-proyecto.md](historia-del-proyecto.md) · PDF `entregables/11-historia-del-proyecto.pdf` |
 | Experimentos, variables y dónde se guarda cada modelo | [EXPERIMENTOS.md](../EXPERIMENTOS.md) (generado por `python experimentos_md.py`) |
@@ -36,7 +36,7 @@ Los servicios públicos están en el plan gratuito de Render: la primera petici�
 | Configuración e hipótesis | `configs/<run_id>.json` (hipótesis, baseline, presupuesto, decisión con fecha); `manifests/<run_id>.json` con el formato de la guía (sección 11: `git_commit`, `config_sha256`, `model_uri`, `model_sha256`, `evaluation_suite_id`, `seed`, `parent_run_id`) | `python manifiestos.py`; `GET /ejecuciones/<id>/manifiesto` |
 | Registro de experimentos | `mlflow.db` y `mlruns/` dentro del repositorio; UI pública en Render | abrir una run desde la ficha del modelo en la web |
 | Catálogo de lo que se sirve | `catalogo.json` v15 con recomendado y anterior por nivel e historial de 15 cambios | `python catalogo.py ver`; `GET /version` dice qué commit y catálogo sirve la API |
-| Entregas etiquetadas | `v0.2.0` (hito 1), `v1.0.0` (cierre del 10 de noviembre), `v1.1.0` (viento en vivo, pantalla completa, paquete de entregables), `v1.1.1` (entrega final: nombres del equipo y marca Alpha Centauri en la web) | `git tag -l` |
+| Entregas etiquetadas | `v0.2.0` (hito 1), `v1.0.0` (cierre del 10 de noviembre), `v1.1.0` (viento en vivo, pantalla completa, paquete de entregables), `v1.1.1` (nombres del equipo y marca Alpha Centauri en la web), `v1.2.0` (entrega final: guion de 10 minutos, correo de entrega, guía de estudio e historia del proyecto) | `git tag -l` |
 
 ### 2. Diseño experimental (25 %)
 
@@ -70,14 +70,29 @@ Los servicios públicos están en el plan gratuito de Render: la primera petici�
 
 | Qué | Evidencia |
 |---|---|
-| Guion de 15 minutos sobre la web pública, con reparto y preguntas probables | [guion-defensa.md](guion-defensa.md) |
+| Guion de 10 minutos sobre la web pública, con reparto y preguntas probables | [guion-defensa.md](guion-defensa.md) |
 | Demostraciones en vivo | replay 3D por nivel y modo viento en vivo en el simulador (`#/`), experimentos (`#/experimentos`), evaluación en vivo desde la ficha, incidente, monitoreo y rollback |
 | Landing de presentación | https://alpha-centauri-five.vercel.app/landing/ |
+
+## Cobertura del documento "Entrega y presentación final" (13 de noviembre)
+
+| Lo que pide | Dónde está |
+|---|---|
+| Presentación de 10 minutos que cuente la historia: problema y negocio, ambiente (variables, observaciones, acciones, pasos, episodios, éxito, fallo, truncamiento, recompensas), modelo e hipótesis, baseline y resultados con los intentos fallidos, versionado, demostración, límites y aprendizajes | [guion-defensa.md](guion-defensa.md) sigue ese orden; material de estudio: [guia-variables-y-experimentos.md](guia-variables-y-experimentos.md) y [historia-del-proyecto.md](historia-del-proyecto.md); presentación en `/landing/` |
+| Correo con grupo, integrantes, repositorio, URL de Vercel y registro de experimentos, tag y SHA, modelo recomendado e histórico, ubicaciones, presentación y limitaciones | borrador completo en [correo-entrega.md](correo-entrega.md) |
+| README con misión, arquitectura, instalación, ejecución y reproducción | [README.md](../README.md), incluida la sección "Evaluar y recuperar un modelo" |
+| Ficha del ambiente y tres niveles | `docs/ambiente-v0.*.md` |
+| Al menos cuatro configuraciones con hipótesis, runs y estados | 23 configuraciones en `configs/`, resumidas en [EXPERIMENTOS.md](../EXPERIMENTOS.md) |
+| Evaluaciones por caso | `resultados/runs/<run_id>/evaluacion.json` (normal y viento 15 m/s), `resultados/incidentes/`, `resultados/suite-reservada/` |
+| Modelos recuperables con manifiestos, normalización, hashes y dependencias | `resultados/runs/<run_id>/` (modelo, normalizador, manifest con SHA-256), `manifests/`, `requirements.txt` fijado; `python cli.py verificar` |
+| Pipeline, incidente, intervención y rollback | `pipelines/`, `incidente.py`, `resultados/incidentes/`, evidencia `pipelines/ejecuciones/rollback-n3-*.json`, vista `#/incidente` |
+| Informe breve de decisiones, resultados, límites y contribuciones | [informe-final.md](informe-final.md) |
+| Aplicación y servicios disponibles sin compartir contraseñas | Vercel, Render (API y MLflow) y GitHub públicos |
 
 ## Cómo reproducir desde cero
 
 ```bash
-git clone https://github.com/mjcastano29-tech/Alpha-Centauri && cd Alpha-Centauri && git checkout v1.1.1
+git clone https://github.com/mjcastano29-tech/Alpha-Centauri && cd Alpha-Centauri && git checkout v1.2.0
 python -m venv .venv && .venv/bin/pip install -r requirements.txt
 python -m pytest                       # 114 pruebas
 python cli.py verificar                # huellas de las 23 ejecuciones

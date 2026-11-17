@@ -31,10 +31,10 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
 <body><main>
 <header class="portada"><div class="proyecto">Alpha Centauri · Rocket Landing · proyecto final de MLOps</div>
 
-<div class="meta">Generado el 2026-11-17 desde <code>docs/guion-defensa.md</code> · etiqueta <code>main</code> · fuente de verdad: el Markdown del repositorio</div></header>
-<h1 id="guion-de-la-defensa-15-minutos-alpha-centauri">Guion de la defensa (15 minutos) · Alpha Centauri</h1>
-<p>Antes de empezar (10 minutos antes): abrir https://alpha-centauri-five.vercel.app/#/monitoreo y pulsar <strong>Medir latencia ahora</strong> para despertar la API y cargar los tres modelos; abrir https://alpha-centauri-mlflow.onrender.com para despertar MLflow. Tener a mano el repositorio y <code>docs/informe-final.md</code>.</p>
-<p>Reparto: <strong>MJ</strong> = María Jimena Castaño Albarracín · <strong>Isaías</strong> = Isaías Céspedes Novoa · <strong>Rojas</strong> = Jorge Horacio Rojas Criollo.</p>
+<div class="meta">Generado el 2026-11-17 desde <code>docs/guion-defensa.md</code> · etiqueta <code>v1.2.0</code> · fuente de verdad: el Markdown del repositorio</div></header>
+<h1 id="guion-de-la-defensa-10-minutos-alpha-centauri">Guion de la defensa (10 minutos) · Alpha Centauri</h1>
+<p>Antes de empezar (10 minutos antes): abrir https://alpha-centauri-five.vercel.app/#/monitoreo y pulsar <strong>Medir latencia ahora</strong> para despertar la API y cargar los tres modelos; abrir https://alpha-centauri-mlflow.onrender.com para despertar MLflow. Tener a mano el repositorio, <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.2.0/docs/informe-final.md">informe-final.md</a>, la <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.2.0/docs/guia-variables-y-experimentos.md">guía de estudio</a> y la <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/v1.2.0/docs/historia-del-proyecto.md">historia del proyecto</a>.</p>
+<p>Reparto: <strong>MJ</strong> = María Jimena Castaño Albarracín · <strong>Isaías</strong> = Isaías Céspedes Novoa · <strong>Rojas</strong> = Jorge Horacio Rojas Criollo. El orden sigue el que pide el documento de entrega: problema y negocio, ambiente, modelo e hipótesis, baseline y resultados, versionado, demostración, límites y aprendizajes.</p>
 <table>
 <thead>
 <tr>
@@ -48,72 +48,56 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
 <tr>
 <td>0–1</td>
 <td><code>/landing/</code></td>
-<td>Misión de la ficha, los tres niveles, qué entregamos: ambiente, modelos, pipeline, API, web, rollback.</td>
+<td><strong>Problema y negocio.</strong> La misión: aterrizar con velocidad e inclinación seguras y combustible limitado. El valor no es el cohete sino el sistema alrededor: un modelo versionado que toma decisiones bajo condiciones que cambian, con criterio de promoción, monitoreo y vuelta atrás (control industrial, logística, drones).</td>
 <td>MJ</td>
 </tr>
 <tr>
-<td>1–4</td>
-<td>Portada <code>#/</code> (cohete)</td>
-<td>Replay del recomendado de N3 bajo la pasarela con viento. Cambiar con las pestañas a N1 y a N2: cómo crece la complejidad. Modo <em>replay</em> visible; criterios de aterrizaje en la consola.</td>
+<td>1–3</td>
+<td>Portada <code>#/</code> (cohete, replay del recomendado de N3)</td>
+<td><strong>Ambiente.</strong> Variables (posición, velocidad, viento como velocidad del aire que entra por el arrastre, atmósfera, combustible, motor), observación de 16 + 4 valores, acción (empuje respecto al peso e inclinación ≤ 9,6°), paso de 20 m o 2 s, episodio de 50 pasos. Éxito (≤ 3 m/s, ≤ 2 m/s, ≤ 10°, ≤ 10 m), fallos, <strong>truncamiento</strong> al agotar pasos. Recompensa: potencial más ±100 al final; por qué flotar no compensa. Cambiar con el desplegable a N1 y N2: cómo crece la complejidad.</td>
 <td>Isaías</td>
 </tr>
 <tr>
-<td>4–6</td>
+<td>3–5</td>
 <td><code>#/experimentos</code></td>
-<td>Tabla de complejidad: qué añade cada nivel, observación, obstáculos, viento, y cuánto pierde el modelo del nivel anterior sin reentrenar (99 → 5 %, 100 → 93,5 %). Pestaña del experimento 5: variables en negrita, decisiones del pipeline, tres semillas.</td>
+<td><strong>Modelo, entrenamiento e hipótesis.</strong> Q-learning como baseline (78 %); PPO 128×128 con la misma receta en todo; la cadena de hipótesis con una variable a la vez. <strong>Baseline y resultados, incluidos los que no mejoraron</strong>: acción cruda 0 %, relativa v1 0 %, v2 97 %; desde cero 8 % frente a transferencia 86 %; el intento de pasarela abortado al 2 %; semillas rechazadas por el criterio. Tabla de complejidad: 99 → 5 % y 100 → 93,5 % sin reentrenar.</td>
 <td>MJ</td>
+</tr>
+<tr>
+<td>5–6</td>
+<td>Ficha de <code>ppo-pasarela-transfer-1m5-v0.4-s2</code> y su run en MLflow</td>
+<td><strong>Versionado.</strong> Ambiente con versión y ficha (0.1.1, 0.4, 0.5), commit completo, SHA-256 de modelo y normalizador, manifiesto de la sección 11, versión en MLflow, dependencias fijadas; <code>cli.py verificar</code>. Un modelo histórico (<code>ppo-v2-v0.1-s0</code>, ambiente 0.1) sigue recuperable y evaluable.</td>
+<td>Rojas</td>
 </tr>
 <tr>
 <td>6–8</td>
-<td>Ficha de <code>ppo-pasarela-transfer-1m5-v0.4-s2</code></td>
-<td>Identidad: commit, SHA-256, manifiesto de la sección 11, versión en MLflow (abrir la run). Hipótesis y decisión. <strong>Evaluación en vivo</strong>: suite v1, 6 épocas; luego el mismo modelo en N3 v1 (misma familia): se ve la degradación.</td>
+<td><code>#/incidente</code> → Simulador, modo <strong>Viento en vivo</strong></td>
+<td><strong>Demostración.</strong> Incidente medido (N2 en N3 v1: −27, −12,5, −6,5 puntos), intervención con criterio fijado antes (+2, viento −5 como mucho, no más colisiones), recomendado de N3 con 85,5 % con viento. Luego lanzar la misión en vivo y subir el viento a 20 m/s a mitad de vuelo: el modelo congelado corrige. Mencionar el rollback demostrado en producción (catálogos v8 → v9 → v10) y enseñar <code>#/monitoreo</code> con el commit servido.</td>
 <td>Rojas</td>
 </tr>
 <tr>
-<td>7–8</td>
-<td>Simulador, modo <strong>Viento en vivo</strong> (<code>#/vivo</code>)</td>
-<td>lanzar una misión con el recomendado de N3 bajo la pasarela, subir el viento a 20 m/s a mitad de vuelo y ver cómo corrige; es la perturbación del nivel 3 aplicada a mano, con el modelo congelado y la API simulando paso a paso.</td>
+<td>8–9</td>
+<td><code>pipelines/README.md</code> + una evidencia JSON</td>
+<td><strong>Cómo se decide.</strong> Ocho etapas, criterio escrito antes de entrenar, 21 evidencias, test reservado de una sola vez (−0,5 a −1,5 puntos: sin sobreajuste).</td>
 <td>Isaías</td>
 </tr>
 <tr>
-<td>8–10</td>
-<td><code>#/incidente</code></td>
-<td>Incidente medido para las tres semillas, intervención (cuatro ejecuciones, criterio fijado antes), recomendado de N3 con 85,5 % con viento.</td>
-<td>Rojas</td>
-</tr>
-<tr>
-<td>10–12</td>
-<td><code>#/monitoreo</code> + terminal</td>
-<td>Qué commit y catálogo se sirven, alertas, últimas decisiones del pipeline y evidencia JSON. <strong>Rollback en vivo</strong>: <code>python catalogo.py restaurar --nivel N3 --motivo "demo"</code>, commit y push; mientras despliega, enseñar la evidencia del rollback anterior; al volver la API, <code>GET /version</code> muestra el catálogo nuevo (si el tiempo no alcanza, se enseña la evidencia y se deja el comando preparado).</td>
-<td>MJ</td>
-</tr>
-<tr>
-<td>12–13</td>
-<td>Pipeline</td>
-<td><code>pipelines/README.md</code>: ocho etapas y criterio; una evidencia abierta; captura de Prefect.</td>
-<td>Rojas</td>
-</tr>
-<tr>
-<td>13–14</td>
-<td>Límites</td>
-<td>Semillas y medias, ejecuciones con <code>*</code>, plan gratuito, <code>mlflow.db</code> en git, qué haríamos después (abertura aleatoria, torque).</td>
-<td>Isaías</td>
-</tr>
-<tr>
-<td>14–15</td>
+<td>9–10</td>
 <td>Cierre</td>
-<td>Contribuciones y preguntas.</td>
-<td>todos</td>
+<td><strong>Límites y aprendizajes.</strong> Medias de tres semillas frente al mejor; ejecuciones con <code>*</code>; plan gratuito; <code>mlflow.db</code> en git. Aprendizajes: la parametrización de la acción decide si aprende; la transferencia hace abordables los niveles; cuando el obstáculo cambia qué significa "objetivo", hay que dárselo al agente; medir antes de diseñar. Contribuciones y preguntas.</td>
+<td>MJ</td>
 </tr>
 </tbody>
 </table>
+<p>Si el tiempo se acorta, lo primero que se recorta es la evaluación en vivo desde la ficha (minuto 5) y se deja el viento en vivo. El rollback en vivo (<code>python catalogo.py restaurar --nivel N3 --motivo "demo"</code>, commit y push, unos tres minutos de despliegue) solo se hace si el docente lo pide; la evidencia del rollback anterior está en <code>pipelines/ejecuciones/rollback-n3-*.json</code>.</p>
 <p>Preguntas probables y respuesta corta:</p>
 <ul>
 <li><strong>¿Por qué el recomendado no es la media?</strong> El pipeline promueve con un criterio fijo (+2 puntos, viento, colisiones) y conserva el anterior; la media de las tres semillas está en el informe y en las fichas. El test reservado da −1,5, −1 y −0,5 puntos respecto a la suite v1: no hay sobreajuste a la suite.</li>
 <li><strong>¿Qué pasa si el modelo nuevo falla en producción?</strong> <code>catalogo.py restaurar</code>, commit y push: la API sirve el anterior en unos tres minutos; <code>comprobar_api.py</code> deja evidencia. Hecho dos veces con el nivel 3.</li>
 <li><strong>¿Por qué cambiaron las torres por la pasarela?</strong> Decisión del equipo tras medir: las torres solo obligaban a desviarse en el 30 % de las salidas; la pasarela, siempre. Los modelos de torres siguen reproducibles.</li>
 <li><strong>¿<code>terminated</code> o <code>truncated</code>?</strong> Éxito y fallos de misión terminan (<code>terminated</code>); agotar los 50 pasos trunca (<code>truncated</code>) con la misma penalización. Pruebas en <code>tests/test_ambiente.py</code>.</li>
-<li><strong>¿Qué es Python o TypeScript?</strong> Python es la autoridad: ambiente, modelos y evaluación. La web solo muestra lo que devuelve la API y reproduce trayectorias grabadas.</li>
+<li><strong>¿Qué es Python o TypeScript?</strong> Python es la autoridad: ambiente, modelos y evaluación. La web solo muestra lo que devuelve la API y reproduce trayectorias grabadas; en el viento en vivo, la API simula paso a paso.</li>
 <li><strong>¿Por qué Prefect en otro entorno?</strong> Prefect 3.8 no convive con la versión de FastAPI de la API; el orquestador tiene su <code>requirements-pipeline.txt</code> y ejecuta las etapas con el intérprete del proyecto.</li>
+<li><strong>¿El viento en vivo es un experimento?</strong> No: es un modo de servicio del modelo congelado. Los experimentos tienen hipótesis, entrenamiento y decisión del pipeline.</li>
 </ul>
 </main></body></html>
