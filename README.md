@@ -200,16 +200,32 @@ El orquestador tiene su propio entorno (`requirements-pipeline.txt`, carpeta `.v
 
 ## Entregables
 
-[docs/entregables.md](docs/entregables.md) es el índice de la entrega: cada criterio de la rúbrica (versionado, diseño experimental, pipeline y rollback, contrato del ambiente, defensa) con su evidencia y cómo comprobarla. `python entregables.py` genera en [entregables/](entregables/) los PDF de lectura (informe, preparación, experimentos, fichas, pipeline, historial) a partir de los Markdown del repositorio; la etiqueta de la entrega es `v1.1.1`.
+[docs/entregables.md](docs/entregables.md) es el índice de la entrega: cada criterio de la rúbrica (versionado, diseño experimental, pipeline y rollback, contrato del ambiente, defensa) con su evidencia y cómo comprobarla. `python entregables.py` genera en [entregables/](entregables/) los PDF de lectura (informe, preparación, experimentos, fichas, pipeline, historial) a partir de los Markdown del repositorio; la etiqueta de la entrega es `v1.2.0`.
 
 ## Informe, defensa y test reservado
 
+- [docs/correo-entrega.md](docs/correo-entrega.md): borrador del correo de entrega al docente con los seis puntos que pide (versión, SHA, modelos, ubicaciones, presentación, limitaciones).
 - [docs/informe-final.md](docs/informe-final.md): qué construimos, los niveles y su complejidad, la cadena de hipótesis, pipeline, incidente, intervención, rollback, límites y contribuciones.
-- [docs/preparación-defensa.md](docs/preparación-defensa.md): preparación de 15 minutos sobre la web pública, con preguntas probables.
+- [docs/preparación-defensa.md](docs/preparación-defensa.md): preparación de 10 minutos sobre la web pública, con preguntas probables.
 - [docs/guia-variables-y-experimentos.md](docs/guia-variables-y-experimentos.md): guía de estudio para la defensa: cómo se modela cada variable, observación y acción, recompensa, `terminated` frente a `truncated`, qué cambia entre versiones del ambiente y entre experimentos, hiperparámetros, criterio de decisión y chuleta de números.
 - [docs/historia-del-proyecto.md](docs/historia-del-proyecto.md): la historia del proyecto contada en orden: qué hicimos cada semana, qué salió mal, qué cambiamos y por qué, y qué significa cada pieza para un negocio.
 - [docs/diagnostico-proyecto-final.md](docs/diagnostico-proyecto-final.md): diagnóstico frente al enunciado, actualizado en cada hito.
 - `python suite_reservada.py`: test final reservado (misma estructura que la suite v1, semilla guardada por el equipo fuera del repo en `.suite_reservada` o `SUITE_RESERVADA_SEMILLA`); resultados sin la semilla en `resultados/suite-reservada/`.
+
+## Evaluar y recuperar un modelo
+
+Cada ejecución vive en `resultados/runs/<run_id>/` con `manifest.json` (commit, versión del ambiente, configuración, software, métricas y huellas SHA-256), el modelo (`modelo.zip` y `modelo_normalizador.pkl` en PPO; `modelo.npz` en Q-learning), `evaluacion.json` y los datos de entrenamiento. Para recuperarlo y evaluarlo en el ambiente con el que se entrenó:
+
+```bash
+pip install -r requirements.txt                                   # las mismas versiones del entrenamiento
+python cli.py verificar                                           # las huellas de modelos, normalizadores y datos coinciden
+python cli.py evaluar --run ppo-pasarela-transfer-1m5-v0.4-s2     # suite v1: 200 épocas normales y 200 con viento de 15 m/s
+python cli.py ver --run ppo-v2-v0.1-s0                            # una época paso a paso de un modelo histórico (ambiente 0.1)
+python incidente.py --run ppo-pasarela-transfer-1m5-v0.4-s2 --ambiente RocketLanding3D-N3-v1   # el mismo modelo en otro ambiente compatible
+python catalogo.py ver                                            # qué modelo se sirve en cada nivel y cuál es el anterior
+```
+
+Desde Python: `from entrenar import load_agent, hacer_entorno` → `agente, carpeta = load_agent("<run_id>")` carga la red y su normalizador y `hacer_entorno(manifest)` construye el ambiente de la versión indicada en el manifiesto (`compatible()` comprueba mayor.menor). En MLflow, cada ejecución es una versión del modelo registrado `rocket-landing-ppo` o `rocket-landing-qlearning` (`mlflow.pyfunc.load_model("models:/rocket-landing-ppo/<versión>")`); el número de versión y la URL de la run están en `manifests/<run_id>.json` y en la ficha de la web. La API hace lo mismo en producción: `POST /evaluar` con un `run_id` carga ese modelo histórico y lo evalúa en su ambiente o en otro compatible.
 
 ## Versionado
 
