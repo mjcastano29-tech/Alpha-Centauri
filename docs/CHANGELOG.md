@@ -9,6 +9,11 @@ y se anota aquí. Los modelos entrenados con versiones distintas del ambiente no
 
 ## Entregas del proyecto (etiquetas de git)
 
+### v1.2.1 · 2026-11-17
+- preparación de la defensa detallado: para cada minuto, qué se muestra (clics exactos) y el texto literal de cada integrante; rollback en
+  vivo opcional y preguntas con responsable. `entregables.py` falla si un PDF no se regenera (en v1.2.0 el PDF del preparación quedó
+  desactualizado por eso). Correo de entrega apuntando a `v1.2.1`.
+
 ### v1.2.0 · 2026-11-17
 - Entrega final conforme al documento "Entrega y presentación final" del 13 de noviembre: preparación de **10 minutos** en el orden que
   pide, borrador del correo de entrega ([correo-entrega.md](correo-entrega.md)), sección "Evaluar y recuperar un modelo" en el README,

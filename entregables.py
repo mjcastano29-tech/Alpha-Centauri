@@ -125,7 +125,7 @@ def a_pdf(pares: list[tuple[Path, Path]]) -> None:
             pagina.pdf(path=str(pdf_path), format="A4", print_background=True, margin={"top": "16mm", "bottom": "18mm", "left": "14mm", "right": "14mm"},
                        display_header_footer=True, header_template="<span></span>",
                        footer_template='<div style="width:100%;font:8pt sans-serif;color:#5d6572;padding:0 14mm;display:flex;justify-content:space-between"><span>Alpha Centauri · Rocket Landing</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>')
-            print(f"  {pdf_path.relative_to(RAIZ)}  ({pdf_path.stat().st_size // 1024} kB)")
+            print(f"  {pdf_path.name}  ({pdf_path.stat().st_size // 1024} kB)")
         navegador.close()
 
 
