@@ -64,7 +64,7 @@ Los servicios públicos están en el plan gratuito de Render: la primera petici�
 |---|---|
 | Ficha del ambiente (observación, acción, recompensa, terminación, versión, mapa) | [ambiente-v0.1.md](ambiente-v0.1.md), [ambiente-v0.4.md](ambiente-v0.4.md), [ambiente-v0.5.md](ambiente-v0.5.md); mapas SVG en `docs/` |
 | `terminated` frente a `truncated` | éxito y fallos terminan; agotar 50 pasos trunca; pruebas en `tests/test_ambiente.py` |
-| Pruebas de contrato | `python -m pytest` (113 pruebas: ambiente, modelos, API) |
+| Pruebas de contrato | `python -m pytest` (114 pruebas: ambiente, modelos, API) |
 
 ### 5. Defensa (15 %)
 
@@ -79,7 +79,7 @@ Los servicios públicos están en el plan gratuito de Render: la primera petici�
 ```bash
 git clone https://github.com/mjcastano29-tech/Alpha-Centauri && cd Alpha-Centauri && git checkout v1.1.1
 python -m venv .venv && .venv/bin/pip install -r requirements.txt
-python -m pytest                       # 113 pruebas
+python -m pytest                       # 114 pruebas
 python cli.py verificar                # huellas de las 23 ejecuciones
 python cli.py evaluar --run ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0 --viento 15
 uvicorn api.main:app --port 8000       # API local; web: cd web && npm ci && npm run dev

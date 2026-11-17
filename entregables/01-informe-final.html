@@ -31,7 +31,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
 <body><main>
 <header class="portada"><div class="proyecto">Alpha Centauri · Rocket Landing · proyecto final de MLOps</div>
 
-<div class="meta">Generado el 2026-11-13 desde <code>docs/informe-final.md</code> · etiqueta <code>main</code> · fuente de verdad: el Markdown del repositorio</div></header>
+<div class="meta">Generado el 2026-11-17 desde <code>docs/informe-final.md</code> · etiqueta <code>main</code> · fuente de verdad: el Markdown del repositorio</div></header>
 <h1 id="informe-final-alpha-centauri-rocket-landing">Informe final · Alpha Centauri · Rocket Landing</h1>
 <p><strong>Proyecto final del curso de MLOps · Universidad Externado · noviembre de 2026 · equipo Alpha Centauri: María Jimena Castaño Albarracín (mjcastano29-tech), Isaías Céspedes Novoa (isaiasexternado-a11y) y Jorge Horacio Rojas Criollo (jhrojas02)</strong></p>
 <p>Web: https://alpha-centauri-five.vercel.app · API: https://alpha-centauri-api.onrender.com · MLflow: https://alpha-centauri-mlflow.onrender.com · Repositorio: https://github.com/mjcastano29-tech/Alpha-Centauri · Entrega: etiqueta <code>v1.1.1</code> (índice en <a href="https://github.com/mjcastano29-tech/Alpha-Centauri/blob/main/docs/entregables.md">entregables.md</a>)</p>
@@ -49,7 +49,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
 <tr>
 <td>Ambientes Gymnasium (N1 0.1.1, N2 v1 0.4, N3 v1 0.5; retirados 0.2 y 0.3)</td>
 <td><code>rocket_env/</code>, fichas <code>docs/ambiente-v0.*.md</code></td>
-<td><code>python -m pytest</code> (113 pruebas de contrato, modelos y API)</td>
+<td><code>python -m pytest</code> (114 pruebas de contrato, modelos y API)</td>
 </tr>
 <tr>
 <td>23 ejecuciones en 6 experimentos</td>
@@ -172,7 +172,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 20px 0; }
 <h2 id="8-como-reproducir">8. Cómo reproducir</h2>
 <pre><code class="language-bash">git clone https://github.com/mjcastano29-tech/Alpha-Centauri &amp;&amp; cd Alpha-Centauri
 python -m venv .venv &amp;&amp; .venv/bin/pip install -r requirements.txt
-python -m pytest                       # 113 pruebas
+python -m pytest                       # 114 pruebas
 python cli.py verificar                # huellas de las 23 ejecuciones
 python cli.py evaluar --run ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0 --viento 15
 uvicorn api.main:app --port 8000       # API local; web: cd web &amp;&amp; npm install &amp;&amp; npm run dev
