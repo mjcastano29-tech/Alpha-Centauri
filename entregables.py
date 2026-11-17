@@ -153,6 +153,11 @@ def main() -> int:
     print(f"HTML: {len(pares)} documentos en {SALIDA.relative_to(RAIZ)}/")
     if not args.sin_pdf:
         a_pdf(pares)
+        # un PDF más viejo que su HTML es señal de que la impresión falló: mejor fallar aquí que entregar un PDF desactualizado
+        viejos = [pdf.name for html_path, pdf in pares if not pdf.exists() or pdf.stat().st_mtime < html_path.stat().st_mtime]
+        if viejos:
+            raise SystemExit(f"PDF sin regenerar: {', '.join(viejos)}")
+        print(f"PDF: {len(pares)} documentos regenerados")
     return 0
 
 
