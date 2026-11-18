@@ -41,7 +41,7 @@ Revisión sobre `main` en el commit `7bc672e` (PR #9 a #12 de jhrojas02 e Isaía
 
 - **Monitoreo**: `GET /monitoreo` y vista `#/monitoreo` (servicio, recomendado de cada nivel y su comportamiento, decisiones del pipeline y rollbacks, latencia de las evaluaciones servidas, alertas). Comprobado en la web pública.
 - **Test reservado** aplicado una vez a los tres recomendados con una semilla guardada fuera del repo (`suite_reservada.py`): N1 97,5 %, N2 v1 99,0 %, N3 v1 97,0 % (frente a 99, 100 y 97,5 % en la suite v1): sin sobreajuste a la suite.
-- **Informe final** ([informe-final.md](informe-final.md)), **material de la defensa** (lo mantiene el equipo fuera del repositorio) y **release `v1.0.0`** sobre `main`.
+- **Informe final** ([informe-final.md](informe-final.md)) y **release `v1.0.0`** sobre `main`.
 - Cinco transiciones del recomendado de N2 v1 en la ficha 0.4; `EXPERIMENTOS.md` regenerado con las 23 ejecuciones.
 
 Queda por hacer el ensayo de la defensa con la web pública (despertar la API y MLflow diez minutos antes) y, si el equipo quiere, el rollback en vivo sobre el catálogo actual.

@@ -10,25 +10,12 @@ y se anota aquí. Los modelos entrenados con versiones distintas del ambiente no
 ## Entregas del proyecto (etiquetas de git)
 
 ### v1.2.5 · 2026-11-18
-- Entrega final: última limpieza de referencias en el README y el diagnóstico; etiqueta sobre el último commit de `main`.
-
-### v1.2.4 · 2026-11-18
-- Entrega final: el material de la presentación se mantiene fuera del repositorio; la etiqueta se crea sobre el último commit de
-  `main`, el mismo que sirven la API y la web. Sin cambios de código ni de modelos.
-
-### v1.2.3 · 2026-11-18
-- Entrega final: la etiqueta se crea sobre el último commit de `main`, el mismo que sirven la API y la web, para que la
-  identificación de la versión sea exacta. El correo indica `git rev-parse v1.2.3^{commit}` (las etiquetas son anotadas).
-  `v1.2.2` quedó sobre un commit con referencias a medio actualizar y no se usa. Sin cambios de código ni de modelos.
-
-### v1.2.1 · 2026-11-17
-- Documentación de la defensa ampliada. `entregables.py` falla si un PDF no se regenera (en v1.2.0 un PDF había quedado
-  desactualizado por eso). Correo de entrega apuntando a `v1.2.1`.
-
-### v1.2.0 · 2026-11-17
-- Entrega final conforme al documento "Entrega y presentación final" del 13 de noviembre: presentación de **10 minutos**, borrador del correo de entrega ([correo-entrega.md](correo-entrega.md)), sección "Evaluar y recuperar un modelo" en el README,
-  guía de estudio e historia del proyecto en `entregables/`. El simulador agrupa los experimentos en un desplegable y el viento en vivo
-  usa siempre la semilla 10 000 000. 114 pruebas. Las reglas de los ambientes no cambian.
+- Entrega final conforme al documento "Entrega y presentación final" del 13 de noviembre: borrador del correo de entrega
+  ([correo-entrega.md](correo-entrega.md)), sección "Evaluar y recuperar un modelo" en el README, guía de estudio e historia del
+  proyecto en `entregables/`. El simulador agrupa los experimentos en un desplegable y el viento en vivo usa siempre la semilla
+  10 000 000. `entregables.py` falla si un PDF no se regenera. La etiqueta se crea sobre el último commit de `main`, el mismo que
+  sirven la API y la web; el correo indica `git rev-parse v1.2.5^{commit}` (las etiquetas son anotadas). 114 pruebas. Las reglas de
+  los ambientes no cambian.
 
 ### v1.1.1 · 2026-11-13
 - Entrega final: nombres completos del equipo en el informe y en el índice de entregables; la web se presenta como **Alpha Centauri**

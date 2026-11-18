@@ -35,7 +35,7 @@ Los servicios públicos están en el plan gratuito de Render: la primera petici�
 | Configuración e hipótesis | `configs/<run_id>.json` (hipótesis, baseline, presupuesto, decisión con fecha); `manifests/<run_id>.json` con el formato de la guía (sección 11: `git_commit`, `config_sha256`, `model_uri`, `model_sha256`, `evaluation_suite_id`, `seed`, `parent_run_id`) | `python manifiestos.py`; `GET /ejecuciones/<id>/manifiesto` |
 | Registro de experimentos | `mlflow.db` y `mlruns/` dentro del repositorio; UI pública en Render | abrir una run desde la ficha del modelo en la web |
 | Catálogo de lo que se sirve | `catalogo.json` v15 con recomendado y anterior por nivel e historial de 15 cambios | `python catalogo.py ver`; `GET /version` dice qué commit y catálogo sirve la API |
-| Entregas etiquetadas | `v0.2.0` (hito 1), `v1.0.0` (cierre del 10 de noviembre), `v1.1.0` (viento en vivo, pantalla completa, paquete de entregables), `v1.1.1` (nombres del equipo y marca Alpha Centauri en la web), `v1.2.0` y `v1.2.1` (correo de entrega, guía e historia), `v1.2.5` (entrega final: etiqueta sobre el mismo commit que se sirve en producción; `v1.2.2` a `v1.2.4` fueron intentos intermedios) | `git tag -l` |
+| Entregas etiquetadas | `v0.2.0` (hito 1), `v1.0.0` (cierre del 10 de noviembre), `v1.1.0` (viento en vivo, pantalla completa, paquete de entregables), `v1.1.1` (nombres del equipo y marca Alpha Centauri en la web), `v1.2.5` (entrega final: correo de entrega, guía e historia; etiqueta sobre el mismo commit que se sirve en producción) |
 
 ### 2. Diseño experimental (25 %)
 
