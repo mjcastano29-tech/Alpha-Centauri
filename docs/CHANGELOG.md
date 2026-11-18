@@ -9,6 +9,9 @@ y se anota aquí. Los modelos entrenados con versiones distintas del ambiente no
 
 ## Entregas del proyecto (etiquetas de git)
 
+### v1.2.5 · 2026-11-18
+- Entrega final: última limpieza de referencias en el README y el diagnóstico; etiqueta sobre el último commit de `main`.
+
 ### v1.2.4 · 2026-11-18
 - Entrega final: el material de la presentación se mantiene fuera del repositorio; la etiqueta se crea sobre el último commit de
   `main`, el mismo que sirven la API y la web. Sin cambios de código ni de modelos.

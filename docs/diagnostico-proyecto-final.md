@@ -25,7 +25,7 @@ Revisión sobre `main` en el commit `7bc672e` (PR #9 a #12 de jhrojas02 e Isaía
 | 1 · Reproducir | contrato, baseline, primer run y despliegue inicial | **Completo** (release `v0.2.0`, web en Vercel, API y MLflow en Render). |
 | 2 · Experimentar | niveles, hipótesis, catálogo y modelos históricos | **Completo**: tres niveles vigentes con ficha y mapa (0.1.1, 0.4, 0.5) y dos retirados (0.2, 0.3) que siguen siendo reproducibles; 23 configuraciones con hipótesis, cambio, presupuesto y decisión; seis experimentos; catálogo por nivel (v15) con historial; tres semillas por finalista en los tres niveles (N1 97,8 ± 1,0 %, N2 v1 96,3 ± 4,4 %, N3 v1 93,7 ± 1,0 % de la receta). |
 | 3 · Operar | pipeline, comparaciones y detección de degradación | **Completo salvo el monitoreo**: 21 ejecuciones del pipeline con evidencia, comparación y vista de experimentos con la progresión de complejidad, degradación medida por viento y por cambio de nivel (9 incidentes). Falta la vista de monitoreo de la operación. |
-| 4 · Recuperar y defender | intervención, rollback, release e informe | **A medias**: intervención hecha y decidida dos veces (N3 con torres y N3 con pasarela), rollback demostrado en producción con evidencia (catálogos v8 a v10). Faltan la release final, el informe, la suite reservada y el preparación de la defensa. |
+| 4 · Recuperar y defender | intervención, rollback, release e informe | **A medias**: intervención hecha y decidida dos veces (N3 con torres y N3 con pasarela), rollback demostrado en producción con evidencia (catálogos v8 a v10). Faltan la release final, el informe, la suite reservada y la preparación de la defensa. |
 
 ### Cobertura estimada de la rúbrica
 
@@ -49,7 +49,7 @@ Queda por hacer el ensayo de la defensa con la web pública (despertar la API y 
 ### Siguientes pasos, en orden (tal como estaban al mediodía)
 
 1. **Monitoreo** (hoy): ruta `GET /monitoreo` en la API y vista `#/monitoreo` en la web con salud y commit servidos, catálogo por nivel, últimas decisiones del pipeline, latencia de las evaluaciones y alertas (recomendado frágil con viento, ejecuciones con cambios sin commit, API dormida).
-2. **Release `v1.0.0` e informe final** (`docs/informe-final.md`): decisiones, resultados por nivel con media de semillas, incidente, intervención, rollback, límites y contribuciones de cada integrante; preparación de la defensa de 15 minutos con la web pública.
+2. **Release `v1.0.0` e informe final** (`docs/informe-final.md`): decisiones, resultados por nivel con media de semillas, incidente, intervención, rollback, límites y contribuciones de cada integrante; preparación de la defensa con la web pública.
 3. **Suite reservada** sobre los tres recomendados, una sola vez, y su resultado en el informe.
 4. **Cinco transiciones** del recomendado de N2 v1 en la ficha 0.4; texto de la vista de experimentos ("seis experimentos").
 5. **Coordinación**: pipeline desde una sola máquina a la vez; `git pull` antes de cada ejecución.
