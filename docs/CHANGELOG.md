@@ -9,6 +9,11 @@ y se anota aquí. Los modelos entrenados con versiones distintas del ambiente no
 
 ## Entregas del proyecto (etiquetas de git)
 
+### v1.2.3 · 2026-11-18
+- Entrega final: la etiqueta se crea sobre el último commit de `main`, el mismo que sirven la API y la web, para que la
+  identificación de la versión sea exacta. El correo indica `git rev-parse v1.2.3^{commit}` (las etiquetas son anotadas).
+  `v1.2.2` quedó sobre un commit con referencias a medio actualizar y no se usa. Sin cambios de código ni de modelos.
+
 ### v1.2.1 · 2026-11-17
 - Guion de la defensa detallado: para cada minuto, qué se muestra (clics exactos) y el texto literal de cada integrante; rollback en
   vivo opcional y preguntas con responsable. `entregables.py` falla si un PDF no se regenera (en v1.2.0 el PDF del guion quedó

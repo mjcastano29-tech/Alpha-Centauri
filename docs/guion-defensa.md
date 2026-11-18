@@ -116,7 +116,7 @@ Ritmo: 10 minutos son unas 1300 palabras. Los textos de abajo están ajustados a
 >
 > Lo que aprendimos: **la parametrización de la acción decide si aprende; la transferencia desde el nivel anterior hace abordables los niveles; cuando el obstáculo cambia qué significa "objetivo", hay que dárselo al agente en la observación; y medir antes de diseñar**, como con las torres que cambiamos por la pasarela porque solo obligaban a desviarse el 30 % de las veces.
 >
-> Contribuciones: Isaías, la escena 3D, las pruebas, las huellas y la landing; Jorge, el nivel 3, el incidente, la intervención y el rollback en producción; yo, el ambiente, los agentes, el versionado, la API, la web y el pipeline. Todo está en el repositorio con la etiqueta **v1.2.1**. Gracias; quedamos atentos a sus preguntas.
+> Contribuciones: Isaías, la escena 3D, las pruebas, las huellas y la landing; Jorge, el nivel 3, el incidente, la intervención y el rollback en producción; yo, el ambiente, los agentes, el versionado, la API, la web y el pipeline. Todo está en el repositorio con la etiqueta **v1.2.3**. Gracias; quedamos atentos a sus preguntas.
 
 ---
 

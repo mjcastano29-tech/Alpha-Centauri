@@ -1,6 +1,6 @@
 # Correo de entrega · borrador
 
-Los tres campos entre corchetes los completa el equipo antes de enviar. Las etiquetas son anotadas: el SHA del **commit** se obtiene con `git rev-parse v1.2.2^{commit}` (sin `^{commit}` devuelve el objeto etiqueta, que no es lo que pide el punto 4). La etiqueta se creó sobre el último commit de `main`, que es el que sirven la API y la web (`GET /version` lo confirma).
+Los tres campos entre corchetes los completa el equipo antes de enviar. Las etiquetas son anotadas: el SHA del **commit** se obtiene con `git rev-parse v1.2.3^{commit}` (sin `^{commit}` devuelve el objeto etiqueta, que no es lo que pide el punto 4). La etiqueta se creó sobre el último commit de `main`, que es el que sirven la API y la web (`GET /version` lo confirma).
 
 ---
 
@@ -20,7 +20,7 @@ Le enviamos la entrega final del equipo **Alpha Centauri**, escenario **[escenar
 - Registro de experimentos y artefactos (MLflow): https://alpha-centauri-mlflow.onrender.com. Los artefactos (modelos, normalizadores, datos, manifiestos) están además versionados en el repositorio.
 - Los servicios están en el plan gratuito de Render: la primera petición tras 15 minutos sin uso tarda cerca de un minuto. Ningún acceso requiere contraseña.
 
-**4. Versión entregada.** Etiqueta y release `v1.2.2`, commit `[SHA completo: git rev-parse v1.2.2^{commit}]`; es el mismo commit que sirven la API (`GET /version`) y la web.
+**4. Versión entregada.** Etiqueta y release `v1.2.3`, commit `[SHA completo: git rev-parse v1.2.3^{commit}]`; es el mismo commit que sirven la API (`GET /version`) y la web.
 - Modelos recomendados (se sirven en la web): N1 `ppo-v2-v0.1-s1` (ambiente `RocketLanding3D-v0` 0.1.1, MLflow `rocket-landing-ppo` v7), N2 `ppo-pasarela-transfer-1m5-v0.4-s2` (`RocketLanding3D-N2-v1` 0.4, v19), N3 `ppo-pasarela-viento-transfer-1m5-desde-s2-v0.5-s0` (`RocketLanding3D-N3-v1` 0.5, v22).
 - Modelos históricos recuperables, por ejemplo: `ppo-v2-v0.1-s0` (anterior de N1; ambiente 0.1, compatible con 0.1.1; MLflow v3) y `ppo-n2-transfer-1m5-v0.2-s1` (nivel 2 con torres, ambiente 0.2 retirado pero reproducible; MLflow v9). Las 23 ejecuciones están en `resultados/runs/<run_id>/` con su manifiesto.
 
