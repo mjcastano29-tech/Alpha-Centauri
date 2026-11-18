@@ -1,6 +1,6 @@
 """Genera el paquete de entregables en `entregables/` a partir de los documentos versionados.
 
-Convierte a PDF (y HTML) el informe final, el preparación de la defensa, el índice de entregables, el catálogo de experimentos,
+Convierte a PDF (y HTML) el informe final, el índice de entregables, el catálogo de experimentos,
 las fichas de los ambientes vigentes, la descripción del pipeline y el historial de versiones. Los PDF son una copia de
 lectura: la fuente de verdad siguen siendo los Markdown del repositorio.
 

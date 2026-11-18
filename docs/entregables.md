@@ -2,13 +2,13 @@
 
 Proyecto final del curso de MLOps · noviembre de 2026 · equipo Alpha Centauri: María Jimena Castaño Albarracín (mjcastano29-tech), Isaías Céspedes Novoa (isaiasexternado-a11y) y Jorge Horacio Rojas Criollo (jhrojas02).
 
-Este documento es el índice de la entrega: qué pide cada criterio de la rúbrica, dónde está la evidencia y cómo se comprueba. Todo lo que se cita vive en el repositorio en el commit etiquetado como `v1.2.3`; los PDF de la carpeta [`entregables/`](../entregables/) son copias de lectura generadas con `python entregables.py` a partir de estos mismos archivos.
+Este documento es el índice de la entrega: qué pide cada criterio de la rúbrica, dónde está la evidencia y cómo se comprueba. Todo lo que se cita vive en el repositorio en el commit etiquetado como `v1.2.4`; los PDF de la carpeta [`entregables/`](../entregables/) son copias de lectura generadas con `python entregables.py` a partir de estos mismos archivos.
 
 ## Dónde está todo
 
 | Qué | Dónde |
 |---|---|
-| Repositorio (código, fichas, modelos, datos, MLflow) | https://github.com/mjcastano29-tech/Alpha-Centauri · etiqueta `v1.2.3` |
+| Repositorio (código, fichas, modelos, datos, MLflow) | https://github.com/mjcastano29-tech/Alpha-Centauri · etiqueta `v1.2.4` |
 | Web pública (simulador con replay y viento en vivo, experimentos, catálogo, incidente, monitoreo, landing) | https://alpha-centauri-five.vercel.app |
 | API pública | https://alpha-centauri-api.onrender.com (`/version`, `/docs`) |
 | Registro de modelos MLflow | https://alpha-centauri-mlflow.onrender.com |
@@ -35,7 +35,7 @@ Los servicios públicos están en el plan gratuito de Render: la primera petici�
 | Configuración e hipótesis | `configs/<run_id>.json` (hipótesis, baseline, presupuesto, decisión con fecha); `manifests/<run_id>.json` con el formato de la guía (sección 11: `git_commit`, `config_sha256`, `model_uri`, `model_sha256`, `evaluation_suite_id`, `seed`, `parent_run_id`) | `python manifiestos.py`; `GET /ejecuciones/<id>/manifiesto` |
 | Registro de experimentos | `mlflow.db` y `mlruns/` dentro del repositorio; UI pública en Render | abrir una run desde la ficha del modelo en la web |
 | Catálogo de lo que se sirve | `catalogo.json` v15 con recomendado y anterior por nivel e historial de 15 cambios | `python catalogo.py ver`; `GET /version` dice qué commit y catálogo sirve la API |
-| Entregas etiquetadas | `v0.2.0` (hito 1), `v1.0.0` (cierre del 10 de noviembre), `v1.1.0` (viento en vivo, pantalla completa, paquete de entregables), `v1.1.1` (nombres del equipo y marca Alpha Centauri en la web), `v1.2.0` (preparación de 10 minutos, correo de entrega, guía e historia), `v1.2.1` (preparación detallado y PDF regenerados), `v1.2.3` (entrega final: etiqueta sobre el mismo commit que se sirve en producción; `v1.2.2` fue un intento incompleto) | `git tag -l` |
+| Entregas etiquetadas | `v0.2.0` (hito 1), `v1.0.0` (cierre del 10 de noviembre), `v1.1.0` (viento en vivo, pantalla completa, paquete de entregables), `v1.1.1` (nombres del equipo y marca Alpha Centauri en la web), `v1.2.0` y `v1.2.1` (correo de entrega, guía e historia), `v1.2.4` (entrega final: etiqueta sobre el mismo commit que se sirve en producción; `v1.2.2` y `v1.2.3` fueron intentos intermedios) | `git tag -l` |
 
 ### 2. Diseño experimental (25 %)
 
@@ -69,7 +69,6 @@ Los servicios públicos están en el plan gratuito de Render: la primera petici�
 
 | Qué | Evidencia |
 |---|---|
-| preparación de 10 minutos con reparto y preguntas probables | lo mantiene el equipo fuera del repositorio |
 | Demostraciones en vivo | replay 3D por nivel y modo viento en vivo en el simulador (`#/`), experimentos (`#/experimentos`), evaluación en vivo desde la ficha, incidente, monitoreo y rollback |
 | Landing de presentación | https://alpha-centauri-five.vercel.app/landing/ |
 
@@ -77,7 +76,7 @@ Los servicios públicos están en el plan gratuito de Render: la primera petici�
 
 | Lo que pide | Dónde está |
 |---|---|
-| Presentación de 10 minutos que cuente la historia: problema y negocio, ambiente (variables, observaciones, acciones, pasos, episodios, éxito, fallo, truncamiento, recompensas), modelo e hipótesis, baseline y resultados con los intentos fallidos, versionado, demostración, límites y aprendizajes | el preparación lo mantiene el equipo fuera del repositorio; material de estudio: [guia-variables-y-experimentos.md](guia-variables-y-experimentos.md) y [historia-del-proyecto.md](historia-del-proyecto.md); presentación en `/landing/` |
+| Presentación de 10 minutos que cuente la historia: problema y negocio, ambiente (variables, observaciones, acciones, pasos, episodios, éxito, fallo, truncamiento, recompensas), modelo e hipótesis, baseline y resultados con los intentos fallidos, versionado, demostración, límites y aprendizajes | material de estudio: [guia-variables-y-experimentos.md](guia-variables-y-experimentos.md) y [historia-del-proyecto.md](historia-del-proyecto.md); presentación en `/landing/` |
 | Correo con grupo, integrantes, repositorio, URL de Vercel y registro de experimentos, tag y SHA, modelo recomendado e histórico, ubicaciones, presentación y limitaciones | borrador completo en [correo-entrega.md](correo-entrega.md) |
 | README con misión, arquitectura, instalación, ejecución y reproducción | [README.md](../README.md), incluida la sección "Evaluar y recuperar un modelo" |
 | Ficha del ambiente y tres niveles | `docs/ambiente-v0.*.md` |
@@ -91,7 +90,7 @@ Los servicios públicos están en el plan gratuito de Render: la primera petici�
 ## Cómo reproducir desde cero
 
 ```bash
-git clone https://github.com/mjcastano29-tech/Alpha-Centauri && cd Alpha-Centauri && git checkout v1.2.3
+git clone https://github.com/mjcastano29-tech/Alpha-Centauri && cd Alpha-Centauri && git checkout v1.2.4
 python -m venv .venv && .venv/bin/pip install -r requirements.txt
 python -m pytest                       # 114 pruebas
 python cli.py verificar                # huellas de las 23 ejecuciones
@@ -103,4 +102,4 @@ python entregables.py                  # regenera los PDF de entregables/
 ## Lo que queda en manos del equipo
 
 - La semilla del test reservado está fuera del repositorio, en el archivo `.suite_reservada` de la máquina que lo ejecutó (ignorado por git); su huella SHA-256 figura en `resultados/suite-reservada/*.json`. Conviene guardar una copia en un lugar privado del equipo.
-- Ensayar el preparación con la web pública despierta.
+- Ensayar la presentación con la web pública despierta.

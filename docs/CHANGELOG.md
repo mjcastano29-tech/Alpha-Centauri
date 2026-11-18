@@ -9,19 +9,21 @@ y se anota aquí. Los modelos entrenados con versiones distintas del ambiente no
 
 ## Entregas del proyecto (etiquetas de git)
 
+### v1.2.4 · 2026-11-18
+- Entrega final: el material de la presentación se mantiene fuera del repositorio; la etiqueta se crea sobre el último commit de
+  `main`, el mismo que sirven la API y la web. Sin cambios de código ni de modelos.
+
 ### v1.2.3 · 2026-11-18
 - Entrega final: la etiqueta se crea sobre el último commit de `main`, el mismo que sirven la API y la web, para que la
   identificación de la versión sea exacta. El correo indica `git rev-parse v1.2.3^{commit}` (las etiquetas son anotadas).
   `v1.2.2` quedó sobre un commit con referencias a medio actualizar y no se usa. Sin cambios de código ni de modelos.
 
 ### v1.2.1 · 2026-11-17
-- preparación de la defensa detallado: para cada minuto, qué se muestra (clics exactos) y el texto literal de cada integrante; rollback en
-  vivo opcional y preguntas con responsable. `entregables.py` falla si un PDF no se regenera (en v1.2.0 el PDF del preparación quedó
+- Documentación de la defensa ampliada. `entregables.py` falla si un PDF no se regenera (en v1.2.0 un PDF había quedado
   desactualizado por eso). Correo de entrega apuntando a `v1.2.1`.
 
 ### v1.2.0 · 2026-11-17
-- Entrega final conforme al documento "Entrega y presentación final" del 13 de noviembre: preparación de **10 minutos** en el orden que
-  pide, borrador del correo de entrega ([correo-entrega.md](correo-entrega.md)), sección "Evaluar y recuperar un modelo" en el README,
+- Entrega final conforme al documento "Entrega y presentación final" del 13 de noviembre: presentación de **10 minutos**, borrador del correo de entrega ([correo-entrega.md](correo-entrega.md)), sección "Evaluar y recuperar un modelo" en el README,
   guía de estudio e historia del proyecto en `entregables/`. El simulador agrupa los experimentos en un desplegable y el viento en vivo
   usa siempre la semilla 10 000 000. 114 pruebas. Las reglas de los ambientes no cambian.
 
@@ -44,7 +46,7 @@ y se anota aquí. Los modelos entrenados con versiones distintas del ambiente no
 ### v1.0.0 · 2026-11-10
 - Cierre del proyecto: tres niveles (N1 0.1.1, N2 v1 0.4, N3 v1 0.5), 23 ejecuciones en 6 experimentos, pipeline Prefect de
   8 etapas con 21 evidencias, API y web públicas, catálogo v15, monitoreo, incidente, intervención, rollback demostrado,
-  informe final, preparación de la defensa y test reservado.
+  informe final y test reservado.
 
 ### v0.2.0 · 2026-11-03
 - Hito 1: ambiente 0.1 con ficha, experimentos 1 (Q-learning) y 2 (PPO), MLflow, API, web y despliegue en contenedor.
