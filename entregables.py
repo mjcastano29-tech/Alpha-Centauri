@@ -27,7 +27,6 @@ SALIDA = RAIZ / "entregables"
 DOCUMENTOS = [
     ("docs/entregables.md", "00-indice-entregables", "Índice de entregables"),
     ("docs/informe-final.md", "01-informe-final", "Informe final"),
-    ("docs/preparación-defensa.md", "02-preparación-defensa", "preparación de la defensa"),
     ("EXPERIMENTOS.md", "03-experimentos-y-modelos", "Experimentos y modelos"),
     ("docs/ambiente-v0.1.md", "04-ficha-ambiente-v0.1-N1", "Ficha del ambiente 0.1 (nivel 1)"),
     ("docs/ambiente-v0.4.md", "05-ficha-ambiente-v0.4-N2", "Ficha del ambiente 0.4 (nivel 2, pasarela)"),

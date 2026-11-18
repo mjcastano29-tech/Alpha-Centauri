@@ -13,7 +13,6 @@ Este documento es el índice de la entrega: qué pide cada criterio de la rúbri
 | API pública | https://alpha-centauri-api.onrender.com (`/version`, `/docs`) |
 | Registro de modelos MLflow | https://alpha-centauri-mlflow.onrender.com |
 | Informe final | [docs/informe-final.md](informe-final.md) · PDF `entregables/01-informe-final.pdf` |
-| preparación de la defensa (10 min) | [docs/preparación-defensa.md](preparación-defensa.md) · PDF `entregables/02-preparación-defensa.pdf` |
 | Guía de estudio para la defensa (variables, modelo, recompensa, truncamiento, experimentos) | [docs/guia-variables-y-experimentos.md](guia-variables-y-experimentos.md) · PDF `entregables/10-guia-variables-y-experimentos.pdf` |
 | Historia del proyecto (proceso de creación, qué cambiamos y aprendimos, aplicabilidad al negocio) | [docs/historia-del-proyecto.md](historia-del-proyecto.md) · PDF `entregables/11-historia-del-proyecto.pdf` |
 | Experimentos, variables y dónde se guarda cada modelo | [EXPERIMENTOS.md](../EXPERIMENTOS.md) (generado por `python experimentos_md.py`) |
@@ -70,7 +69,7 @@ Los servicios públicos están en el plan gratuito de Render: la primera petici�
 
 | Qué | Evidencia |
 |---|---|
-| preparación de 10 minutos sobre la web pública, con reparto y preguntas probables | [preparación-defensa.md](preparación-defensa.md) |
+| preparación de 10 minutos con reparto y preguntas probables | lo mantiene el equipo fuera del repositorio |
 | Demostraciones en vivo | replay 3D por nivel y modo viento en vivo en el simulador (`#/`), experimentos (`#/experimentos`), evaluación en vivo desde la ficha, incidente, monitoreo y rollback |
 | Landing de presentación | https://alpha-centauri-five.vercel.app/landing/ |
 
@@ -78,7 +77,7 @@ Los servicios públicos están en el plan gratuito de Render: la primera petici�
 
 | Lo que pide | Dónde está |
 |---|---|
-| Presentación de 10 minutos que cuente la historia: problema y negocio, ambiente (variables, observaciones, acciones, pasos, episodios, éxito, fallo, truncamiento, recompensas), modelo e hipótesis, baseline y resultados con los intentos fallidos, versionado, demostración, límites y aprendizajes | [preparación-defensa.md](preparación-defensa.md) sigue ese orden; material de estudio: [guia-variables-y-experimentos.md](guia-variables-y-experimentos.md) y [historia-del-proyecto.md](historia-del-proyecto.md); presentación en `/landing/` |
+| Presentación de 10 minutos que cuente la historia: problema y negocio, ambiente (variables, observaciones, acciones, pasos, episodios, éxito, fallo, truncamiento, recompensas), modelo e hipótesis, baseline y resultados con los intentos fallidos, versionado, demostración, límites y aprendizajes | el preparación lo mantiene el equipo fuera del repositorio; material de estudio: [guia-variables-y-experimentos.md](guia-variables-y-experimentos.md) y [historia-del-proyecto.md](historia-del-proyecto.md); presentación en `/landing/` |
 | Correo con grupo, integrantes, repositorio, URL de Vercel y registro de experimentos, tag y SHA, modelo recomendado e histórico, ubicaciones, presentación y limitaciones | borrador completo en [correo-entrega.md](correo-entrega.md) |
 | README con misión, arquitectura, instalación, ejecución y reproducción | [README.md](../README.md), incluida la sección "Evaluar y recuperar un modelo" |
 | Ficha del ambiente y tres niveles | `docs/ambiente-v0.*.md` |

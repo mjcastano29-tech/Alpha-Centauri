@@ -206,7 +206,6 @@ El orquestador tiene su propio entorno (`requirements-pipeline.txt`, carpeta `.v
 
 - [docs/correo-entrega.md](docs/correo-entrega.md): borrador del correo de entrega al docente con los seis puntos que pide (versión, SHA, modelos, ubicaciones, presentación, limitaciones).
 - [docs/informe-final.md](docs/informe-final.md): qué construimos, los niveles y su complejidad, la cadena de hipótesis, pipeline, incidente, intervención, rollback, límites y contribuciones.
-- [docs/preparación-defensa.md](docs/preparación-defensa.md): preparación de 10 minutos sobre la web pública, con preguntas probables.
 - [docs/guia-variables-y-experimentos.md](docs/guia-variables-y-experimentos.md): guía de estudio para la defensa: cómo se modela cada variable, observación y acción, recompensa, `terminated` frente a `truncated`, qué cambia entre versiones del ambiente y entre experimentos, hiperparámetros, criterio de decisión y chuleta de números.
 - [docs/historia-del-proyecto.md](docs/historia-del-proyecto.md): la historia del proyecto contada en orden: qué hicimos cada semana, qué salió mal, qué cambiamos y por qué, y qué significa cada pieza para un negocio.
 - [docs/diagnostico-proyecto-final.md](docs/diagnostico-proyecto-final.md): diagnóstico frente al enunciado, actualizado en cada hito.
